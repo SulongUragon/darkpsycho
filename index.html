@@ -350,6 +350,7 @@
               <option value="#ffffff">White</option>
               <option value="#000000">Black</option>
               <option value="#ff4040">Red</option>
+              <option value="#8b0000">Blood Red</option>
               <option value="none" selected>Hide captions</option>
             </select>
           </div>
@@ -765,7 +766,9 @@ function drawSceneCaption(text, alpha, position = 'bottom') {
   ctx.fillRect(0, y - pad, W, blockH + pad * 2);
   ctx.shadowColor = `rgba(0,0,0,${alpha * 0.9})`;
   ctx.shadowBlur = 8;
-  ctx.fillStyle = color === '#000000' ? `rgba(0,0,0,${alpha})` : color === '#ff4040' ? `rgba(255,64,64,${alpha})` : `rgba(255,255,255,${alpha})`;
+  const h = color.replace('#', '');
+  const cr = parseInt(h.slice(0,2),16), cg = parseInt(h.slice(2,4),16), cb = parseInt(h.slice(4,6),16);
+  ctx.fillStyle = `rgba(${cr},${cg},${cb},${alpha})`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   lines.forEach((line, i) => ctx.fillText(line, W/2, y + i * lineHeight));
