@@ -332,6 +332,14 @@
             </select>
           </div>
           <div class="field">
+            <label>Illustration mode</label>
+            <select id="illMode">
+              <option value="baked" selected>Baked (gray concrete built into image)</option>
+              <option value="clean">Clean (multiply blend — bg shows through)</option>
+            </select>
+            <div class="cost-note" id="illModeNote" style="margin-top:6px">Changing this requires re-generating images</div>
+          </div>
+          <div class="field">
             <label>Illustration size (<span id="illScaleVal">100%</span>) · pull down to reveal background</label>
             <input type="range" id="illScale" min="55" max="100" value="100">
           </div>
@@ -605,11 +613,18 @@ CRITICAL RULES:
 // =========================================================
 //  FAL.ai — FLUX schnell image generator
 // =========================================================
-const STYLE_PREFIX = "Minimalist cartoon illustration, clean hand-drawn black ink sketch linework, simple 2D vector style, thin outlines, centered composition with clear negative space, on a medium gray textured concrete wall background with subtle grain and shadow, vertical 9:16 framing, viral dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
+const STYLE_PREFIX_BAKED = "Minimalist cartoon illustration, clean hand-drawn black ink sketch linework, simple 2D vector style, thin outlines, centered composition with clear negative space, on a medium gray textured concrete wall background with subtle grain and shadow, vertical 9:16 framing, viral dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
+
+const STYLE_PREFIX_CLEAN = "Bold minimalist cartoon illustration, clean thick black ink outlines, 2D vector style, SINGLE centered subject isolated on a PLAIN FLAT SOLID PURE WHITE BACKGROUND (#FFFFFF, absolutely completely white everywhere, NO texture, NO shadow, NO gradient, NO background elements, NO wall, NO floor, NO scenery), vertical 9:16 aspect ratio, viral social media aesthetic. ABSOLUTELY NO TEXT. NO watermarks. NO logos. NO borders. NO background objects. Subject: ";
+
+function getStylePrefix() {
+  const mode = document.getElementById('illMode')?.value || 'baked';
+  return mode === 'clean' ? STYLE_PREFIX_CLEAN : STYLE_PREFIX_BAKED;
+}
 
 async function generateImageForScene(scenePrompt, apiKey) {
   const body = {
-    prompt: STYLE_PREFIX + scenePrompt,
+    prompt: getStylePrefix() + scenePrompt,
     image_size: { width: 768, height: 1344 },
     num_images: 1,
     num_inference_steps: 4,
@@ -724,7 +739,12 @@ function drawIllustration(img, zoom, alpha) {
   const dy = (H - dh) / 2;
   ctx.save();
   ctx.globalAlpha = alpha;
+  const illMode = document.getElementById('illMode')?.value || 'baked';
+  if (illMode === 'clean') {
+    ctx.globalCompositeOperation = 'multiply';
+  }
   ctx.drawImage(img, dx, dy, dw, dh);
+  ctx.globalCompositeOperation = 'source-over';
   // Darken overlay — only over illustration area when scaled down
   const darken = parseInt(darkenEl.value) / 100;
   if (darken > 0) {
@@ -1468,6 +1488,13 @@ $('bgVariant').addEventListener('change', () => {
 });
 illScaleEl.addEventListener('input', () => {
   illScaleValEl.textContent = illScaleEl.value + '%';
+  drawStaticPreview();
+});
+$('illMode').addEventListener('change', () => {
+  const note = $('illModeNote');
+  note.textContent = $('illMode').value === 'clean'
+    ? '⚠ Re-gen Images to produce white-bg illustrations for this mode'
+    : '⚠ Re-gen Images to produce concrete-bg illustrations for this mode';
   drawStaticPreview();
 });
 darkenEl.addEventListener('input', () => {
