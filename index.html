@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRUTAL STORIES — Dark Psychology Listicle Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Montserrat:wght@800;900&family=Anton&family=Archivo+Black&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #070707; color: #e5e5e5; min-height: 100vh; padding: 24px;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  header {
+    text-align: center; margin-bottom: 20px; padding: 14px 0;
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(7, 7, 7, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  h1 {
+    font-size: 36px; font-weight: 900; letter-spacing: 8px;
+    background: linear-gradient(135deg, #ff3b3b, #8b0000);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .subtitle { color: #555; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; }
+  .layout { display: grid; grid-template-columns: 1fr 480px; gap: 24px; align-items: start; }
+  @media (min-width: 961px) {
+    .layout > div:first-child {
+      position: sticky; top: 130px; align-self: start;
+      max-height: calc(100vh - 150px); overflow-y: auto;
+      padding-right: 4px;
+    }
+    .layout > div:first-child::-webkit-scrollbar { width: 6px; }
+    .layout > div:first-child::-webkit-scrollbar-track { background: transparent; }
+    .layout > div:first-child::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+  }
+  @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+  .panel { background: #121212; border: 1px solid #1f1f1f; border-radius: 10px; padding: 20px; }
+  .panel + .panel { margin-top: 14px; }
+  .panel h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 3px;
+    color: #888; margin-bottom: 14px; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .panel h2 .num {
+    background: #8b0000; color: #fff; width: 22px; height: 22px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 10px;
+    font-weight: 800; margin-right: 8px;
+  }
+  label {
+    display: block; font-size: 10px; color: #666; text-transform: uppercase;
+    letter-spacing: 2px; margin-bottom: 6px; font-weight: 600;
+  }
+  input[type=text], input[type=password], input[type=number], select, textarea {
+    width: 100%; background: #080808; border: 1px solid #252525; color: #e5e5e5;
+    padding: 11px 13px; border-radius: 6px; font-family: inherit; font-size: 14px;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #8b0000; }
+  textarea { resize: vertical; min-height: 140px; font-family: 'Inter', monospace; font-size: 13px; line-height: 1.6; }
+  input[type=range] {
+    width: 100%; height: 4px; background: #1a1a1a; border-radius: 2px;
+    -webkit-appearance: none; outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
+    background: #8b0000; border-radius: 50%; cursor: pointer;
+    box-shadow: 0 0 8px rgba(139, 0, 0, 0.5);
+  }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  .slider-row input[type=range] { flex: 1; }
+  .slider-val {
+    min-width: 46px; text-align: right; font-family: 'Inter', monospace;
+    font-size: 13px; color: #999;
+  }
+  button {
+    background: linear-gradient(135deg, #8b0000, #3b0000); color: #fff; border: none;
+    padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 2px; font-weight: 700;
+    transition: transform 0.1s, opacity 0.2s; width: 100%; font-family: inherit;
+  }
+  button:hover:not(:disabled) { transform: translateY(-1px); }
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+  button.secondary { background: transparent; border: 1px solid #2a2a2a; color: #aaa; }
+  button.secondary:hover:not(:disabled) { border-color: #8b0000; color: #fff; }
+  button.small { padding: 6px 10px; font-size: 10px; width: auto; letter-spacing: 1px; }
+  .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  canvas {
+    width: 100%; max-width: 380px; aspect-ratio: 9 / 16; background: #1a1a1a;
+    border-radius: 10px; display: block; margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(139, 0, 0, 0.15);
+  }
+  .preview-wrapper { display: flex; justify-content: center; padding: 10px 0; }
+  .scene-nav {
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+    margin-top: 14px; padding: 0 8px;
+  }
+  .scene-dot {
+    padding: 6px 10px; background: #161616; border: 1px solid #252525;
+    border-radius: 14px; font-size: 10px; cursor: pointer; color: #888;
+    letter-spacing: 1px; min-width: 40px; text-align: center;
+    transition: all 0.12s;
+  }
+  .scene-dot:hover { border-color: #555; color: #ccc; }
+  .scene-dot.active { background: #8b0000; border-color: #8b0000; color: #fff; }
+  .status {
+    margin-top: 12px; padding: 10px 14px; border-radius: 6px; font-size: 12px;
+    text-align: center; letter-spacing: 1px;
+  }
+  .status.info { background: #0f1525; color: #8ba3ff; border: 1px solid #1a2340; }
+  .status.error { background: #251010; color: #ff8080; border: 1px solid #401a1a; }
+  .status.success { background: #102510; color: #80ff99; border: 1px solid #1a401a; }
+  .api-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .api-row input { flex: 1; }
+  .api-row button { width: auto; padding: 11px 16px; }
+  .api-row:last-child { margin-bottom: 0; }
+  .api-label {
+    width: 110px; font-size: 10px; color: #888; text-transform: uppercase;
+    letter-spacing: 1px; padding: 11px 0; flex-shrink: 0; font-weight: 600;
+  }
+  .check-row {
+    display: flex; align-items: center; gap: 8px; font-size: 12px; color: #aaa;
+    cursor: pointer; padding: 6px 0;
+  }
+  .check-row input { width: 16px; height: 16px; accent-color: #8b0000; cursor: pointer; }
+  .footer-note {
+    text-align: center; color: #444; font-size: 10px; margin-top: 30px;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  a { color: #8b0000; text-decoration: none; }
+  a:hover { color: #ff3b3b; }
+  .thumb-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px; margin-top: 10px;
+  }
+  .thumb {
+    aspect-ratio: 1/1; background: #0a0a0a; border: 1px solid #252525;
+    border-radius: 6px; overflow: hidden; position: relative; cursor: pointer;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb .idx {
+    position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7);
+    color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 8px;
+    font-weight: 700;
+  }
+  .thumb .regen {
+    position: absolute; bottom: 4px; right: 4px; background: rgba(139,0,0,0.85);
+    color: #fff; font-size: 9px; padding: 3px 6px; border-radius: 8px;
+    cursor: pointer; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .thumb.empty { display: flex; align-items: center; justify-content: center; color: #444; font-size: 20px; }
+  .cost-note {
+    font-size: 10px; color: #666; margin-top: 8px; letter-spacing: 1px;
+    text-transform: uppercase; text-align: center;
+  }
+  .big-btn { padding: 16px; font-size: 13px; }
+  audio { width: 100%; margin-top: 8px; filter: invert(90%) hue-rotate(180deg); }
+  details summary {
+    cursor: pointer; padding: 6px 0; color: #888; font-size: 11px;
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+  }
+  details[open] summary { color: #aaa; }
+  details > *:not(summary) { margin-top: 10px; }
+  .hidden { display: none !important; }
+  .progress-track {
+    height: 4px; background: #1a1a1a; border-radius: 2px; overflow: hidden;
+    margin-top: 10px;
+  }
+  .progress-bar {
+    height: 100%; background: linear-gradient(90deg, #8b0000, #ff3b3b);
+    width: 0%; transition: width 0.3s;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>BRUTAL STORIES</h1>
+    <div class="subtitle">Dark Psychology · Listicle Generator</div>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2><span>Preview · 9:16</span><span style="color:#555;font-size:10px" id="sceneInfo"></span></h2>
+        <div class="preview-wrapper">
+          <canvas id="canvas" width="720" height="1280"></canvas>
+        </div>
+        <div class="scene-nav" id="sceneNav"></div>
+        <div id="status" class="status info" style="display:none"></div>
+        <div class="progress-track" style="display:none" id="progressTrack"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+
+      <div class="panel">
+        <h2><span><span class="num">5</span>Export</span></h2>
+        <div class="row-2">
+          <button id="previewBtn" class="secondary">▶ Preview</button>
+          <button id="stopBtn" class="secondary" disabled>■ Stop</button>
+        </div>
+        <div class="button-row">
+          <button id="recordBtn">● Record MP4</button>
+          <button id="downloadBtn" class="secondary" disabled>↓ Download</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2><span><span class="num">1</span>API Keys</span></h2>
+        <div class="api-row">
+          <div class="api-label">Anthropic</div>
+          <input type="password" id="anthropicKey" placeholder="sk-ant-… (Claude)" autocomplete="off">
+        </div>
+        <div class="api-row">
+          <div class="api-label">FAL.ai</div>
+          <input type="password" id="falKey" placeholder="fal-… (FLUX images)" autocomplete="off">
+        </div>
+        <div class="api-row">
+          <div class="api-label">ElevenLabs</div>
+          <input type="password" id="elevenKey" placeholder="xi-… (TTS)" autocomplete="off">
+        </div>
+        <button id="saveKeys" class="secondary">Save All Keys Locally</button>
+        <div class="cost-note">Cost per video ≈ $0.05 (FLUX schnell + TTS) · <a href="https://fal.ai/dashboard/keys" target="_blank">Get FAL key</a></div>
+      </div>
+
+      <div class="panel">
+        <h2><span><span class="num">2</span>Topic &amp; Config</span></h2>
+        <div class="field">
+          <label>Topic / Theme</label>
+          <input type="text" id="topic" placeholder="e.g. 5 stages of every relationship" value="The Dark Psychology Behind Why Filipinos Can't Say No">
+        </div>
+        <div class="row-3">
+          <div class="field">
+            <label>Scenes</label>
+            <select id="sceneCount">
+              <option value="5">5</option>
+              <option value="7" selected>7</option>
+              <option value="9">9</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Voice</label>
+            <select id="voice">
+              <option value="pNInz6obpgDQGcFmaJgB" selected>Adam (deep)</option>
+              <option value="ErXwobaYiN019PkySvjV">Antoni (warm)</option>
+              <option value="VR6AewLTigWG4xSOukaG">Arnold (strong)</option>
+              <option value="21m00Tcm4TlvDq8ikWAM">Rachel (calm)</option>
+              <option value="AZnzlk1XvdvUeBnXmlld">Domi (bold)</option>
+              <option value="EXAVITQu4vr4xnSDxMaL">Bella (soft)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Title font</label>
+            <select id="titleFont">
+              <option value="'Montserrat', sans-serif" selected>Montserrat 900</option>
+              <option value="'Anton', sans-serif">Anton</option>
+              <option value="'Archivo Black', sans-serif">Archivo Black</option>
+              <option value="'Inter', sans-serif">Inter 900</option>
+            </select>
+          </div>
+        </div>
+        <button id="generateAllBtn" class="big-btn">⚡ Generate Everything</button>
+      </div>
+
+      <div class="panel">
+        <h2><span><span class="num">3</span>Script</span>
+          <button id="regenScriptBtn" class="small secondary">Regenerate</button>
+        </h2>
+        <div class="field">
+          <label>Main Title (shown throughout)</label>
+          <input type="text" id="mainTitle" placeholder="Will be filled after generation">
+        </div>
+        <div class="field">
+          <label>Scenes (edit the JSON carefully)</label>
+          <textarea id="scriptJson" spellcheck="false" placeholder='Click "Generate Everything" first…'></textarea>
+        </div>
+        <div class="cost-note" id="scriptStatus">No script yet</div>
+      </div>
+
+      <div class="panel">
+        <h2><span><span class="num">4</span>Illustrations &amp; Voice</span>
+          <div style="display:flex;gap:6px">
+            <button id="regenImagesBtn" class="small secondary">Re-gen Images</button>
+            <button id="regenVoiceBtn" class="small secondary">Re-gen Voice</button>
+          </div>
+        </h2>
+        <div class="thumb-grid" id="thumbGrid"></div>
+        <div class="cost-note" id="assetsStatus">No assets yet</div>
+        <details style="margin-top:12px">
+          <summary>Style &amp; audio options</summary>
+          <div class="row-2" style="margin-top:10px">
+            <div class="field">
+              <label>Title color</label>
+              <select id="titleColor">
+                <option value="#000000" selected>Black</option>
+                <option value="#ffffff">White</option>
+                <option value="#8b0000">Blood Red</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Title position</label>
+              <select id="titlePos">
+                <option value="top" selected>Top</option>
+                <option value="bottom">Bottom</option>
+                <option value="hide">Hidden</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Darken illustration (<span id="darkenVal">15%</span>)</label>
+            <input type="range" id="darken" min="0" max="70" value="15">
+          </div>
+          <div class="field">
+            <label>Scene caption color</label>
+            <select id="captionColor">
+              <option value="#ffffff">White</option>
+              <option value="#000000">Black</option>
+              <option value="#ff4040">Red</option>
+              <option value="none" selected>Hide captions</option>
+            </select>
+          </div>
+          <div class="field" style="border-top:1px solid #222;padding-top:12px;margin-top:12px">
+            <label>Burn-in subtitles (narration captions)</label>
+            <label class="check-row">
+              <input type="checkbox" id="subsEnabled" checked> Show word-by-word subtitles
+            </label>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Words per chunk</label>
+              <select id="subsWords">
+                <option value="1">1 word</option>
+                <option value="2" selected>2 words</option>
+                <option value="3">3 words</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Subtitle color</label>
+              <select id="subsColor">
+                <option value="#ffffff" selected>White</option>
+                <option value="#ffe600">Yellow (TikTok)</option>
+                <option value="#00ff88">Green</option>
+                <option value="#ff4040">Red</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Subtitle position (<span id="subsPosVal">75%</span> from top)</label>
+            <input type="range" id="subsPos" min="40" max="90" value="75">
+          </div>
+          <div class="field">
+            <label>Subtitle size (<span id="subsSizeVal">56px</span>)</label>
+            <input type="range" id="subsSize" min="32" max="88" value="56">
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Local · No backend · Your keys stay in your browser</div>
+</div>
+
+<script>
+// =========================================================
+//  BRUTAL STORIES — Dark Psychology Listicle Generator
+// =========================================================
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width;
+const H = canvas.height;
+
+// ----- DOM refs
+const $ = id => document.getElementById(id);
+const anthropicKeyEl = $('anthropicKey');
+const falKeyEl = $('falKey');
+const elevenKeyEl = $('elevenKey');
+const topicEl = $('topic');
+const sceneCountEl = $('sceneCount');
+const voiceEl = $('voice');
+const titleFontEl = $('titleFont');
+const titleColorEl = $('titleColor');
+const titlePosEl = $('titlePos');
+const darkenEl = $('darken');
+const darkenValEl = $('darkenVal');
+const captionColorEl = $('captionColor');
+const subsEnabledEl = $('subsEnabled');
+const subsWordsEl = $('subsWords');
+const subsColorEl = $('subsColor');
+const subsPosEl = $('subsPos');
+const subsPosValEl = $('subsPosVal');
+const subsSizeEl = $('subsSize');
+const subsSizeValEl = $('subsSizeVal');
+const statusEl = $('status');
+const progressTrack = $('progressTrack');
+const progressBar = $('progressBar');
+const mainTitleEl = $('mainTitle');
+const scriptJsonEl = $('scriptJson');
+const scriptStatusEl = $('scriptStatus');
+const thumbGridEl = $('thumbGrid');
+const assetsStatusEl = $('assetsStatus');
+const sceneNavEl = $('sceneNav');
+const sceneInfoEl = $('sceneInfo');
+
+// ----- State
+let script = null;          // { mainTitle, scenes: [{title, narration, imagePrompt}] }
+let images = [];            // HTMLImageElement[] per scene (may be null)
+let audios = [];            // AudioBuffer[] per scene (may be null)
+let concreteBg = null;      // Pre-rendered concrete texture canvas
+let previewScene = 0;       // Which scene to show on static preview
+let currentBlob = null;
+let currentExt = 'webm';
+let playing = false;
+let playAbort = null;
+
+// ----- Concrete bg generator (procedural)
+function buildConcrete() {
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const c = off.getContext('2d');
+  // Base gradient
+  const grad = c.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#7a7a7a');
+  grad.addColorStop(0.5, '#6a6a6a');
+  grad.addColorStop(1, '#555555');
+  c.fillStyle = grad;
+  c.fillRect(0, 0, W, H);
+  // Grain
+  const imgData = c.getImageData(0, 0, W, H);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const n = (Math.random() - 0.5) * 30;
+    d[i] = Math.max(0, Math.min(255, d[i] + n));
+    d[i+1] = Math.max(0, Math.min(255, d[i+1] + n));
+    d[i+2] = Math.max(0, Math.min(255, d[i+2] + n));
+  }
+  c.putImageData(imgData, 0, 0);
+  // Splotches
+  for (let i = 0; i < 40; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H;
+    const r = 40 + Math.random() * 120;
+    const a = Math.random() * 0.06;
+    const rad = c.createRadialGradient(x, y, 0, x, y, r);
+    rad.addColorStop(0, `rgba(${Math.random() > 0.5 ? 255 : 0}, ${Math.random() > 0.5 ? 255 : 0}, ${Math.random() > 0.5 ? 255 : 0}, ${a})`);
+    rad.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = rad;
+    c.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  // Vignette
+  const vig = c.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.75);
+  vig.addColorStop(0, 'rgba(0,0,0,0)');
+  vig.addColorStop(1, 'rgba(0,0,0,0.35)');
+  c.fillStyle = vig;
+  c.fillRect(0, 0, W, H);
+  concreteBg = off;
+}
+
+// ----- Status / progress helpers
+function setStatus(msg, type = 'info') {
+  if (!msg) { statusEl.style.display = 'none'; return; }
+  statusEl.style.display = 'block';
+  statusEl.className = 'status ' + type;
+  statusEl.textContent = msg;
+}
+function setProgress(pct) {
+  if (pct === null) { progressTrack.style.display = 'none'; return; }
+  progressTrack.style.display = 'block';
+  progressBar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+}
+
+// ----- Save keys
+$('saveKeys').onclick = () => {
+  localStorage.setItem('anthropic_api_key', anthropicKeyEl.value.trim());
+  localStorage.setItem('fal_api_key', falKeyEl.value.trim());
+  localStorage.setItem('elevenlabs_api_key', elevenKeyEl.value.trim());
+  setStatus('All keys saved locally', 'success');
+  setTimeout(() => setStatus(''), 2000);
+};
+
+function loadKeys() {
+  anthropicKeyEl.value = localStorage.getItem('anthropic_api_key') || '';
+  falKeyEl.value = localStorage.getItem('fal_api_key') || '';
+  elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
+}
+
+// =========================================================
+//  CLAUDE — Script generator
+// =========================================================
+async function generateScript(topic, sceneCount, apiKey) {
+  const prompt = `You are a viral content creator who makes dark-psychology storytelling videos (think TikTok / Reels / Shorts). Topic: "${topic}".
+
+Write a ${sceneCount}-scene listicle video script that reveals uncomfortable truths about human nature.
+
+Output STRICTLY valid JSON in this exact shape:
+
+{
+  "mainTitle": "short viral hook title, MAX 8 WORDS, capitalize like a headline",
+  "scenes": [
+    {
+      "title": "short scene heading shown on screen, MAX 5 WORDS",
+      "narration": "spoken voice-over for this scene, 2-3 sentences, 4-6 seconds when read naturally, conversational tone",
+      "imagePrompt": "clear visual description of ONE simple minimalist cartoon sketch illustration that represents this scene — describe a single concrete subject (a person, a couple, a tree, an object). Example: 'a young couple smiling and holding hands, cartoon line drawing'. Keep it under 25 words."
+    }
+  ]
+}
+
+CRITICAL RULES:
+- EXACTLY ${sceneCount} scenes
+- Every scene builds on the previous — no random order
+- Raw, uncomfortable, honest — but not edgy for its own sake
+- Narration must be SPOKEN — write like people actually talk
+- imagePrompt must be CONCRETE visuals, not abstract concepts
+- No hashtags, no emojis, no quotes inside any field
+- NO MARKDOWN CODE BLOCKS. Output only the raw JSON starting with { and ending with }`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2500,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!response.ok) {
+    let detail = '';
+    try { detail = (await response.json()).error?.message || ''; } catch (e) {}
+    throw new Error(`Claude ${response.status}: ${detail || response.statusText}`);
+  }
+  const data = await response.json();
+  let text = data.content[0].text.trim();
+  // Strip markdown fences if any
+  text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
+  const parsed = JSON.parse(text);
+  if (!parsed.mainTitle || !Array.isArray(parsed.scenes)) {
+    throw new Error('Claude returned malformed JSON');
+  }
+  return parsed;
+}
+
+// =========================================================
+//  FAL.ai — FLUX schnell image generator
+// =========================================================
+const STYLE_PREFIX = "Minimalist cartoon illustration, clean hand-drawn black ink sketch linework, simple 2D vector style, thin outlines, centered composition with clear negative space, on a medium gray textured concrete wall background with subtle grain and shadow, vertical 9:16 framing, viral dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
+
+async function generateImageForScene(scenePrompt, apiKey) {
+  const body = {
+    prompt: STYLE_PREFIX + scenePrompt,
+    image_size: { width: 768, height: 1344 },
+    num_images: 1,
+    num_inference_steps: 4,
+    enable_safety_checker: false,
+    sync_mode: true
+  };
+  const response = await fetch('https://fal.run/fal-ai/flux/schnell', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Key ${apiKey}`
+    },
+    body: JSON.stringify(body)
+  });
+  if (!response.ok) {
+    let detail = '';
+    try {
+      const j = await response.json();
+      detail = j.detail || j.error || j.message || JSON.stringify(j);
+    } catch (e) {}
+    throw new Error(`FAL.ai ${response.status}: ${detail || response.statusText}`);
+  }
+  const data = await response.json();
+  const imgObj = data.images?.[0];
+  if (!imgObj) throw new Error('FAL.ai returned no image');
+  // sync_mode returns data URI directly; otherwise fetch the URL
+  const url = imgObj.url;
+  if (url.startsWith('data:')) return await loadImage(url);
+  // Convert remote URL to blob to avoid canvas taint issues
+  const imgResp = await fetch(url);
+  const blob = await imgResp.blob();
+  const objUrl = URL.createObjectURL(blob);
+  return await loadImage(objUrl);
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('image load failed'));
+    img.src = src;
+  });
+}
+
+// =========================================================
+//  ELEVENLABS — TTS
+// =========================================================
+async function generateSpeech(text, voiceId, apiKey, audioCtx) {
+  const body = {
+    text: text,
+    model_id: 'eleven_turbo_v2_5',
+    voice_settings: {
+      stability: 0.45,
+      similarity_boost: 0.75,
+      style: 0.35,
+      use_speaker_boost: true
+    }
+  };
+  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`, {
+    method: 'POST',
+    headers: {
+      'xi-api-key': apiKey,
+      'Content-Type': 'application/json',
+      'Accept': 'audio/mpeg'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!response.ok) {
+    let detail = '';
+    try { detail = (await response.json()).detail?.message || (await response.text()); } catch (e) {}
+    throw new Error(`ElevenLabs ${response.status}: ${detail || response.statusText}`);
+  }
+  const arrayBuf = await response.arrayBuffer();
+  const audioBuf = await audioCtx.decodeAudioData(arrayBuf.slice(0));
+  return audioBuf;
+}
+
+// =========================================================
+//  CANVAS RENDERING
+// =========================================================
+function drawConcrete() {
+  if (concreteBg) ctx.drawImage(concreteBg, 0, 0);
+  else { ctx.fillStyle = '#6a6a6a'; ctx.fillRect(0, 0, W, H); }
+}
+
+function drawIllustration(img, zoom, alpha) {
+  if (!img) return;
+  // cover-fit image to canvas
+  const imgAspect = img.width / img.height;
+  const canvasAspect = W / H;
+  let dw, dh;
+  if (imgAspect > canvasAspect) {
+    dh = H; dw = H * imgAspect;
+  } else {
+    dw = W; dh = W / imgAspect;
+  }
+  dw *= zoom; dh *= zoom;
+  const dx = (W - dw) / 2;
+  const dy = (H - dh) / 2;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(img, dx, dy, dw, dh);
+  // Darken overlay on illustration area
+  const darken = parseInt(darkenEl.value) / 100;
+  if (darken > 0) {
+    ctx.fillStyle = `rgba(0, 0, 0, ${darken})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+  ctx.restore();
+}
+
+function wrapText(text, maxWidth) {
+  const words = text.split(/\s+/);
+  const lines = [];
+  let current = '';
+  for (const word of words) {
+    const test = current ? current + ' ' + word : word;
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = test;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+function drawMainTitle(text, alpha) {
+  if (!text || titlePosEl.value === 'hide') return;
+  const fontFamily = titleFontEl.value;
+  const color = titleColorEl.value;
+  let fontSize = 60;
+  const maxWidth = W - 70;
+  ctx.font = `900 ${fontSize}px ${fontFamily}`;
+  let lines = wrapText(text.toUpperCase(), maxWidth);
+  while (lines.length > 3 && fontSize > 36) {
+    fontSize -= 3;
+    ctx.font = `900 ${fontSize}px ${fontFamily}`;
+    lines = wrapText(text.toUpperCase(), maxWidth);
+  }
+  const lineHeight = fontSize * 1.05;
+  const blockH = lineHeight * lines.length;
+  const isBottom = titlePosEl.value === 'bottom';
+  const yStart = isBottom ? H - blockH - 70 : 80;
+  ctx.save();
+  // text background band (subtle)
+  ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.55})`;
+  ctx.fillRect(0, yStart - 30, W, blockH + 60);
+  // title text
+  ctx.fillStyle = color === '#ffffff' ? `rgba(255,255,255,${alpha})` : color === '#8b0000' ? `rgba(139,0,0,${alpha})` : `rgba(0,0,0,${alpha})`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  lines.forEach((line, i) => ctx.fillText(line, W/2, yStart + i * lineHeight));
+  ctx.restore();
+}
+
+function drawSceneCaption(text, alpha, position = 'bottom') {
+  if (!text || captionColorEl.value === 'none') return;
+  const color = captionColorEl.value;
+  ctx.save();
+  let fontSize = 42;
+  const maxWidth = W - 80;
+  ctx.font = `700 ${fontSize}px 'Inter', sans-serif`;
+  let lines = wrapText(text, maxWidth);
+  while (lines.length > 2 && fontSize > 24) {
+    fontSize -= 2;
+    ctx.font = `700 ${fontSize}px 'Inter', sans-serif`;
+    lines = wrapText(text, maxWidth);
+  }
+  const lineHeight = fontSize * 1.15;
+  const blockH = lineHeight * lines.length;
+  const isBottom = position === 'bottom';
+  const y = isBottom ? H - blockH - 180 : 280;
+  // Dark band for readability
+  ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.55})`;
+  const pad = 14;
+  ctx.fillRect(0, y - pad, W, blockH + pad * 2);
+  ctx.shadowColor = `rgba(0,0,0,${alpha * 0.9})`;
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = color === '#000000' ? `rgba(0,0,0,${alpha})` : color === '#ff4040' ? `rgba(255,64,64,${alpha})` : `rgba(255,255,255,${alpha})`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  lines.forEach((line, i) => ctx.fillText(line, W/2, y + i * lineHeight));
+  ctx.restore();
+}
+
+function chunkWords(text, wordsPerChunk) {
+  const words = (text || '').trim().split(/\s+/).filter(w => w);
+  const chunks = [];
+  for (let i = 0; i < words.length; i += wordsPerChunk) {
+    chunks.push(words.slice(i, i + wordsPerChunk).join(' '));
+  }
+  return chunks;
+}
+
+function getCurrentChunk(chunks, tInScene, narrationDuration) {
+  if (chunks.length === 0) return '';
+  if (tInScene > narrationDuration) return chunks[chunks.length - 1];
+  const timePerChunk = narrationDuration / chunks.length;
+  const idx = Math.max(0, Math.min(chunks.length - 1, Math.floor(tInScene / timePerChunk)));
+  return chunks[idx];
+}
+
+function drawSubtitle(text, alpha) {
+  if (!text || !subsEnabledEl.checked) return;
+  ctx.save();
+  const fontSize = parseInt(subsSizeEl.value);
+  const posPct = parseInt(subsPosEl.value) / 100;
+  const color = subsColorEl.value;
+  ctx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const maxWidth = W - 80;
+  const lines = wrapText(text.toUpperCase(), maxWidth);
+  const lineHeight = fontSize * 1.15;
+  const blockH = lineHeight * lines.length;
+  const centerY = H * posPct;
+  const startY = centerY - blockH / 2 + lineHeight / 2;
+
+  // Heavy black stroke for readability
+  ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
+  ctx.lineWidth = Math.max(8, fontSize * 0.14);
+  ctx.lineJoin = 'round';
+  ctx.miterLimit = 2;
+
+  // Fill color
+  const rgb = hex => {
+    const h = hex.replace('#', '');
+    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  };
+  const [r, g, b] = rgb(color);
+  ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+
+  lines.forEach((line, i) => {
+    const y = startY + i * lineHeight;
+    ctx.strokeText(line, W / 2, y);
+    ctx.fillText(line, W / 2, y);
+  });
+
+  ctx.restore();
+}
+
+function drawScene(sceneIdx, tInScene, sceneDuration) {
+  drawConcrete();
+  if (!script || !script.scenes[sceneIdx]) return;
+  const scene = script.scenes[sceneIdx];
+  const img = images[sceneIdx];
+  // Fade in first 0.35s
+  const fade = Math.min(1, tInScene / 0.35);
+  // Ken Burns: zoom 1.0 → 1.06
+  const zoom = 1 + 0.06 * (tInScene / Math.max(1, sceneDuration));
+  drawIllustration(img, zoom, fade);
+  drawMainTitle(script.mainTitle, fade);
+  const capPos = (titlePosEl.value === 'bottom') ? 'top' : 'bottom';
+  drawSceneCaption(scene.title, fade, capPos);
+
+  // Burn-in subtitles (narration captions) — word chunks synced to audio
+  if (subsEnabledEl.checked) {
+    const narrationDuration = audios[sceneIdx]
+      ? audios[sceneIdx].duration
+      : Math.max(0.5, sceneDuration - 0.2);
+    const wordsPerChunk = parseInt(subsWordsEl.value);
+    const chunks = chunkWords(scene.narration, wordsPerChunk);
+    const currentChunk = getCurrentChunk(chunks, tInScene, narrationDuration);
+    drawSubtitle(currentChunk, fade);
+  }
+
+  // Scene indicator (bottom right)
+  ctx.save();
+  ctx.fillStyle = `rgba(255,255,255,${0.5 * fade})`;
+  ctx.font = `600 20px 'Inter', sans-serif`;
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(`${sceneIdx + 1} / ${script.scenes.length}`, W - 40, H - 40);
+  ctx.restore();
+}
+
+function drawStaticPreview() {
+  if (!script) {
+    drawConcrete();
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = `700 28px 'Inter', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Generate a script to preview', W/2, H/2);
+    ctx.restore();
+    return;
+  }
+  drawScene(previewScene, 0.5, 4);
+}
+
+// =========================================================
+//  SCENE NAV
+// =========================================================
+function rebuildSceneNav() {
+  sceneNavEl.innerHTML = '';
+  sceneInfoEl.textContent = '';
+  if (!script) return;
+  sceneInfoEl.textContent = `Scene ${previewScene + 1} / ${script.scenes.length}`;
+  script.scenes.forEach((s, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'scene-dot' + (i === previewScene ? ' active' : '');
+    dot.textContent = String(i + 1).padStart(2, '0');
+    dot.onclick = () => {
+      previewScene = i;
+      rebuildSceneNav();
+      drawStaticPreview();
+    };
+    sceneNavEl.appendChild(dot);
+  });
+}
+
+// =========================================================
+//  THUMB GRID
+// =========================================================
+function rebuildThumbGrid() {
+  thumbGridEl.innerHTML = '';
+  if (!script) return;
+  script.scenes.forEach((s, i) => {
+    const t = document.createElement('div');
+    t.className = 'thumb';
+    const idx = document.createElement('div');
+    idx.className = 'idx';
+    idx.textContent = String(i + 1).padStart(2, '0');
+    t.appendChild(idx);
+    if (images[i]) {
+      const im = document.createElement('img');
+      im.src = images[i].src;
+      t.appendChild(im);
+      const regen = document.createElement('div');
+      regen.className = 'regen';
+      regen.textContent = '↻';
+      regen.title = 'Regenerate this image';
+      regen.onclick = (e) => { e.stopPropagation(); regenerateOneImage(i); };
+      t.appendChild(regen);
+    } else {
+      t.classList.add('empty');
+      t.textContent = '—';
+    }
+    t.onclick = () => {
+      previewScene = i;
+      rebuildSceneNav();
+      drawStaticPreview();
+    };
+    thumbGridEl.appendChild(t);
+  });
+}
+
+// =========================================================
+//  WORKFLOW — Generate All
+// =========================================================
+async function runGenerateAll() {
+  const anthropicKey = anthropicKeyEl.value.trim();
+  const falKey = falKeyEl.value.trim();
+  const elevenKey = elevenKeyEl.value.trim();
+  if (!anthropicKey || !falKey || !elevenKey) {
+    setStatus('Need all 3 API keys (Anthropic, FAL.ai, ElevenLabs)', 'error');
+    return;
+  }
+  const topic = topicEl.value.trim();
+  if (!topic) { setStatus('Enter a topic', 'error'); return; }
+  const sceneCount = parseInt(sceneCountEl.value);
+
+  disableControls(true);
+  try {
+    // Step 1: Script
+    setStatus('Claude writing script…', 'info');
+    setProgress(5);
+    script = await generateScript(topic, sceneCount, anthropicKey);
+    images = new Array(script.scenes.length).fill(null);
+    audios = new Array(script.scenes.length).fill(null);
+    mainTitleEl.value = script.mainTitle;
+    scriptJsonEl.value = JSON.stringify(script.scenes, null, 2);
+    scriptStatusEl.textContent = `✓ Script · ${script.scenes.length} scenes`;
+    previewScene = 0;
+    rebuildSceneNav();
+    rebuildThumbGrid();
+    setProgress(10);
+
+    // Step 2: Images (sequential to respect rate limits)
+    for (let i = 0; i < script.scenes.length; i++) {
+      setStatus(`Generating illustration ${i + 1}/${script.scenes.length}…`, 'info');
+      const img = await generateImageForScene(script.scenes[i].imagePrompt, falKey);
+      images[i] = img;
+      rebuildThumbGrid();
+      if (i === 0) drawStaticPreview();
+      setProgress(10 + ((i + 1) / script.scenes.length) * 50);
+    }
+    assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations ready`;
+
+    // Step 3: Voices (in parallel — ElevenLabs has generous limits)
+    setStatus('Generating voiceovers…', 'info');
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const voiceId = voiceEl.value;
+    const voicePromises = script.scenes.map((s, i) =>
+      generateSpeech(s.narration, voiceId, elevenKey, audioCtx)
+        .then(buf => { audios[i] = buf; })
+    );
+    await Promise.all(voicePromises);
+    setProgress(95);
+    const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
+    assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
+
+    setProgress(100);
+    setStatus('Ready to preview and record', 'success');
+    setTimeout(() => setProgress(null), 1200);
+    drawStaticPreview();
+  } catch (err) {
+    console.error(err);
+    setStatus('Error: ' + err.message, 'error');
+    setProgress(null);
+  } finally {
+    disableControls(false);
+  }
+}
+
+async function regenerateScript() {
+  const key = anthropicKeyEl.value.trim();
+  if (!key) { setStatus('Need Anthropic key', 'error'); return; }
+  const topic = topicEl.value.trim();
+  if (!topic) { setStatus('Enter a topic', 'error'); return; }
+  disableControls(true);
+  try {
+    setStatus('Claude writing new script…', 'info');
+    script = await generateScript(topic, parseInt(sceneCountEl.value), key);
+    images = new Array(script.scenes.length).fill(null);
+    audios = new Array(script.scenes.length).fill(null);
+    mainTitleEl.value = script.mainTitle;
+    scriptJsonEl.value = JSON.stringify(script.scenes, null, 2);
+    scriptStatusEl.textContent = `✓ Script · ${script.scenes.length} scenes`;
+    previewScene = 0;
+    rebuildSceneNav();
+    rebuildThumbGrid();
+    drawStaticPreview();
+    setStatus('Script regenerated. Regenerate images & voice to match.', 'success');
+  } catch (err) {
+    setStatus('Error: ' + err.message, 'error');
+  } finally {
+    disableControls(false);
+  }
+}
+
+async function regenerateAllImages() {
+  if (!script) { setStatus('Generate a script first', 'error'); return; }
+  const key = falKeyEl.value.trim();
+  if (!key) { setStatus('Need FAL.ai key', 'error'); return; }
+  disableControls(true);
+  try {
+    setProgress(0);
+    for (let i = 0; i < script.scenes.length; i++) {
+      setStatus(`Regenerating illustration ${i + 1}/${script.scenes.length}…`, 'info');
+      const img = await generateImageForScene(script.scenes[i].imagePrompt, key);
+      images[i] = img;
+      rebuildThumbGrid();
+      if (i === previewScene) drawStaticPreview();
+      setProgress(((i + 1) / script.scenes.length) * 100);
+    }
+    setStatus('All images regenerated', 'success');
+    setTimeout(() => setProgress(null), 1000);
+  } catch (err) {
+    setStatus('Error: ' + err.message, 'error');
+    setProgress(null);
+  } finally {
+    disableControls(false);
+  }
+}
+
+async function regenerateOneImage(idx) {
+  if (!script) return;
+  const key = falKeyEl.value.trim();
+  if (!key) { setStatus('Need FAL.ai key', 'error'); return; }
+  disableControls(true);
+  try {
+    setStatus(`Regenerating illustration ${idx + 1}…`, 'info');
+    const img = await generateImageForScene(script.scenes[idx].imagePrompt, key);
+    images[idx] = img;
+    rebuildThumbGrid();
+    if (idx === previewScene) drawStaticPreview();
+    setStatus(`Illustration ${idx + 1} updated`, 'success');
+    setTimeout(() => setStatus(''), 1500);
+  } catch (err) {
+    setStatus('Error: ' + err.message, 'error');
+  } finally {
+    disableControls(false);
+  }
+}
+
+async function regenerateVoice() {
+  if (!script) { setStatus('Generate a script first', 'error'); return; }
+  const key = elevenKeyEl.value.trim();
+  if (!key) { setStatus('Need ElevenLabs key', 'error'); return; }
+  disableControls(true);
+  try {
+    setStatus('Regenerating voiceovers…', 'info');
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const voiceId = voiceEl.value;
+    const voicePromises = script.scenes.map((s, i) =>
+      generateSpeech(s.narration, voiceId, key, audioCtx)
+        .then(buf => { audios[i] = buf; })
+    );
+    await Promise.all(voicePromises);
+    const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
+    assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
+    setStatus('Voiceovers regenerated', 'success');
+  } catch (err) {
+    setStatus('Error: ' + err.message, 'error');
+  } finally {
+    disableControls(false);
+  }
+}
+
+// Save script edits
+mainTitleEl.addEventListener('change', () => {
+  if (script) { script.mainTitle = mainTitleEl.value; drawStaticPreview(); }
+});
+scriptJsonEl.addEventListener('change', () => {
+  if (!script) return;
+  try {
+    const scenes = JSON.parse(scriptJsonEl.value);
+    if (!Array.isArray(scenes)) throw new Error('Must be an array');
+    script.scenes = scenes;
+    // Resize asset arrays
+    while (images.length < scenes.length) images.push(null);
+    while (audios.length < scenes.length) audios.push(null);
+    images = images.slice(0, scenes.length);
+    audios = audios.slice(0, scenes.length);
+    previewScene = Math.min(previewScene, scenes.length - 1);
+    rebuildSceneNav();
+    rebuildThumbGrid();
+    drawStaticPreview();
+    setStatus('Script updated', 'success');
+    setTimeout(() => setStatus(''), 1500);
+  } catch (err) {
+    setStatus('Invalid JSON: ' + err.message, 'error');
+  }
+});
+
+// =========================================================
+//  PREVIEW / RECORD / EXPORT
+// =========================================================
+function computeTimings() {
+  // Each scene = audio duration + 0.2s gap. Or 3.0s if no audio.
+  const timings = [];
+  let t = 0;
+  for (let i = 0; i < script.scenes.length; i++) {
+    const dur = (audios[i] ? audios[i].duration : 3.0) + 0.2;
+    timings.push({ start: t, duration: dur });
+    t += dur;
+  }
+  return { timings, total: t };
+}
+
+function playAudioSequence(audioCtx, dest) {
+  const { timings } = computeTimings();
+  const sources = [];
+  for (let i = 0; i < audios.length; i++) {
+    if (!audios[i]) continue;
+    const src = audioCtx.createBufferSource();
+    src.buffer = audios[i];
+    if (dest) src.connect(dest);
+    src.connect(audioCtx.destination); // monitor
+    src.start(audioCtx.currentTime + timings[i].start);
+    sources.push(src);
+  }
+  return sources;
+}
+
+async function runPlayback(record) {
+  if (!script) { setStatus('Generate a script first', 'error'); return; }
+  if (playing) return;
+  playing = true;
+  playAbort = { cancel: false };
+
+  const { timings, total } = computeTimings();
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let canvasStream = null;
+  let recorder = null;
+  let chunks = [];
+  let audioDest = null;
+  let mimeType = '';
+  let ext = 'webm';
+
+  if (record) {
+    const candidates = [
+      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+      'video/mp4;codecs=h264,mp4a',
+      'video/mp4',
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm'
+    ];
+    for (const c of candidates) if (MediaRecorder.isTypeSupported(c)) { mimeType = c; break; }
+    if (!mimeType) { setStatus('Browser does not support video recording', 'error'); playing = false; return; }
+    ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+    canvasStream = canvas.captureStream(30);
+    audioDest = audioCtx.createMediaStreamDestination();
+    const audioTrack = audioDest.stream.getAudioTracks()[0];
+    if (audioTrack) canvasStream.addTrack(audioTrack);
+    recorder = new MediaRecorder(canvasStream, { mimeType, videoBitsPerSecond: 6_000_000 });
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  }
+
+  $('stopBtn').disabled = false;
+  $('previewBtn').disabled = true;
+  $('recordBtn').disabled = true;
+  setStatus(record ? `Recording ${total.toFixed(1)}s…` : `Playing ${total.toFixed(1)}s preview…`, 'info');
+
+  const stoppedPromise = record ? new Promise((resolve) => { recorder.onstop = resolve; }) : null;
+
+  // Start audio
+  const sources = playAudioSequence(audioCtx, audioDest);
+  if (record) recorder.start(100);
+  const start = performance.now();
+
+  await new Promise(resolve => {
+    function loop() {
+      if (playAbort.cancel) { resolve(); return; }
+      const elapsed = (performance.now() - start) / 1000;
+      if (elapsed >= total) { resolve(); return; }
+      // Find current scene
+      let idx = 0;
+      for (let i = 0; i < timings.length; i++) {
+        if (elapsed >= timings[i].start && elapsed < timings[i].start + timings[i].duration) {
+          idx = i; break;
+        }
+        if (elapsed >= timings[i].start) idx = i;
+      }
+      const tInScene = elapsed - timings[idx].start;
+      drawScene(idx, tInScene, timings[idx].duration);
+      previewScene = idx;
+      // Update scene dots live
+      Array.from(sceneNavEl.children).forEach((el, i) => el.classList.toggle('active', i === idx));
+      sceneInfoEl.textContent = `Scene ${idx + 1} / ${script.scenes.length} · ${elapsed.toFixed(1)}s / ${total.toFixed(1)}s`;
+      requestAnimationFrame(loop);
+    }
+    loop();
+  });
+
+  // Hold last frame briefly
+  await new Promise(r => setTimeout(r, 250));
+
+  if (record) {
+    recorder.stop();
+    await stoppedPromise;
+    currentBlob = new Blob(chunks, { type: mimeType });
+    currentExt = ext;
+    $('downloadBtn').disabled = false;
+    setStatus(`Done · ${(currentBlob.size / 1024 / 1024).toFixed(1)} MB · ${ext.toUpperCase()}`, 'success');
+  } else {
+    setStatus('');
+  }
+
+  // Cleanup audio sources
+  sources.forEach(s => { try { s.stop(); } catch (e) {} });
+  try { await audioCtx.close(); } catch (e) {}
+
+  playing = false;
+  playAbort = null;
+  $('stopBtn').disabled = true;
+  $('previewBtn').disabled = false;
+  $('recordBtn').disabled = false;
+  drawStaticPreview();
+}
+
+// =========================================================
+//  UI WIRING
+// =========================================================
+function disableControls(disable) {
+  ['generateAllBtn', 'regenScriptBtn', 'regenImagesBtn', 'regenVoiceBtn', 'previewBtn', 'recordBtn']
+    .forEach(id => { const el = $(id); if (el) el.disabled = disable; });
+}
+
+$('generateAllBtn').onclick = runGenerateAll;
+$('regenScriptBtn').onclick = regenerateScript;
+$('regenImagesBtn').onclick = regenerateAllImages;
+$('regenVoiceBtn').onclick = regenerateVoice;
+$('previewBtn').onclick = () => runPlayback(false);
+$('recordBtn').onclick = () => runPlayback(true);
+$('stopBtn').onclick = () => { if (playAbort) playAbort.cancel = true; };
+$('downloadBtn').onclick = () => {
+  if (!currentBlob) return;
+  const url = URL.createObjectURL(currentBlob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  a.href = url;
+  a.download = `brutal-${(script?.mainTitle || 'story').replace(/\s+/g, '-').toLowerCase().slice(0, 40)}-${stamp}.${currentExt}`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+// Live style updates
+[titleFontEl, titleColorEl, titlePosEl, captionColorEl, subsEnabledEl, subsWordsEl, subsColorEl].forEach(el =>
+  el.addEventListener('change', drawStaticPreview)
+);
+darkenEl.addEventListener('input', () => {
+  darkenValEl.textContent = darkenEl.value + '%';
+  drawStaticPreview();
+});
+subsPosEl.addEventListener('input', () => {
+  subsPosValEl.textContent = subsPosEl.value + '%';
+  drawStaticPreview();
+});
+subsSizeEl.addEventListener('input', () => {
+  subsSizeValEl.textContent = subsSizeEl.value + 'px';
+  drawStaticPreview();
+});
+
+// Init
+function init() {
+  loadKeys();
+  buildConcrete();
+  drawStaticPreview();
+}
+document.fonts.ready.then(init);
+</script>
+</body>
+</html>
