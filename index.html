@@ -326,10 +326,17 @@
             <label>Background texture</label>
             <select id="bgVariant">
               <option value="concrete" selected>Gray Concrete (default)</option>
-              <option value="blood">Blood Red</option>
+              <option value="blood">Blood Red (dark)</option>
+              <option value="bloodLight">Blood Red (lighter)</option>
+              <option value="bloodWine">Wine / Burgundy</option>
               <option value="black">Pure Black</option>
+              <option value="charcoal">Charcoal (softer black)</option>
               <option value="sepia">Sepia</option>
             </select>
+          </div>
+          <div class="field">
+            <label>Background brightness (<span id="bgBrightnessVal">0</span>) · lighten / darken any texture</label>
+            <input type="range" id="bgBrightness" min="-50" max="80" value="0">
           </div>
           <div class="field">
             <label>Illustration mode</label>
@@ -482,23 +489,36 @@ let playAbort = null;
 
 // ----- Background texture generator (procedural)
 const BG_PALETTES = {
-  concrete: { stops: ['#7a7a7a', '#6a6a6a', '#555555'], grainAmount: 30, splotchAlpha: 0.06 },
-  blood:    { stops: ['#5a0000', '#3d0000', '#1a0000'], grainAmount: 22, splotchAlpha: 0.08 },
-  black:    { stops: ['#1f1f1f', '#121212', '#050505'], grainAmount: 18, splotchAlpha: 0.05 },
-  sepia:    { stops: ['#6b4a2a', '#4a331c', '#241812'], grainAmount: 26, splotchAlpha: 0.06 }
+  concrete:   { stops: ['#7a7a7a', '#6a6a6a', '#555555'], grainAmount: 30, splotchAlpha: 0.06 },
+  blood:      { stops: ['#5a0000', '#3d0000', '#1a0000'], grainAmount: 22, splotchAlpha: 0.08 },
+  bloodLight: { stops: ['#9a1010', '#722020', '#3a0808'], grainAmount: 26, splotchAlpha: 0.07 },
+  bloodWine:  { stops: ['#7a0a2a', '#4d051c', '#200010'], grainAmount: 22, splotchAlpha: 0.07 },
+  black:      { stops: ['#1f1f1f', '#121212', '#050505'], grainAmount: 18, splotchAlpha: 0.05 },
+  charcoal:   { stops: ['#3a3a3a', '#2a2a2a', '#1a1a1a'], grainAmount: 24, splotchAlpha: 0.05 },
+  sepia:      { stops: ['#6b4a2a', '#4a331c', '#241812'], grainAmount: 26, splotchAlpha: 0.06 }
 };
+
+function shiftHex(hex, offset) {
+  const h = hex.replace('#', '');
+  const r = Math.max(0, Math.min(255, parseInt(h.slice(0,2),16) + offset));
+  const g = Math.max(0, Math.min(255, parseInt(h.slice(2,4),16) + offset));
+  const b = Math.max(0, Math.min(255, parseInt(h.slice(4,6),16) + offset));
+  return `rgb(${r},${g},${b})`;
+}
 
 function buildConcrete(variant) {
   const key = variant || (document.getElementById('bgVariant')?.value) || 'concrete';
   const palette = BG_PALETTES[key] || BG_PALETTES.concrete;
+  const brightness = parseInt(document.getElementById('bgBrightness')?.value || '0');
+  const stops = palette.stops.map(s => shiftHex(s, brightness));
   const off = document.createElement('canvas');
   off.width = W; off.height = H;
   const c = off.getContext('2d');
   // Base gradient
   const grad = c.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, palette.stops[0]);
-  grad.addColorStop(0.5, palette.stops[1]);
-  grad.addColorStop(1, palette.stops[2]);
+  grad.addColorStop(0, stops[0]);
+  grad.addColorStop(0.5, stops[1]);
+  grad.addColorStop(1, stops[2]);
   c.fillStyle = grad;
   c.fillRect(0, 0, W, H);
   // Grain
@@ -1498,6 +1518,11 @@ $('downloadBtn').onclick = async () => {
 );
 $('subsFont').addEventListener('change', drawStaticPreview);
 $('bgVariant').addEventListener('change', () => {
+  buildConcrete($('bgVariant').value);
+  drawStaticPreview();
+});
+$('bgBrightness').addEventListener('input', () => {
+  $('bgBrightnessVal').textContent = $('bgBrightness').value;
   buildConcrete($('bgVariant').value);
   drawStaticPreview();
 });
