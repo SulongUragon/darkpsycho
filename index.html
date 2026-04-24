@@ -401,6 +401,16 @@
             </div>
           </div>
           <div class="field">
+            <label>Subtitle font</label>
+            <select id="subsFont">
+              <option value="'Inter', sans-serif" selected>Inter 900 (bold sans)</option>
+              <option value="'Special Elite', monospace">Typewriter (Special Elite)</option>
+              <option value="'Courier Prime', monospace">Typewriter (Courier)</option>
+              <option value="'Anton', sans-serif">Anton (condensed)</option>
+              <option value="'Archivo Black', sans-serif">Archivo Black</option>
+            </select>
+          </div>
+          <div class="field">
             <label>Subtitle position (<span id="subsPosVal">75%</span> from top)</label>
             <input type="range" id="subsPos" min="40" max="90" value="75">
           </div>
@@ -859,7 +869,11 @@ function drawSubtitle(text, alpha) {
   const fontSize = parseInt(subsSizeEl.value);
   const posPct = parseInt(subsPosEl.value) / 100;
   const color = subsColorEl.value;
-  ctx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+  const fontFamily = document.getElementById('subsFont')?.value || "'Inter', sans-serif";
+  // Typewriter fonts render better without ultra-heavy weights
+  const isMono = fontFamily.includes('Special Elite') || fontFamily.includes('Courier');
+  const weight = isMono ? 700 : 900;
+  ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
@@ -1482,6 +1496,7 @@ $('downloadBtn').onclick = async () => {
 [titleFontEl, titleColorEl, titlePosEl, captionColorEl, subsEnabledEl, subsWordsEl, subsColorEl].forEach(el =>
   el.addEventListener('change', drawStaticPreview)
 );
+$('subsFont').addEventListener('change', drawStaticPreview);
 $('bgVariant').addEventListener('change', () => {
   buildConcrete($('bgVariant').value);
   drawStaticPreview();
