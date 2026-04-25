@@ -167,6 +167,41 @@
     font-size: 10px; color: #666; margin-top: 8px; letter-spacing: 1px;
     text-transform: uppercase; text-align: center;
   }
+  .project-list {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 240px; overflow-y: auto; padding-right: 4px;
+  }
+  .project-list::-webkit-scrollbar { width: 5px; }
+  .project-list::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+  .project-item {
+    display: flex; align-items: center; gap: 10px;
+    background: #0c0c0c; border: 1px solid #1f1f1f; border-radius: 6px;
+    padding: 8px; transition: border-color 0.15s;
+  }
+  .project-item:hover { border-color: #444; }
+  .project-item.active { border-color: #8b0000; }
+  .project-thumb {
+    width: 38px; height: 68px; object-fit: cover; border-radius: 4px;
+    background: #050505; flex-shrink: 0;
+  }
+  .project-meta { flex: 1; min-width: 0; }
+  .project-name {
+    font-size: 13px; font-weight: 600; color: #ddd;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .project-date { font-size: 10px; color: #666; letter-spacing: 1px; margin-top: 2px; }
+  .project-load-btn, .project-del-btn {
+    padding: 6px 10px; border-radius: 4px; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
+    cursor: pointer; flex-shrink: 0; width: auto;
+  }
+  .project-load-btn {
+    background: linear-gradient(135deg, #8b0000, #3b0000); color: #fff; border: none;
+  }
+  .project-del-btn {
+    background: transparent; border: 1px solid #2a2a2a; color: #888;
+  }
+  .project-del-btn:hover { border-color: #ff4040; color: #ff4040; }
   .folder-row { display: flex; gap: 8px; align-items: center; }
   .folder-display {
     flex: 1; background: #080808; border: 1px solid #252525;
@@ -257,6 +292,14 @@
         </div>
         <button id="saveKeys" class="secondary">Save All Keys Locally</button>
         <div class="cost-note">Cost per video ≈ $0.05 (FLUX schnell + TTS) · <a href="https://fal.ai/dashboard/keys" target="_blank">Get FAL key</a></div>
+      </div>
+
+      <div class="panel">
+        <h2><span><span class="num">★</span>Project Library</span>
+          <button id="saveProjectBtn" class="small secondary">+ Save current</button>
+        </h2>
+        <div id="projectList" class="project-list"></div>
+        <div class="cost-note">Stored in your browser · script + images + voice + settings</div>
       </div>
 
       <div class="panel">
@@ -481,7 +524,10 @@ const sceneInfoEl = $('sceneInfo');
 // ----- State
 let script = null;          // { mainTitle, scenes: [{title, narration, imagePrompt}] }
 let images = [];            // HTMLImageElement[] per scene (may be null)
+let imageBlobs = [];        // Blob[] per scene (raw FAL image, for project save)
 let audios = [];            // AudioBuffer[] per scene (may be null)
+let audioMp3s = [];         // ArrayBuffer[] per scene (raw ElevenLabs MP3, for project save)
+let currentProjectId = null;
 let concreteBg = null;      // Pre-rendered concrete texture canvas
 let previewScene = 0;       // Which scene to show on static preview
 let currentBlob = null;
@@ -682,14 +728,18 @@ async function generateImageForScene(scenePrompt, apiKey) {
   const data = await response.json();
   const imgObj = data.images?.[0];
   if (!imgObj) throw new Error('FAL.ai returned no image');
-  // sync_mode returns data URI directly; otherwise fetch the URL
   const url = imgObj.url;
-  if (url.startsWith('data:')) return await loadImage(url);
-  // Convert remote URL to blob to avoid canvas taint issues
-  const imgResp = await fetch(url);
-  const blob = await imgResp.blob();
+  let blob;
+  if (url.startsWith('data:')) {
+    const r = await fetch(url);
+    blob = await r.blob();
+  } else {
+    const imgResp = await fetch(url);
+    blob = await imgResp.blob();
+  }
   const objUrl = URL.createObjectURL(blob);
-  return await loadImage(objUrl);
+  const img = await loadImage(objUrl);
+  return { img, blob };
 }
 
 function loadImage(src) {
@@ -731,7 +781,7 @@ async function generateSpeech(text, voiceId, apiKey, audioCtx) {
   }
   const arrayBuf = await response.arrayBuffer();
   const audioBuf = await audioCtx.decodeAudioData(arrayBuf.slice(0));
-  return audioBuf;
+  return { audioBuffer: audioBuf, mp3Buffer: arrayBuf };
 }
 
 // =========================================================
@@ -1058,7 +1108,10 @@ async function runGenerateAll() {
     setProgress(5);
     script = await generateScript(topic, sceneCount, anthropicKey);
     images = new Array(script.scenes.length).fill(null);
+    imageBlobs = new Array(script.scenes.length).fill(null);
     audios = new Array(script.scenes.length).fill(null);
+    audioMp3s = new Array(script.scenes.length).fill(null);
+    currentProjectId = null;
     mainTitleEl.value = script.mainTitle;
     scriptJsonEl.value = JSON.stringify(script.scenes, null, 2);
     scriptStatusEl.textContent = `✓ Script · ${script.scenes.length} scenes`;
@@ -1070,8 +1123,9 @@ async function runGenerateAll() {
     // Step 2: Images (sequential to respect rate limits)
     for (let i = 0; i < script.scenes.length; i++) {
       setStatus(`Generating illustration ${i + 1}/${script.scenes.length}…`, 'info');
-      const img = await generateImageForScene(script.scenes[i].imagePrompt, falKey);
-      images[i] = img;
+      const result = await generateImageForScene(script.scenes[i].imagePrompt, falKey);
+      images[i] = result.img;
+      imageBlobs[i] = result.blob;
       rebuildThumbGrid();
       if (i === 0) drawStaticPreview();
       setProgress(10 + ((i + 1) / script.scenes.length) * 50);
@@ -1084,7 +1138,7 @@ async function runGenerateAll() {
     const voiceId = voiceEl.value;
     const voicePromises = script.scenes.map((s, i) =>
       generateSpeech(s.narration, voiceId, elevenKey, audioCtx)
-        .then(buf => { audios[i] = buf; })
+        .then(r => { audios[i] = r.audioBuffer; audioMp3s[i] = r.mp3Buffer; })
     );
     await Promise.all(voicePromises);
     setProgress(95);
@@ -1115,7 +1169,10 @@ async function regenerateScript() {
     setStatus('Claude writing new script…', 'info');
     script = await generateScript(topic, parseInt(sceneCountEl.value), key);
     images = new Array(script.scenes.length).fill(null);
+    imageBlobs = new Array(script.scenes.length).fill(null);
     audios = new Array(script.scenes.length).fill(null);
+    audioMp3s = new Array(script.scenes.length).fill(null);
+    currentProjectId = null;
     mainTitleEl.value = script.mainTitle;
     scriptJsonEl.value = JSON.stringify(script.scenes, null, 2);
     scriptStatusEl.textContent = `✓ Script · ${script.scenes.length} scenes`;
@@ -1140,8 +1197,9 @@ async function regenerateAllImages() {
     setProgress(0);
     for (let i = 0; i < script.scenes.length; i++) {
       setStatus(`Regenerating illustration ${i + 1}/${script.scenes.length}…`, 'info');
-      const img = await generateImageForScene(script.scenes[i].imagePrompt, key);
-      images[i] = img;
+      const result = await generateImageForScene(script.scenes[i].imagePrompt, key);
+      images[i] = result.img;
+      imageBlobs[i] = result.blob;
       rebuildThumbGrid();
       if (i === previewScene) drawStaticPreview();
       setProgress(((i + 1) / script.scenes.length) * 100);
@@ -1163,8 +1221,9 @@ async function regenerateOneImage(idx) {
   disableControls(true);
   try {
     setStatus(`Regenerating illustration ${idx + 1}…`, 'info');
-    const img = await generateImageForScene(script.scenes[idx].imagePrompt, key);
-    images[idx] = img;
+    const result = await generateImageForScene(script.scenes[idx].imagePrompt, key);
+    images[idx] = result.img;
+    imageBlobs[idx] = result.blob;
     rebuildThumbGrid();
     if (idx === previewScene) drawStaticPreview();
     setStatus(`Illustration ${idx + 1} updated`, 'success');
@@ -1187,7 +1246,7 @@ async function regenerateVoice() {
     const voiceId = voiceEl.value;
     const voicePromises = script.scenes.map((s, i) =>
       generateSpeech(s.narration, voiceId, key, audioCtx)
-        .then(buf => { audios[i] = buf; })
+        .then(r => { audios[i] = r.audioBuffer; audioMp3s[i] = r.mp3Buffer; })
     );
     await Promise.all(voicePromises);
     const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
@@ -1377,8 +1436,14 @@ const fsaSupported = 'showDirectoryPicker' in window;
 
 function openIDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('darkpsycho', 1);
-    req.onupgradeneeded = () => { req.result.createObjectStore('handles'); };
+    const req = indexedDB.open('darkpsycho', 2);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains('handles')) db.createObjectStore('handles');
+      if (!db.objectStoreNames.contains('projects')) {
+        db.createObjectStore('projects', { keyPath: 'id' });
+      }
+    };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
@@ -1623,12 +1688,194 @@ subsSizeEl.addEventListener('input', () => {
   drawStaticPreview();
 });
 
+// =========================================================
+//  PROJECT LIBRARY (IndexedDB)
+// =========================================================
+function collectSettings() {
+  return {
+    topic: topicEl.value, sceneCount: sceneCountEl.value, voice: voiceEl.value,
+    titleFont: titleFontEl.value, titleColor: titleColorEl.value, titlePos: titlePosEl.value,
+    captionColor: captionColorEl.value, darken: darkenEl.value, illScale: illScaleEl.value,
+    illMode: $('illMode')?.value, subsEnabled: subsEnabledEl.checked, subsWords: subsWordsEl.value,
+    subsColor: subsColorEl.value, subsFont: $('subsFont')?.value, subsPos: subsPosEl.value,
+    subsSize: subsSizeEl.value, bgVariant: $('bgVariant')?.value,
+    bgBrightness: $('bgBrightness')?.value, duration: durationSelect.value
+  };
+}
+
+function applySettings(s) {
+  if (!s) return;
+  const set = (el, v) => { if (el && v !== undefined && v !== null) el.value = v; };
+  set(topicEl, s.topic); set(sceneCountEl, s.sceneCount); set(voiceEl, s.voice);
+  set(titleFontEl, s.titleFont); set(titleColorEl, s.titleColor); set(titlePosEl, s.titlePos);
+  set(captionColorEl, s.captionColor); set(durationSelect, s.duration);
+  set(subsWordsEl, s.subsWords); set(subsColorEl, s.subsColor);
+  if (s.subsEnabled !== undefined) subsEnabledEl.checked = s.subsEnabled;
+  if (s.illMode && $('illMode')) $('illMode').value = s.illMode;
+  if (s.subsFont && $('subsFont')) $('subsFont').value = s.subsFont;
+  if (s.bgVariant && $('bgVariant')) $('bgVariant').value = s.bgVariant;
+  if (s.darken !== undefined) { darkenEl.value = s.darken; darkenValEl.textContent = s.darken + '%'; }
+  if (s.illScale !== undefined) { illScaleEl.value = s.illScale; illScaleValEl.textContent = s.illScale + '%'; }
+  if (s.subsPos !== undefined) { subsPosEl.value = s.subsPos; subsPosValEl.textContent = s.subsPos + '%'; }
+  if (s.subsSize !== undefined) { subsSizeEl.value = s.subsSize; subsSizeValEl.textContent = s.subsSize + 'px'; }
+  if (s.bgBrightness !== undefined && $('bgBrightness')) {
+    $('bgBrightness').value = s.bgBrightness;
+    $('bgBrightnessVal').textContent = s.bgBrightness;
+  }
+  buildConcrete($('bgVariant')?.value);
+}
+
+async function makeThumb() {
+  const off = document.createElement('canvas');
+  off.width = 200; off.height = 356;
+  off.getContext('2d').drawImage(canvas, 0, 0, 200, 356);
+  return await new Promise(r => off.toBlob(r, 'image/jpeg', 0.7));
+}
+
+async function listProjects() {
+  const db = await openIDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('projects', 'readonly');
+    const r = tx.objectStore('projects').getAll();
+    r.onsuccess = () => res((r.result || []).sort((a, b) => b.updatedAt - a.updatedAt));
+    r.onerror = () => rej(r.error);
+  });
+}
+
+async function getProject(id) {
+  const db = await openIDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('projects', 'readonly');
+    const r = tx.objectStore('projects').get(id);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+
+async function putProject(project) {
+  const db = await openIDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('projects', 'readwrite');
+    tx.objectStore('projects').put(project);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  });
+}
+
+async function deleteProjectIDB(id) {
+  const db = await openIDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('projects', 'readwrite');
+    tx.objectStore('projects').delete(id);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  });
+}
+
+async function saveCurrentProject() {
+  if (!script) { setStatus('Generate something first', 'error'); return; }
+  const defaultName = script.mainTitle || 'Untitled';
+  const name = prompt('Project name:', currentProjectId ? defaultName : defaultName);
+  if (!name) return;
+  setStatus('Saving project…', 'info');
+  try {
+    const thumbnail = await makeThumb();
+    const id = currentProjectId || ('p_' + Date.now());
+    const existing = currentProjectId ? await getProject(currentProjectId) : null;
+    const project = {
+      id, name,
+      createdAt: existing?.createdAt || Date.now(),
+      updatedAt: Date.now(),
+      thumbnail,
+      script: JSON.parse(JSON.stringify(script)),
+      imageBlobs: imageBlobs.map(b => b || null),
+      audioMp3s: audioMp3s.map(b => b || null),
+      settings: collectSettings()
+    };
+    await putProject(project);
+    currentProjectId = id;
+    await refreshProjectList();
+    setStatus(`Saved: ${name}`, 'success');
+    setTimeout(() => setStatus(''), 2000);
+  } catch (err) {
+    setStatus('Save failed: ' + err.message, 'error');
+  }
+}
+
+async function loadProject(id) {
+  const project = await getProject(id);
+  if (!project) { setStatus('Project not found', 'error'); return; }
+  setStatus('Loading project…', 'info');
+  try {
+    script = project.script;
+    imageBlobs = project.imageBlobs || [];
+    audioMp3s = project.audioMp3s || [];
+    images = await Promise.all(imageBlobs.map(b => b ? loadImage(URL.createObjectURL(b)) : null));
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audios = await Promise.all(audioMp3s.map(b => b ? audioCtx.decodeAudioData(b.slice(0)) : null));
+    applySettings(project.settings);
+    mainTitleEl.value = script.mainTitle || '';
+    scriptJsonEl.value = JSON.stringify(script.scenes, null, 2);
+    scriptStatusEl.textContent = `✓ Script · ${script.scenes.length} scenes`;
+    const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
+    assetsStatusEl.textContent = `✓ ${images.filter(i => i).length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
+    currentProjectId = project.id;
+    previewScene = 0;
+    rebuildSceneNav();
+    rebuildThumbGrid();
+    refreshAudioDownloadBtn();
+    drawStaticPreview();
+    setStatus(`Loaded: ${project.name}`, 'success');
+    setTimeout(() => setStatus(''), 2000);
+  } catch (err) {
+    setStatus('Load failed: ' + err.message, 'error');
+  }
+}
+
+async function deleteProjectAction(id, name) {
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  await deleteProjectIDB(id);
+  if (currentProjectId === id) currentProjectId = null;
+  await refreshProjectList();
+  setStatus(`Deleted: ${name}`, 'success');
+  setTimeout(() => setStatus(''), 2000);
+}
+
+async function refreshProjectList() {
+  const list = $('projectList');
+  if (!list) return;
+  const projects = await listProjects();
+  list.innerHTML = '';
+  if (projects.length === 0) {
+    list.innerHTML = '<div class="cost-note" style="text-align:center;padding:14px">No saved projects yet — click "+ Save current" after generating</div>';
+    return;
+  }
+  for (const p of projects) {
+    const item = document.createElement('div');
+    item.className = 'project-item' + (p.id === currentProjectId ? ' active' : '');
+    const thumbUrl = p.thumbnail ? URL.createObjectURL(p.thumbnail) : '';
+    const date = new Date(p.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    item.innerHTML = `
+      <img class="project-thumb" src="${thumbUrl}" alt="">
+      <div class="project-meta">
+        <div class="project-name">${p.name.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
+        <div class="project-date">${date} · ${p.script?.scenes?.length || '?'} scenes</div>
+      </div>
+      <button class="project-load-btn" data-id="${p.id}">Load</button>
+      <button class="project-del-btn" data-id="${p.id}" data-name="${p.name.replace(/"/g, '&quot;')}">✕</button>
+    `;
+    list.appendChild(item);
+  }
+  list.querySelectorAll('.project-load-btn').forEach(b => b.onclick = () => loadProject(b.dataset.id));
+  list.querySelectorAll('.project-del-btn').forEach(b => b.onclick = () => deleteProjectAction(b.dataset.id, b.dataset.name));
+}
+
 // Init
 function init() {
   loadKeys();
   loadSavedFolder();
   buildConcrete();
   drawStaticPreview();
+  if ($('saveProjectBtn')) $('saveProjectBtn').onclick = saveCurrentProject;
+  refreshProjectList();
 }
 document.fonts.ready.then(init);
 </script>
