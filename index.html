@@ -409,6 +409,16 @@
             </select>
           </div>
         </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;">
+          <div>
+            <div style="font-size:11px;color:#ccc;font-weight:600;">🎭 Cartoon Characters</div>
+            <div style="font-size:10px;color:#555;margin-top:2px;">Include animated characters in scenes for variety</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="cartoonMode">
+            <div class="toggle-track"></div>
+          </label>
+        </div>
         <button id="generateAllBtn" class="big-btn">⚡ Generate Everything</button>
       </div>
 
@@ -879,6 +889,10 @@ function loadKeys() {
 //  CLAUDE — Script generator
 // =========================================================
 async function generateScript(topic, sceneCount, apiKey) {
+  const cartoonMode = document.getElementById('cartoonMode')?.checked;
+  const cartoonInstruction = cartoonMode
+    ? "MIX IT UP — roughly half the scenes should feature expressive cartoon characters (people, animals, figures with faces and emotions showing the scene's theme); the rest can be object/scene-based minimalist sketches. For character scenes, describe the character's expression and pose vividly. For non-character scenes, describe a single concrete object or setting. Vary them so no two consecutive scenes are the same type."
+    : "Describe a single concrete subject (a person, a couple, a tree, an object) as a minimalist cartoon sketch illustration. Example: 'a young couple smiling and holding hands, cartoon line drawing'.";
   const prompt = `You are a viral content creator who makes dark-psychology storytelling videos (think TikTok / Reels / Shorts). Topic: "${topic}".
 
 Write a ${sceneCount}-scene listicle video script that reveals uncomfortable truths about human nature, AND a complete post bundle (caption + SEO keywords + hashtags) for the same topic.
@@ -891,7 +905,7 @@ Output STRICTLY valid JSON in this exact shape:
     {
       "title": "short scene heading shown on screen, MAX 5 WORDS",
       "narration": "spoken voice-over for this scene, 2-3 sentences, 4-6 seconds when read naturally, conversational tone",
-      "imagePrompt": "clear visual description of ONE simple minimalist cartoon sketch illustration that represents this scene — describe a single concrete subject (a person, a couple, a tree, an object). Example: 'a young couple smiling and holding hands, cartoon line drawing'. Keep it under 25 words."
+      "imagePrompt": "clear visual description of ONE scene illustration. ${cartoonInstruction} Keep it under 25 words."
     }
   ],
   "caption": "viral TikTok / Reels post caption, 1-2 short sentences, strong hook + curiosity. NO hashtags inside this field. NO emojis.",
@@ -953,9 +967,12 @@ function getStylePrefix() {
   return mode === 'clean' ? STYLE_PREFIX_CLEAN : STYLE_PREFIX_BAKED;
 }
 
-async function generateImageForScene(scenePrompt, apiKey) {
+async function generateImageForScene(scenePrompt, apiKey, isCartoon = false) {
+  const cartoonStyleAddition = isCartoon
+    ? 'Expressive cartoon character with exaggerated facial emotion, bold ink outlines, dynamic pose, vibrant personality. '
+    : '';
   const body = {
-    prompt: getStylePrefix() + scenePrompt,
+    prompt: getStylePrefix() + cartoonStyleAddition + scenePrompt,
     image_size: { width: 768, height: 1344 },
     num_images: 1,
     num_inference_steps: 4,
@@ -1688,7 +1705,8 @@ async function runGenerateAll() {
     // Step 2: Images (sequential to respect rate limits)
     for (let i = 0; i < script.scenes.length; i++) {
       setStatus(`Generating illustration ${i + 1}/${script.scenes.length}…`, 'info');
-      const result = await generateImageForScene(script.scenes[i].imagePrompt, falKey);
+      const isCartoon = document.getElementById('cartoonMode')?.checked || false;
+      const result = await generateImageForScene(script.scenes[i].imagePrompt, falKey, isCartoon);
       images[i] = result.img;
       imageBlobs[i] = result.blob;
       rebuildThumbGrid();
@@ -1866,7 +1884,8 @@ async function regenerateAllImages() {
     setProgress(0);
     for (let i = 0; i < script.scenes.length; i++) {
       setStatus(`Regenerating illustration ${i + 1}/${script.scenes.length}…`, 'info');
-      const result = await generateImageForScene(script.scenes[i].imagePrompt, key);
+      const isCartoon = document.getElementById('cartoonMode')?.checked || false;
+      const result = await generateImageForScene(script.scenes[i].imagePrompt, key, isCartoon);
       images[i] = result.img;
       imageBlobs[i] = result.blob;
       rebuildThumbGrid();
