@@ -247,6 +247,30 @@
   canvas.generating { animation: canvasPulse 1.2s ease-in-out infinite; }
   .retry-bar { display:none; gap:8px; margin-top:10px; flex-wrap:wrap; }
   .retry-bar.show { display:flex; }
+
+  /* ── Subtitle presets ── */
+  .subs-presets { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:14px; }
+  .subs-preset-btn {
+    background:#0e0e0e; border:1px solid #2a2a2a; color:#aaa;
+    padding:8px 4px; border-radius:6px; cursor:pointer; font-size:9px;
+    text-transform:uppercase; letter-spacing:1px; font-weight:700;
+    font-family:'Inter',sans-serif; text-align:center; line-height:1.4;
+    transition:all 0.15s; width:100%;
+  }
+  .subs-preset-btn:hover { border-color:#8b0000; color:#fff; }
+  .subs-preset-btn.active { background:#8b0000; border-color:#8b0000; color:#fff; }
+  .subs-section-label { font-size:9px; text-transform:uppercase; letter-spacing:2px; color:#555; font-weight:700; margin:12px 0 8px; display:block; }
+  .subs-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .subs-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #1a1a1a; }
+  .subs-toggle-label { font-size:11px; color:#ccc; }
+  /* Toggle switch */
+  .toggle-switch { position:relative; width:38px; height:20px; flex-shrink:0; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .toggle-track { position:absolute; inset:0; background:#1a1a1a; border-radius:20px; border:1px solid #333; cursor:pointer; transition:background 0.2s; }
+  .toggle-switch input:checked + .toggle-track { background:#8b0000; border-color:#8b0000; }
+  .toggle-track::after { content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; background:#fff; border-radius:50%; transition:transform 0.2s; }
+  .toggle-switch input:checked + .toggle-track::after { transform:translateX(18px); }
+
   .hidden { display: none !important; }
   .progress-track {
     height: 4px; background: #1a1a1a; border-radius: 2px; overflow: hidden;
@@ -546,66 +570,111 @@
             <label>Scene gap after narration (<span id="gapValDisplay">0.2</span>s)</label>
             <div class="slider-row"><input type="range" id="sceneGap" min="0" max="30" value="2" step="1"><span class="slider-val" id="sceneGapVal">0.2s</span></div>
           </div>
-          <div class="field" style="border-top:1px solid #222;padding-top:12px;margin-top:12px">
-            <label>Burn-in subtitles (narration captions)</label>
-            <label class="check-row">
-              <input type="checkbox" id="subsEnabled" checked> Show word-by-word subtitles
-            </label>
-          </div>
-          <div class="row-2">
+          <div class="field" style="border-top:1px solid #222;padding-top:14px;margin-top:14px">
+            <div class="subs-toggle-row">
+              <span class="subs-toggle-label">🔤 Burn-in Subtitles</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="subsEnabled" checked>
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+
+            <span class="subs-section-label">Quick Style</span>
+            <div class="subs-presets">
+              <button class="subs-preset-btn active" data-preset="tiktok">TikTok<br>Classic</button>
+              <button class="subs-preset-btn" data-preset="impact">Bold<br>Impact</button>
+              <button class="subs-preset-btn" data-preset="neon">Neon<br>Glow</button>
+              <button class="subs-preset-btn" data-preset="cinema">Cine-<br>matic</button>
+              <button class="subs-preset-btn" data-preset="minimal">Mini-<br>mal</button>
+            </div>
+
+            <span class="subs-section-label">Style</span>
+            <div class="subs-row">
+              <div class="field">
+                <label>Display</label>
+                <select id="subsStyle">
+                  <option value="chunks" selected>Word Chunks</option>
+                  <option value="highlight">Highlight Mode</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Words per chunk</label>
+                <select id="subsWords">
+                  <option value="1">1 word</option>
+                  <option value="2" selected>2 words</option>
+                  <option value="3">3 words</option>
+                </select>
+              </div>
+            </div>
+
+            <span class="subs-section-label">Typography</span>
             <div class="field">
-              <label>Subtitle style</label>
-              <select id="subsStyle">
-                <option value="chunks" selected>Chunks (one group at a time)</option>
-                <option value="highlight">Highlight (full sentence + faded ahead)</option>
+              <label>Font</label>
+              <select id="subsFont">
+                <option value="'Inter', sans-serif" selected>Inter (bold sans)</option>
+                <option value="'Anton', sans-serif">Anton (condensed)</option>
+                <option value="'Archivo Black', sans-serif">Archivo Black</option>
+                <option value="'Montserrat', sans-serif">Montserrat 900</option>
+                <option value="'Special Elite', monospace">Special Elite (typewriter)</option>
+                <option value="'Permanent Marker', cursive">Permanent Marker</option>
+                <option value="'Kalam', cursive">Kalam (handwritten)</option>
               </select>
             </div>
-            <div class="field">
-              <label>Words per chunk</label>
-              <select id="subsWords">
-                <option value="1">1 word</option>
-                <option value="2" selected>2 words</option>
-                <option value="3">3 words</option>
-              </select>
+            <div class="subs-row">
+              <div class="field">
+                <label>Color</label>
+                <input type="color" id="subsColor" value="#ffffff" style="width:100%;height:36px;background:#080808;border:1px solid #252525;border-radius:6px;cursor:pointer;padding:2px 4px;">
+              </div>
+              <div class="field">
+                <label>Stroke color</label>
+                <input type="color" id="subsStrokeColor" value="#000000" style="width:100%;height:36px;background:#080808;border:1px solid #252525;border-radius:6px;cursor:pointer;padding:2px 4px;">
+              </div>
             </div>
             <div class="field">
-              <label>Subtitle color</label>
-              <select id="subsColor">
-                <option value="#ffffff" selected>White</option>
-                <option value="#ffe600">Yellow (TikTok)</option>
-                <option value="#00ff88">Green</option>
-                <option value="#ff4040">Red</option>
-              </select>
+              <label>Size (<span id="subsSizeVal">56px</span>)</label>
+              <div class="slider-row"><input type="range" id="subsSize" min="28" max="96" value="56"><span class="slider-val" id="subsSizeDisplay">56px</span></div>
+            </div>
+            <div class="field">
+              <label>Stroke weight (<span id="subsStrokeVal">12</span>)</label>
+              <div class="slider-row"><input type="range" id="subsStroke" min="0" max="24" value="12"><span class="slider-val" id="subsStrokeDisplay">12</span></div>
+            </div>
+
+            <span class="subs-section-label">Background Box</span>
+            <div class="subs-toggle-row" style="border:none;padding:4px 0 10px;">
+              <span class="subs-toggle-label">Show background box</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="subsBgEnabled">
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="subs-row" id="subsBgOptions" style="display:none">
+              <div class="field">
+                <label>Box color</label>
+                <input type="color" id="subsBgColor" value="#000000" style="width:100%;height:36px;background:#080808;border:1px solid #252525;border-radius:6px;cursor:pointer;padding:2px 4px;">
+              </div>
+              <div class="field">
+                <label>Opacity (<span id="subsBgOpacityVal">60%</span>)</label>
+                <input type="range" id="subsBgOpacity" min="10" max="100" value="60">
+              </div>
+            </div>
+
+            <span class="subs-section-label">Position & Timing</span>
+            <div class="field">
+              <label>Position (<span id="subsPosVal">75%</span> from top)</label>
+              <div class="slider-row"><input type="range" id="subsPos" min="40" max="90" value="75"><span class="slider-val" id="subsPosDisplay">75%</span></div>
+            </div>
+            <div class="field">
+              <label>Offset (<span id="subsOffsetVal">0.00s</span>) · – lags · + leads</label>
+              <input type="range" id="subsOffset" min="-1" max="1" step="0.05" value="0">
+            </div>
+            <div class="subs-toggle-row" style="border:none;padding:4px 0 0;">
+              <span class="subs-toggle-label">ALL CAPS</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="subsAllCaps" checked>
+                <div class="toggle-track"></div>
+              </label>
             </div>
           </div>
-          <div class="field">
-            <label>Subtitle font</label>
-            <select id="subsFont">
-              <option value="'Inter', sans-serif" selected>Inter 900 (bold sans)</option>
-              <option value="'Special Elite', monospace">Typewriter (Special Elite)</option>
-              <option value="'Courier Prime', monospace">Typewriter (Courier)</option>
-              <option value="'Anton', sans-serif">Anton (condensed)</option>
-              <option value="'Archivo Black', sans-serif">Archivo Black</option>
-              <option value="'Permanent Marker', cursive">Permanent Marker</option>
-              <option value="'Caveat', cursive">Caveat (handwritten)</option>
-              <option value="'Kalam', cursive">Kalam (handwritten)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Subtitle position (<span id="subsPosVal">75%</span> from top)</label>
-            <input type="range" id="subsPos" min="40" max="90" value="75">
-          </div>
-          <div class="field">
-            <label>Subtitle size (<span id="subsSizeVal">56px</span>)</label>
-            <input type="range" id="subsSize" min="32" max="88" value="56">
-          </div>
-          <div class="field">
-            <label>Timing offset (<span id="subsOffsetVal">0.00s</span>) · &minus; lags audio · + leads audio</label>
-            <input type="range" id="subsOffset" min="-1" max="1" step="0.05" value="0">
-          </div>
-          <label class="check-row">
-            <input type="checkbox" id="subsAllCaps" checked> Force ALL CAPS subtitles
-          </label>
         </details>
       </div>
     </div>
@@ -1301,46 +1370,70 @@ function getSpokenWordCount(words, tInScene, narrationDuration) {
   return words.length;
 }
 
+function hexToRgb(hex) {
+  const h = hex.replace('#','');
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+
 function drawSubtitle(text, alpha) {
   if (!text || !subsEnabledEl.checked) return;
   ctx.save();
   const fontSize = parseInt(subsSizeEl.value);
   const posPct = parseInt(subsPosEl.value) / 100;
-  const color = subsColorEl.value;
+  const color = document.getElementById('subsColor')?.value || '#ffffff';
+  const strokeColor = document.getElementById('subsStrokeColor')?.value || '#000000';
+  const strokeWeight = parseInt(document.getElementById('subsStroke')?.value ?? 12);
   const fontFamily = document.getElementById('subsFont')?.value || "'Inter', sans-serif";
-  // Typewriter fonts render better without ultra-heavy weights
-  const isMono = fontFamily.includes('Special Elite') || fontFamily.includes('Courier');
+  const isMono = fontFamily.includes('Special Elite') || fontFamily.includes('Courier') || fontFamily.includes('Kalam') || fontFamily.includes('Caveat') || fontFamily.includes('Marker');
   const weight = isMono ? 700 : 900;
+  const allCaps = document.getElementById('subsAllCaps')?.checked !== false;
+  const bgEnabled = document.getElementById('subsBgEnabled')?.checked;
+  const bgColor = document.getElementById('subsBgColor')?.value || '#000000';
+  const bgOpacity = parseInt(document.getElementById('subsBgOpacity')?.value ?? 60) / 100;
+
   ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  const allCaps = document.getElementById('subsAllCaps')?.checked !== false;
   const maxWidth = W - 80;
-  const lines = wrapText(allCaps ? text.toUpperCase() : text, maxWidth);
-  const lineHeight = fontSize * 1.15;
+  const displayText = allCaps ? text.toUpperCase() : text;
+  const lines = wrapText(displayText, maxWidth);
+  const lineHeight = fontSize * 1.2;
   const blockH = lineHeight * lines.length;
   const centerY = H * posPct;
   const startY = centerY - blockH / 2 + lineHeight / 2;
 
-  // Heavy black stroke for readability
-  ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
-  ctx.lineWidth = Math.max(8, fontSize * 0.14);
+  // Background box
+  if (bgEnabled) {
+    const padX = 28, padY = 14;
+    const maxLineW = Math.max(...lines.map(l => ctx.measureText(l).width));
+    const [br, bg, bb] = hexToRgb(bgColor);
+    const radius = 12;
+    const bx = W/2 - maxLineW/2 - padX;
+    const by = centerY - blockH/2 - padY;
+    const bw = maxLineW + padX*2;
+    const bh = blockH + padY*2;
+    ctx.fillStyle = `rgba(${br},${bg},${bb},${bgOpacity * alpha})`;
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, radius);
+    ctx.fill();
+  }
+
+  // Stroke
+  const [sr, sg, sb] = hexToRgb(strokeColor);
+  ctx.strokeStyle = `rgba(${sr},${sg},${sb},${alpha})`;
+  ctx.lineWidth = strokeWeight;
   ctx.lineJoin = 'round';
   ctx.miterLimit = 2;
 
-  // Fill color
-  const rgb = hex => {
-    const h = hex.replace('#', '');
-    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
-  };
-  const [r, g, b] = rgb(color);
-  ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  // Fill
+  const [fr, fg, fb] = hexToRgb(color);
+  ctx.fillStyle = `rgba(${fr},${fg},${fb},${alpha})`;
 
   lines.forEach((line, i) => {
     const y = startY + i * lineHeight;
-    ctx.strokeText(line, W / 2, y);
-    ctx.fillText(line, W / 2, y);
+    if (strokeWeight > 0) ctx.strokeText(line, W/2, y);
+    ctx.fillText(line, W/2, y);
   });
 
   ctx.restore();
@@ -2739,6 +2832,90 @@ function getSceneGap() {
   const el = document.getElementById('sceneGap');
   return el ? parseInt(el.value)/10 : 0.2;
 }
+
+
+// ── Subtitle presets ──────────────────────────────────────────────────────────
+const SUBS_PRESETS = {
+  tiktok:  { color:'#ffffff', strokeColor:'#000000', stroke:14, font:"'Inter', sans-serif",   words:2, size:60, pos:75, allCaps:true,  bgEnabled:false, bgColor:'#000000', bgOpacity:60, style:'chunks' },
+  impact:  { color:'#ffe600', strokeColor:'#000000', stroke:16, font:"'Anton', sans-serif",    words:1, size:72, pos:70, allCaps:true,  bgEnabled:false, bgColor:'#000000', bgOpacity:60, style:'chunks' },
+  neon:    { color:'#00ff88', strokeColor:'#003322', stroke:8,  font:"'Inter', sans-serif",    words:2, size:58, pos:75, allCaps:true,  bgEnabled:true,  bgColor:'#001a0d', bgOpacity:75, style:'chunks' },
+  cinema:  { color:'#ffffff', strokeColor:'#000000', stroke:6,  font:"'Montserrat', sans-serif", words:3, size:48, pos:82, allCaps:false, bgEnabled:true,  bgColor:'#000000', bgOpacity:70, style:'chunks' },
+  minimal: { color:'#ffffff', strokeColor:'#000000', stroke:0,  font:"'Kalam', cursive",       words:2, size:54, pos:78, allCaps:false, bgEnabled:false, bgColor:'#000000', bgOpacity:40, style:'chunks' },
+};
+
+function applySubsPreset(name) {
+  const p = SUBS_PRESETS[name]; if (!p) return;
+  const set = (id, val, prop='value') => { const el = document.getElementById(id); if (el) el[prop] = val; };
+  set('subsColor', p.color);
+  set('subsStrokeColor', p.strokeColor);
+  set('subsStroke', p.stroke);
+  set('subsFont', p.font);
+  set('subsWords', p.words);
+  set('subsSize', p.size);
+  set('subsPos', p.pos);
+  set('subsAllCaps', p.allCaps, 'checked');
+  set('subsBgEnabled', p.bgEnabled, 'checked');
+  set('subsBgColor', p.bgColor);
+  set('subsBgOpacity', p.bgOpacity);
+  set('subsStyle', p.style);
+  // Update displays
+  const sd = document.getElementById('subsSizeVal'); if (sd) sd.textContent = p.size + 'px';
+  const sdd = document.getElementById('subsSizeDisplay'); if (sdd) sdd.textContent = p.size + 'px';
+  const sw = document.getElementById('subsStrokeVal'); if (sw) sw.textContent = p.stroke;
+  const swd = document.getElementById('subsStrokeDisplay'); if (swd) swd.textContent = p.stroke;
+  const sp = document.getElementById('subsPosVal'); if (sp) sp.textContent = p.pos + '%';
+  const spd = document.getElementById('subsPosDisplay'); if (spd) spd.textContent = p.pos + '%';
+  const bo = document.getElementById('subsBgOptions'); if (bo) bo.style.display = p.bgEnabled ? 'grid' : 'none';
+  const boVal = document.getElementById('subsBgOpacityVal'); if (boVal) boVal.textContent = p.bgOpacity + '%';
+  // Active button
+  document.querySelectorAll('.subs-preset-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === name));
+  drawStaticPreview();
+}
+
+document.querySelectorAll('.subs-preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => applySubsPreset(btn.dataset.preset));
+});
+
+// Slider live displays
+const sliderPairs = [
+  ['subsSize', 'subsSizeVal', v => v+'px', 'subsSizeDisplay'],
+  ['subsStroke', 'subsStrokeVal', v => v, 'subsStrokeDisplay'],
+  ['subsPos', 'subsPosVal', v => v+'%', 'subsPosDisplay'],
+  ['subsBgOpacity', 'subsBgOpacityVal', v => v+'%'],
+];
+sliderPairs.forEach(([id, spanId, fmt, displayId]) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    const v = fmt(el.value);
+    const s = document.getElementById(spanId); if (s) s.textContent = v;
+    if (displayId) { const d = document.getElementById(displayId); if (d) d.textContent = v; }
+    drawStaticPreview();
+  });
+});
+
+// Color pickers
+['subsColor','subsStrokeColor','subsBgColor'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', drawStaticPreview);
+});
+
+// Bg box toggle
+const subsBgEnabledEl = document.getElementById('subsBgEnabled');
+const subsBgOptionsEl = document.getElementById('subsBgOptions');
+if (subsBgEnabledEl) {
+  subsBgEnabledEl.addEventListener('change', () => {
+    if (subsBgOptionsEl) subsBgOptionsEl.style.display = subsBgEnabledEl.checked ? 'grid' : 'none';
+    drawStaticPreview();
+  });
+}
+
+// All other subs controls
+['subsStyle','subsWords','subsFont','subsAllCaps','subsEnabled'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', drawStaticPreview);
+});
+
 
 // Init
 function init() {
