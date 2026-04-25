@@ -513,6 +513,13 @@
             <label>Subtitle size (<span id="subsSizeVal">56px</span>)</label>
             <input type="range" id="subsSize" min="32" max="88" value="56">
           </div>
+          <div class="field">
+            <label>Timing offset (<span id="subsOffsetVal">0.00s</span>) · &minus; lags audio · + leads audio</label>
+            <input type="range" id="subsOffset" min="-1" max="1" step="0.05" value="0">
+          </div>
+          <label class="check-row">
+            <input type="checkbox" id="subsAllCaps" checked> Force ALL CAPS subtitles
+          </label>
         </details>
       </div>
     </div>
@@ -944,16 +951,26 @@ function roundedRectPath(c, x, y, w, h, r) {
   c.closePath();
 }
 
+function fontWeightFor(fontFamily, defaultWeight = 900) {
+  if (fontFamily.includes('Permanent Marker')) return 400;
+  if (fontFamily.includes('Caveat')) return 700;
+  if (fontFamily.includes('Kalam')) return 700;
+  if (fontFamily.includes('Special Elite') || fontFamily.includes('Courier')) return 700;
+  return defaultWeight;
+}
+
 function drawSpeechBubbleTitle(text, alpha) {
   const fontFamily = titleFontEl.value;
+  const titleColor = titleColorEl.value;
+  const weight = fontWeightFor(fontFamily, 900);
   let fontSize = 56;
   const padX = 38, padY = 32;
   const maxTextWidth = W - 120 - padX * 2;
-  ctx.font = `900 ${fontSize}px ${fontFamily}`;
+  ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
   let lines = wrapText(text, maxTextWidth);
   while (lines.length > 4 && fontSize > 28) {
     fontSize -= 3;
-    ctx.font = `900 ${fontSize}px ${fontFamily}`;
+    ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
     lines = wrapText(text, maxTextWidth);
   }
   const lineHeight = fontSize * 1.15;
@@ -966,33 +983,17 @@ function drawSpeechBubbleTitle(text, alpha) {
 
   ctx.save();
   ctx.globalAlpha = alpha;
-  // White fill bubble + heavy black stroke
   ctx.fillStyle = '#ffffff';
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 8;
   roundedRectPath(ctx, bubbleX, bubbleY, bubbleW, bubbleH, radius);
   ctx.fill();
   ctx.stroke();
-  // Tail pointing down-left
-  const tailLeft = bubbleX + 70;
-  const tailRight = bubbleX + 170;
-  const tailTipX = bubbleX + 30;
-  const tailTipY = bubbleY + bubbleH + 90;
-  ctx.beginPath();
-  ctx.moveTo(tailLeft, bubbleY + bubbleH);
-  ctx.lineTo(tailTipX, tailTipY);
-  ctx.lineTo(tailRight, bubbleY + bubbleH);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  // Cover the seam where tail meets bubble bottom
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(tailLeft + 4, bubbleY + bubbleH - 4, tailRight - tailLeft - 8, 8);
-  // Title text
-  ctx.fillStyle = '#000000';
+  // Title text uses the dropdown color
+  ctx.fillStyle = titleColor;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font = `900 ${fontSize}px ${fontFamily}`;
+  ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
   const startY = bubbleY + padY + lineHeight / 2;
   lines.forEach((line, i) => ctx.fillText(line, W / 2, startY + i * lineHeight));
   ctx.restore();
@@ -1003,13 +1004,14 @@ function drawMainTitle(text, alpha) {
   if (titlePosEl.value === 'bubble') { drawSpeechBubbleTitle(text, alpha); return; }
   const fontFamily = titleFontEl.value;
   const color = titleColorEl.value;
+  const weight = fontWeightFor(fontFamily, 900);
   let fontSize = 60;
   const maxWidth = W - 70;
-  ctx.font = `900 ${fontSize}px ${fontFamily}`;
+  ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
   let lines = wrapText(text.toUpperCase(), maxWidth);
   while (lines.length > 3 && fontSize > 36) {
     fontSize -= 3;
-    ctx.font = `900 ${fontSize}px ${fontFamily}`;
+    ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
     lines = wrapText(text.toUpperCase(), maxWidth);
   }
   const lineHeight = fontSize * 1.05;
@@ -1071,10 +1073,33 @@ function chunkWords(text, wordsPerChunk) {
 
 function getCurrentChunk(chunks, tInScene, narrationDuration) {
   if (chunks.length === 0) return '';
-  if (tInScene > narrationDuration) return chunks[chunks.length - 1];
-  const timePerChunk = narrationDuration / chunks.length;
-  const idx = Math.max(0, Math.min(chunks.length - 1, Math.floor(tInScene / timePerChunk)));
-  return chunks[idx];
+  if (tInScene <= 0) return chunks[0];
+  if (tInScene >= narrationDuration) return chunks[chunks.length - 1];
+  // Char-weighted: long chunks get proportionally more time
+  const weights = chunks.map(c => Math.max(1, c.length));
+  const total = weights.reduce((s, w) => s + w, 0);
+  const target = (tInScene / narrationDuration) * total;
+  let acc = 0;
+  for (let i = 0; i < chunks.length; i++) {
+    acc += weights[i];
+    if (target <= acc) return chunks[i];
+  }
+  return chunks[chunks.length - 1];
+}
+
+function getSpokenWordCount(words, tInScene, narrationDuration) {
+  if (words.length === 0) return 0;
+  if (tInScene <= 0) return 0;
+  if (tInScene >= narrationDuration) return words.length;
+  const weights = words.map(w => Math.max(1, w.length));
+  const total = weights.reduce((s, w) => s + w, 0);
+  const target = (tInScene / narrationDuration) * total;
+  let acc = 0;
+  for (let i = 0; i < words.length; i++) {
+    acc += weights[i];
+    if (target <= acc) return i + 1;
+  }
+  return words.length;
 }
 
 function drawSubtitle(text, alpha) {
@@ -1091,8 +1116,9 @@ function drawSubtitle(text, alpha) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
+  const allCaps = document.getElementById('subsAllCaps')?.checked !== false;
   const maxWidth = W - 80;
-  const lines = wrapText(text.toUpperCase(), maxWidth);
+  const lines = wrapText(allCaps ? text.toUpperCase() : text, maxWidth);
   const lineHeight = fontSize * 1.15;
   const blockH = lineHeight * lines.length;
   const centerY = H * posPct;
@@ -1128,11 +1154,11 @@ function drawHighlightSubtitle(words, spokenCount, alpha) {
   const posPct = parseInt(subsPosEl.value) / 100;
   const color = subsColorEl.value;
   const fontFamily = document.getElementById('subsFont')?.value || "'Inter', sans-serif";
-  const isMono = fontFamily.includes('Special Elite') || fontFamily.includes('Courier');
-  const isHandwritten = fontFamily.includes('Caveat') || fontFamily.includes('Permanent Marker') || fontFamily.includes('Kalam');
-  const weight = (isMono || isHandwritten) ? 700 : 900;
+  const allCaps = document.getElementById('subsAllCaps')?.checked !== false;
+  const weight = fontWeightFor(fontFamily, 900);
   ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
   ctx.textBaseline = 'middle';
+  if (allCaps) words = words.map(w => w.toUpperCase());
 
   // Layout words across multiple lines, word-wrap-aware
   const maxWidth = W - 80;
@@ -1204,16 +1230,18 @@ function drawScene(sceneIdx, tInScene, sceneDuration) {
     const narrationDuration = audios[sceneIdx]
       ? audios[sceneIdx].duration
       : Math.max(0.5, sceneDuration - 0.2);
+    const offset = parseFloat(document.getElementById('subsOffset')?.value || '0');
+    // Positive offset = subs lead audio (shifted earlier in time)
+    const adjT = tInScene + offset;
     const subsStyle = document.getElementById('subsStyle')?.value || 'chunks';
     if (subsStyle === 'highlight') {
       const words = (scene.narration || '').trim().split(/\s+/).filter(w => w);
-      const progress = Math.min(1, tInScene / Math.max(0.1, narrationDuration));
-      const spokenCount = Math.floor(progress * words.length);
+      const spokenCount = getSpokenWordCount(words, adjT, narrationDuration);
       drawHighlightSubtitle(words, spokenCount, fade);
     } else {
       const wordsPerChunk = parseInt(subsWordsEl.value);
       const chunks = chunkWords(scene.narration, wordsPerChunk);
-      const currentChunk = getCurrentChunk(chunks, tInScene, narrationDuration);
+      const currentChunk = getCurrentChunk(chunks, adjT, narrationDuration);
       drawSubtitle(currentChunk, fade);
     }
   }
@@ -1999,6 +2027,12 @@ $('downloadBtn').onclick = async () => {
 );
 $('subsFont').addEventListener('change', drawStaticPreview);
 $('subsStyle').addEventListener('change', drawStaticPreview);
+$('subsAllCaps').addEventListener('change', drawStaticPreview);
+$('subsOffset').addEventListener('input', () => {
+  const v = parseFloat($('subsOffset').value);
+  $('subsOffsetVal').textContent = (v >= 0 ? '+' : '') + v.toFixed(2) + 's';
+  drawStaticPreview();
+});
 $('bgVariant').addEventListener('change', () => {
   buildConcrete($('bgVariant').value);
   drawStaticPreview();
@@ -2042,7 +2076,9 @@ function collectSettings() {
     captionColor: captionColorEl.value, darken: darkenEl.value, illScale: illScaleEl.value,
     illMode: $('illMode')?.value, subsEnabled: subsEnabledEl.checked, subsWords: subsWordsEl.value,
     subsColor: subsColorEl.value, subsFont: $('subsFont')?.value, subsPos: subsPosEl.value,
-    subsSize: subsSizeEl.value, subsStyle: $('subsStyle')?.value, bgVariant: $('bgVariant')?.value,
+    subsSize: subsSizeEl.value, subsStyle: $('subsStyle')?.value,
+    subsAllCaps: $('subsAllCaps')?.checked, subsOffset: $('subsOffset')?.value,
+    bgVariant: $('bgVariant')?.value,
     bgBrightness: $('bgBrightness')?.value, duration: durationSelect.value
   };
 }
@@ -2058,6 +2094,12 @@ function applySettings(s) {
   if (s.illMode && $('illMode')) $('illMode').value = s.illMode;
   if (s.subsFont && $('subsFont')) $('subsFont').value = s.subsFont;
   if (s.subsStyle && $('subsStyle')) $('subsStyle').value = s.subsStyle;
+  if (s.subsAllCaps !== undefined && $('subsAllCaps')) $('subsAllCaps').checked = s.subsAllCaps;
+  if (s.subsOffset !== undefined && $('subsOffset')) {
+    $('subsOffset').value = s.subsOffset;
+    const v = parseFloat(s.subsOffset);
+    $('subsOffsetVal').textContent = (v >= 0 ? '+' : '') + v.toFixed(2) + 's';
+  }
   if (s.bgVariant && $('bgVariant')) $('bgVariant').value = s.bgVariant;
   if (s.darken !== undefined) { darkenEl.value = s.darken; darkenValEl.textContent = s.darken + '%'; }
   if (s.illScale !== undefined) { illScaleEl.value = s.illScale; illScaleValEl.textContent = s.illScale + '%'; }
