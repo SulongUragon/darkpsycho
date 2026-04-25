@@ -233,8 +233,10 @@
         </div>
         <div class="button-row">
           <button id="recordBtn">● Record MP4</button>
-          <button id="downloadBtn" class="secondary" disabled>↓ Download</button>
+          <button id="downloadBtn" class="secondary" disabled>↓ Download Video</button>
         </div>
+        <button id="downloadAudioBtn" class="secondary" disabled style="margin-top:10px">↓ Audio Only (WAV) · for CapCut</button>
+        <div class="cost-note" style="margin-top:6px">If CapCut chops the audio: import the video, MUTE its track, then add this WAV as new audio at 0:00</div>
       </div>
     </div>
 
@@ -1088,6 +1090,7 @@ async function runGenerateAll() {
     setProgress(95);
     const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
     assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
+    refreshAudioDownloadBtn();
 
     setProgress(100);
     setStatus('Ready to preview and record', 'success');
@@ -1189,6 +1192,7 @@ async function regenerateVoice() {
     await Promise.all(voicePromises);
     const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
     assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
+    refreshAudioDownloadBtn();
     setStatus('Voiceovers regenerated', 'success');
   } catch (err) {
     setStatus('Error: ' + err.message, 'error');
@@ -1495,6 +1499,75 @@ function downloadBlobDefault(blob, filename) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+// =========================================================
+//  WAV encoder — concatenated narration as a single audio file
+// =========================================================
+function buffersToWav(buffers, gapSeconds = 0.2) {
+  const usable = buffers.filter(b => b);
+  if (usable.length === 0) return null;
+  const sampleRate = usable[0].sampleRate;
+  const gapSamples = Math.round(gapSeconds * sampleRate);
+
+  let totalSamples = 0;
+  for (let i = 0; i < usable.length; i++) {
+    totalSamples += usable[i].length;
+    if (i < usable.length - 1) totalSamples += gapSamples;
+  }
+
+  const combined = new Float32Array(totalSamples);
+  let offset = 0;
+  for (let i = 0; i < usable.length; i++) {
+    combined.set(usable[i].getChannelData(0), offset);
+    offset += usable[i].length;
+    if (i < usable.length - 1) offset += gapSamples;
+  }
+
+  const buffer = new ArrayBuffer(44 + totalSamples * 2);
+  const view = new DataView(buffer);
+  const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+  writeStr(0, 'RIFF');
+  view.setUint32(4, 36 + totalSamples * 2, true);
+  writeStr(8, 'WAVE');
+  writeStr(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeStr(36, 'data');
+  view.setUint32(40, totalSamples * 2, true);
+  let pos = 44;
+  for (let i = 0; i < totalSamples; i++) {
+    const s = Math.max(-1, Math.min(1, combined[i]));
+    view.setInt16(pos, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    pos += 2;
+  }
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+
+function refreshAudioDownloadBtn() {
+  $('downloadAudioBtn').disabled = !audios || audios.filter(a => a).length === 0;
+}
+
+$('downloadAudioBtn').onclick = async () => {
+  const wavBlob = buffersToWav(audios, 0.2);
+  if (!wavBlob) { setStatus('No narration to export', 'error'); return; }
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const slug = (script?.mainTitle || 'story').replace(/\s+/g, '-').toLowerCase().slice(0, 40);
+  const filename = `darkpsycho-${slug}-${stamp}.wav`;
+  if (downloadDirHandle) {
+    const ok = await saveBlobToFolder(wavBlob, filename);
+    if (ok) {
+      setStatus(`Audio saved: ${downloadDirHandle.name}/${filename}`, 'success');
+      setTimeout(() => setStatus(''), 3000);
+      return;
+    }
+  }
+  downloadBlobDefault(wavBlob, filename);
+};
 
 $('downloadBtn').onclick = async () => {
   if (!currentBlob) return;
