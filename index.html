@@ -1301,19 +1301,33 @@ function computeTimings() {
   return { timings, total: t };
 }
 
-function playAudioSequence(audioCtx, dest) {
+function playAudioSequence(audioCtx, recordDest) {
   const { timings } = computeTimings();
+  // Monitor via MediaStreamDestination -> HTMLAudioElement so iOS treats
+  // playback as media (respects ringer/media volume, NOT the silent switch)
+  const monitorDest = audioCtx.createMediaStreamDestination();
+  const monitorEl = document.createElement('audio');
+  monitorEl.srcObject = monitorDest.stream;
+  monitorEl.playsInline = true;
+  monitorEl.autoplay = true;
+  monitorEl.style.display = 'none';
+  document.body.appendChild(monitorEl);
+  const playPromise = monitorEl.play();
+  if (playPromise && typeof playPromise.catch === 'function') {
+    playPromise.catch(err => console.warn('monitor element play() rejected', err));
+  }
+
   const sources = [];
   for (let i = 0; i < audios.length; i++) {
     if (!audios[i]) continue;
     const src = audioCtx.createBufferSource();
     src.buffer = audios[i];
-    if (dest) src.connect(dest);
-    src.connect(audioCtx.destination); // monitor
+    if (recordDest) src.connect(recordDest);
+    src.connect(monitorDest);
     src.start(audioCtx.currentTime + timings[i].start);
     sources.push(src);
   }
-  return sources;
+  return { sources, monitorEl };
 }
 
 async function runPlayback(record) {
@@ -1358,8 +1372,12 @@ async function runPlayback(record) {
 
   const stoppedPromise = record ? new Promise((resolve) => { recorder.onstop = resolve; }) : null;
 
+  // Resume audio context (iOS / Chrome can leave it suspended)
+  if (audioCtx.state === 'suspended') {
+    try { await audioCtx.resume(); } catch (e) {}
+  }
   // Start audio
-  const sources = playAudioSequence(audioCtx, audioDest);
+  const { sources, monitorEl } = playAudioSequence(audioCtx, audioDest);
   if (record) recorder.start(100);
   const start = performance.now();
 
@@ -1401,8 +1419,13 @@ async function runPlayback(record) {
     setStatus('');
   }
 
-  // Cleanup audio sources
+  // Cleanup audio sources + monitor element
   sources.forEach(s => { try { s.stop(); } catch (e) {} });
+  if (monitorEl) {
+    try { monitorEl.pause(); } catch (e) {}
+    monitorEl.srcObject = null;
+    monitorEl.remove();
+  }
   try { await audioCtx.close(); } catch (e) {}
 
   playing = false;
