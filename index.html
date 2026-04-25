@@ -427,6 +427,10 @@
             <label>Illustration size (<span id="illScaleVal">100%</span>) · pull down to reveal background</label>
             <input type="range" id="illScale" min="55" max="100" value="100">
           </div>
+          <div class="field">
+            <label>Remove illustration bg (<span id="illBgRemoveVal">0</span>) · key out near-white pixels (works on baked images)</label>
+            <input type="range" id="illBgRemove" min="0" max="240" step="5" value="0">
+          </div>
           <div class="row-2">
             <div class="field">
               <label>Title color</label>
@@ -575,6 +579,8 @@ const sceneInfoEl = $('sceneInfo');
 let script = null;          // { mainTitle, scenes: [{title, narration, imagePrompt}] }
 let images = [];            // HTMLImageElement[] per scene (may be null)
 let imageBlobs = [];        // Blob[] per scene (raw FAL image, for project save)
+let processedImages = [];   // Canvas[] with bg-removed pixels (lazy-rebuilt)
+let processedThreshold = -1;
 let audios = [];            // AudioBuffer[] per scene (may be null)
 let audioMp3s = [];         // ArrayBuffer[] per scene (raw ElevenLabs MP3, for project save)
 let currentProjectId = null;
@@ -876,8 +882,49 @@ function drawConcrete() {
   else { ctx.fillStyle = '#6a6a6a'; ctx.fillRect(0, 0, W, H); }
 }
 
+function processBgRemove(img, threshold) {
+  // threshold 0 = passthrough; otherwise key out pixels with luminance > threshold
+  // Soft fade from threshold to 255 so edges stay anti-aliased.
+  if (threshold <= 0) return img;
+  const c = document.createElement('canvas');
+  c.width = img.width; c.height = img.height;
+  const cc = c.getContext('2d');
+  cc.drawImage(img, 0, 0);
+  const data = cc.getImageData(0, 0, c.width, c.height);
+  const d = data.data;
+  const range = Math.max(1, 255 - threshold);
+  for (let i = 0; i < d.length; i += 4) {
+    const lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    if (lum > threshold) {
+      const fade = Math.min(1, (lum - threshold) / range);
+      d[i + 3] = Math.max(0, d[i + 3] - Math.round(255 * fade));
+    }
+  }
+  cc.putImageData(data, 0, 0);
+  return c;
+}
+
+function rebuildProcessedImages() {
+  const threshold = parseInt(document.getElementById('illBgRemove')?.value || '0');
+  if (threshold === 0) {
+    processedImages = [];
+    processedThreshold = 0;
+    return;
+  }
+  if (threshold === processedThreshold) return; // already up to date
+  processedImages = images.map(img => img ? processBgRemove(img, threshold) : null);
+  processedThreshold = threshold;
+}
+
 function drawIllustration(img, zoom, alpha) {
   if (!img) return;
+  // Apply bg-remove processing if configured
+  const threshold = parseInt(document.getElementById('illBgRemove')?.value || '0');
+  if (threshold > 0) {
+    if (threshold !== processedThreshold) rebuildProcessedImages();
+    const idx = images.indexOf(img);
+    if (idx >= 0 && processedImages[idx]) img = processedImages[idx];
+  }
   const illScale = parseFloat(illScaleEl?.value || '100') / 100;
   const imgAspect = img.width / img.height;
   const canvasAspect = W / H;
@@ -1351,6 +1398,7 @@ async function runGenerateAll() {
     script = await generateScript(topic, sceneCount, anthropicKey);
     images = new Array(script.scenes.length).fill(null);
     imageBlobs = new Array(script.scenes.length).fill(null);
+    processedImages = []; processedThreshold = -1;
     audios = new Array(script.scenes.length).fill(null);
     audioMp3s = new Array(script.scenes.length).fill(null);
     currentProjectId = null;
@@ -1412,6 +1460,7 @@ async function regenerateScript() {
     script = await generateScript(topic, parseInt(sceneCountEl.value), key);
     images = new Array(script.scenes.length).fill(null);
     imageBlobs = new Array(script.scenes.length).fill(null);
+    processedImages = []; processedThreshold = -1;
     audios = new Array(script.scenes.length).fill(null);
     audioMp3s = new Array(script.scenes.length).fill(null);
     currentProjectId = null;
@@ -2046,6 +2095,14 @@ illScaleEl.addEventListener('input', () => {
   illScaleValEl.textContent = illScaleEl.value + '%';
   drawStaticPreview();
 });
+$('illBgRemove').addEventListener('input', () => {
+  $('illBgRemoveVal').textContent = $('illBgRemove').value;
+  // Reprocessing is potentially slow — do it on 'change' (release), but show value live
+});
+$('illBgRemove').addEventListener('change', () => {
+  rebuildProcessedImages();
+  drawStaticPreview();
+});
 $('illMode').addEventListener('change', () => {
   const note = $('illModeNote');
   note.textContent = $('illMode').value === 'clean'
@@ -2074,6 +2131,7 @@ function collectSettings() {
     topic: topicEl.value, sceneCount: sceneCountEl.value, voice: voiceEl.value,
     titleFont: titleFontEl.value, titleColor: titleColorEl.value, titlePos: titlePosEl.value,
     captionColor: captionColorEl.value, darken: darkenEl.value, illScale: illScaleEl.value,
+    illBgRemove: $('illBgRemove')?.value,
     illMode: $('illMode')?.value, subsEnabled: subsEnabledEl.checked, subsWords: subsWordsEl.value,
     subsColor: subsColorEl.value, subsFont: $('subsFont')?.value, subsPos: subsPosEl.value,
     subsSize: subsSizeEl.value, subsStyle: $('subsStyle')?.value,
@@ -2103,6 +2161,11 @@ function applySettings(s) {
   if (s.bgVariant && $('bgVariant')) $('bgVariant').value = s.bgVariant;
   if (s.darken !== undefined) { darkenEl.value = s.darken; darkenValEl.textContent = s.darken + '%'; }
   if (s.illScale !== undefined) { illScaleEl.value = s.illScale; illScaleValEl.textContent = s.illScale + '%'; }
+  if (s.illBgRemove !== undefined && $('illBgRemove')) {
+    $('illBgRemove').value = s.illBgRemove;
+    $('illBgRemoveVal').textContent = s.illBgRemove;
+    rebuildProcessedImages();
+  }
   if (s.subsPos !== undefined) { subsPosEl.value = s.subsPos; subsPosValEl.textContent = s.subsPos + '%'; }
   if (s.subsSize !== undefined) { subsSizeEl.value = s.subsSize; subsSizeValEl.textContent = s.subsSize + 'px'; }
   if (s.bgBrightness !== undefined && $('bgBrightness')) {
