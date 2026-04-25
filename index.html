@@ -451,6 +451,10 @@
             </div>
           </div>
           <div class="field">
+            <label>Title bg opacity (<span id="titleBgOpacityVal">100%</span>) · 0 = fully transparent</label>
+            <input type="range" id="titleBgOpacity" min="0" max="100" value="100">
+          </div>
+          <div class="field">
             <label>Darken illustration (<span id="darkenVal">15%</span>)</label>
             <input type="range" id="darken" min="0" max="70" value="15">
           </div>
@@ -1028,13 +1032,18 @@ function drawSpeechBubbleTitle(text, alpha) {
   const bubbleH = blockH + padY * 2;
   const radius = 22;
 
+  const bgOpacity = parseInt(document.getElementById('titleBgOpacity')?.value || '100') / 100;
   ctx.save();
   ctx.globalAlpha = alpha;
-  ctx.fillStyle = '#ffffff';
+  // Bubble fill (transparent when slider is 0; outline always drawn)
+  if (bgOpacity > 0) {
+    ctx.fillStyle = `rgba(255, 255, 255, ${bgOpacity})`;
+    roundedRectPath(ctx, bubbleX, bubbleY, bubbleW, bubbleH, radius);
+    ctx.fill();
+  }
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 8;
   roundedRectPath(ctx, bubbleX, bubbleY, bubbleW, bubbleH, radius);
-  ctx.fill();
   ctx.stroke();
   // Title text uses the dropdown color
   ctx.fillStyle = titleColor;
@@ -1065,10 +1074,13 @@ function drawMainTitle(text, alpha) {
   const blockH = lineHeight * lines.length;
   const isBottom = titlePosEl.value === 'bottom';
   const yStart = isBottom ? H - blockH - 70 : 80;
+  const bandOpacity = parseInt(document.getElementById('titleBgOpacity')?.value || '100') / 100;
   ctx.save();
-  // text background band (subtle)
-  ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.55})`;
-  ctx.fillRect(0, yStart - 30, W, blockH + 60);
+  // text background band — adjustable opacity (0 = fully transparent)
+  if (bandOpacity > 0) {
+    ctx.fillStyle = `rgba(255, 255, 255, ${alpha * bandOpacity})`;
+    ctx.fillRect(0, yStart - 30, W, blockH + 60);
+  }
   // title text
   ctx.fillStyle = color === '#ffffff' ? `rgba(255,255,255,${alpha})` : color === '#8b0000' ? `rgba(139,0,0,${alpha})` : `rgba(0,0,0,${alpha})`;
   ctx.textAlign = 'center';
@@ -2103,6 +2115,10 @@ $('illBgRemove').addEventListener('change', () => {
   rebuildProcessedImages();
   drawStaticPreview();
 });
+$('titleBgOpacity').addEventListener('input', () => {
+  $('titleBgOpacityVal').textContent = $('titleBgOpacity').value + '%';
+  drawStaticPreview();
+});
 $('illMode').addEventListener('change', () => {
   const note = $('illModeNote');
   note.textContent = $('illMode').value === 'clean'
@@ -2130,6 +2146,7 @@ function collectSettings() {
   return {
     topic: topicEl.value, sceneCount: sceneCountEl.value, voice: voiceEl.value,
     titleFont: titleFontEl.value, titleColor: titleColorEl.value, titlePos: titlePosEl.value,
+    titleBgOpacity: $('titleBgOpacity')?.value,
     captionColor: captionColorEl.value, darken: darkenEl.value, illScale: illScaleEl.value,
     illBgRemove: $('illBgRemove')?.value,
     illMode: $('illMode')?.value, subsEnabled: subsEnabledEl.checked, subsWords: subsWordsEl.value,
@@ -2146,6 +2163,10 @@ function applySettings(s) {
   const set = (el, v) => { if (el && v !== undefined && v !== null) el.value = v; };
   set(topicEl, s.topic); set(sceneCountEl, s.sceneCount); set(voiceEl, s.voice);
   set(titleFontEl, s.titleFont); set(titleColorEl, s.titleColor); set(titlePosEl, s.titlePos);
+  if (s.titleBgOpacity !== undefined && $('titleBgOpacity')) {
+    $('titleBgOpacity').value = s.titleBgOpacity;
+    $('titleBgOpacityVal').textContent = s.titleBgOpacity + '%';
+  }
   set(captionColorEl, s.captionColor); set(durationSelect, s.duration);
   set(subsWordsEl, s.subsWords); set(subsColorEl, s.subsColor);
   if (s.subsEnabled !== undefined) subsEnabledEl.checked = s.subsEnabled;
