@@ -6,7 +6,7 @@
 <title>DARK PSYCHO — Brutal Stories Listicle Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Montserrat:wght@800;900&family=Anton&family=Archivo+Black&family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Montserrat:wght@800;900&family=Anton&family=Archivo+Black&family=Special+Elite&family=Caveat:wght@500;700&family=Permanent+Marker&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -335,6 +335,9 @@
               <option value="'Anton', sans-serif">Anton</option>
               <option value="'Archivo Black', sans-serif">Archivo Black</option>
               <option value="'Inter', sans-serif">Inter 900</option>
+              <option value="'Permanent Marker', cursive">Permanent Marker</option>
+              <option value="'Caveat', cursive">Caveat (handwritten)</option>
+              <option value="'Kalam', cursive">Kalam (handwritten)</option>
             </select>
           </div>
         </div>
@@ -391,13 +394,21 @@
           <div class="field" style="margin-top:10px">
             <label>Background texture</label>
             <select id="bgVariant">
-              <option value="concrete" selected>Gray Concrete (default)</option>
-              <option value="blood">Blood Red (dark)</option>
-              <option value="bloodLight">Blood Red (lighter)</option>
-              <option value="bloodWine">Wine / Burgundy</option>
-              <option value="black">Pure Black</option>
-              <option value="charcoal">Charcoal (softer black)</option>
-              <option value="sepia">Sepia</option>
+              <optgroup label="Dark">
+                <option value="concrete" selected>Gray Concrete (default)</option>
+                <option value="blood">Blood Red (dark)</option>
+                <option value="bloodLight">Blood Red (lighter)</option>
+                <option value="bloodWine">Wine / Burgundy</option>
+                <option value="black">Pure Black</option>
+                <option value="charcoal">Charcoal (softer black)</option>
+                <option value="sepia">Sepia</option>
+              </optgroup>
+              <optgroup label="Light / Bright">
+                <option value="paperLight">Paper Light + Hexagons</option>
+                <option value="paperWarm">Paper Warm Yellow</option>
+                <option value="paperCool">Paper Cool Blue + Hexagons</option>
+                <option value="paperPink">Paper Pink</option>
+              </optgroup>
             </select>
           </div>
           <div class="field">
@@ -428,8 +439,9 @@
             <div class="field">
               <label>Title position</label>
               <select id="titlePos">
-                <option value="top" selected>Top</option>
-                <option value="bottom">Bottom</option>
+                <option value="top" selected>Top (white band)</option>
+                <option value="bottom">Bottom (white band)</option>
+                <option value="bubble">Speech Bubble (top)</option>
                 <option value="hide">Hidden</option>
               </select>
             </div>
@@ -456,6 +468,13 @@
           </div>
           <div class="row-2">
             <div class="field">
+              <label>Subtitle style</label>
+              <select id="subsStyle">
+                <option value="chunks" selected>Chunks (one group at a time)</option>
+                <option value="highlight">Highlight (full sentence + faded ahead)</option>
+              </select>
+            </div>
+            <div class="field">
               <label>Words per chunk</label>
               <select id="subsWords">
                 <option value="1">1 word</option>
@@ -481,6 +500,9 @@
               <option value="'Courier Prime', monospace">Typewriter (Courier)</option>
               <option value="'Anton', sans-serif">Anton (condensed)</option>
               <option value="'Archivo Black', sans-serif">Archivo Black</option>
+              <option value="'Permanent Marker', cursive">Permanent Marker</option>
+              <option value="'Caveat', cursive">Caveat (handwritten)</option>
+              <option value="'Kalam', cursive">Kalam (handwritten)</option>
             </select>
           </div>
           <div class="field">
@@ -558,13 +580,17 @@ let playAbort = null;
 
 // ----- Background texture generator (procedural)
 const BG_PALETTES = {
-  concrete:   { stops: ['#7a7a7a', '#6a6a6a', '#555555'], grainAmount: 30, splotchAlpha: 0.06 },
-  blood:      { stops: ['#5a0000', '#3d0000', '#1a0000'], grainAmount: 22, splotchAlpha: 0.08 },
-  bloodLight: { stops: ['#9a1010', '#722020', '#3a0808'], grainAmount: 26, splotchAlpha: 0.07 },
-  bloodWine:  { stops: ['#7a0a2a', '#4d051c', '#200010'], grainAmount: 22, splotchAlpha: 0.07 },
-  black:      { stops: ['#1f1f1f', '#121212', '#050505'], grainAmount: 18, splotchAlpha: 0.05 },
-  charcoal:   { stops: ['#3a3a3a', '#2a2a2a', '#1a1a1a'], grainAmount: 24, splotchAlpha: 0.05 },
-  sepia:      { stops: ['#6b4a2a', '#4a331c', '#241812'], grainAmount: 26, splotchAlpha: 0.06 }
+  concrete:   { stops: ['#7a7a7a', '#6a6a6a', '#555555'], grainAmount: 30, splotchAlpha: 0.06, vignette: 0.35 },
+  blood:      { stops: ['#5a0000', '#3d0000', '#1a0000'], grainAmount: 22, splotchAlpha: 0.08, vignette: 0.35 },
+  bloodLight: { stops: ['#9a1010', '#722020', '#3a0808'], grainAmount: 26, splotchAlpha: 0.07, vignette: 0.35 },
+  bloodWine:  { stops: ['#7a0a2a', '#4d051c', '#200010'], grainAmount: 22, splotchAlpha: 0.07, vignette: 0.35 },
+  black:      { stops: ['#1f1f1f', '#121212', '#050505'], grainAmount: 18, splotchAlpha: 0.05, vignette: 0.35 },
+  charcoal:   { stops: ['#3a3a3a', '#2a2a2a', '#1a1a1a'], grainAmount: 24, splotchAlpha: 0.05, vignette: 0.35 },
+  sepia:      { stops: ['#6b4a2a', '#4a331c', '#241812'], grainAmount: 26, splotchAlpha: 0.06, vignette: 0.35 },
+  paperLight: { stops: ['#f8f7f3', '#f0eee8', '#e6e2d8'], grainAmount: 8, splotchAlpha: 0.025, vignette: 0.12, hexOverlay: true,  darkSplotch: true },
+  paperWarm:  { stops: ['#fdf6e3', '#f5ecc8', '#e9dca0'], grainAmount: 8, splotchAlpha: 0.025, vignette: 0.12, darkSplotch: true },
+  paperCool:  { stops: ['#eef4f8', '#e0e9ef', '#cfd8de'], grainAmount: 8, splotchAlpha: 0.025, vignette: 0.12, hexOverlay: true,  darkSplotch: true },
+  paperPink:  { stops: ['#fce8ee', '#f5d4dc', '#e9bcc6'], grainAmount: 8, splotchAlpha: 0.025, vignette: 0.12, darkSplotch: true }
 };
 
 function shiftHex(hex, offset) {
@@ -607,15 +633,45 @@ function buildConcrete(variant) {
     const r = 40 + Math.random() * 120;
     const a = Math.random() * palette.splotchAlpha;
     const rad = c.createRadialGradient(x, y, 0, x, y, r);
-    rad.addColorStop(0, `rgba(${Math.random() > 0.5 ? 255 : 0}, ${Math.random() > 0.5 ? 255 : 0}, ${Math.random() > 0.5 ? 255 : 0}, ${a})`);
+    if (palette.darkSplotch) {
+      // Light palettes: only darker speckles, no white blowouts
+      rad.addColorStop(0, `rgba(0, 0, 0, ${a})`);
+    } else {
+      rad.addColorStop(0, `rgba(${Math.random() > 0.5 ? 255 : 0}, ${Math.random() > 0.5 ? 255 : 0}, ${Math.random() > 0.5 ? 255 : 0}, ${a})`);
+    }
     rad.addColorStop(1, 'rgba(0,0,0,0)');
     c.fillStyle = rad;
     c.fillRect(x - r, y - r, r * 2, r * 2);
   }
-  // Vignette
+  // Hex pattern overlay (for paper palettes)
+  if (palette.hexOverlay) {
+    c.strokeStyle = 'rgba(0, 0, 0, 0.07)';
+    c.lineWidth = 1;
+    const hexSize = 60;
+    const hexW = hexSize * Math.sqrt(3);
+    const hexH = hexSize * 1.5;
+    for (let row = -1; row * hexH < H + hexH; row++) {
+      for (let col = -1; col * hexW < W + hexW; col++) {
+        const cx = col * hexW + (row % 2 ? hexW / 2 : 0);
+        const cy = row * hexH;
+        c.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i + Math.PI / 6;
+          const x = cx + hexSize * Math.cos(a);
+          const y = cy + hexSize * Math.sin(a);
+          if (i === 0) c.moveTo(x, y);
+          else c.lineTo(x, y);
+        }
+        c.closePath();
+        c.stroke();
+      }
+    }
+  }
+  // Vignette (per-palette intensity)
+  const vigAlpha = palette.vignette !== undefined ? palette.vignette : 0.35;
   const vig = c.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.75);
   vig.addColorStop(0, 'rgba(0,0,0,0)');
-  vig.addColorStop(1, 'rgba(0,0,0,0.35)');
+  vig.addColorStop(1, `rgba(0,0,0,${vigAlpha})`);
   c.fillStyle = vig;
   c.fillRect(0, 0, W, H);
   concreteBg = off;
@@ -878,8 +934,73 @@ function wrapText(text, maxWidth) {
   return lines;
 }
 
+function roundedRectPath(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+function drawSpeechBubbleTitle(text, alpha) {
+  const fontFamily = titleFontEl.value;
+  let fontSize = 56;
+  const padX = 38, padY = 32;
+  const maxTextWidth = W - 120 - padX * 2;
+  ctx.font = `900 ${fontSize}px ${fontFamily}`;
+  let lines = wrapText(text, maxTextWidth);
+  while (lines.length > 4 && fontSize > 28) {
+    fontSize -= 3;
+    ctx.font = `900 ${fontSize}px ${fontFamily}`;
+    lines = wrapText(text, maxTextWidth);
+  }
+  const lineHeight = fontSize * 1.15;
+  const blockH = lineHeight * lines.length;
+  const bubbleX = 50;
+  const bubbleY = 50;
+  const bubbleW = W - 100;
+  const bubbleH = blockH + padY * 2;
+  const radius = 22;
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  // White fill bubble + heavy black stroke
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 8;
+  roundedRectPath(ctx, bubbleX, bubbleY, bubbleW, bubbleH, radius);
+  ctx.fill();
+  ctx.stroke();
+  // Tail pointing down-left
+  const tailLeft = bubbleX + 70;
+  const tailRight = bubbleX + 170;
+  const tailTipX = bubbleX + 30;
+  const tailTipY = bubbleY + bubbleH + 90;
+  ctx.beginPath();
+  ctx.moveTo(tailLeft, bubbleY + bubbleH);
+  ctx.lineTo(tailTipX, tailTipY);
+  ctx.lineTo(tailRight, bubbleY + bubbleH);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // Cover the seam where tail meets bubble bottom
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(tailLeft + 4, bubbleY + bubbleH - 4, tailRight - tailLeft - 8, 8);
+  // Title text
+  ctx.fillStyle = '#000000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `900 ${fontSize}px ${fontFamily}`;
+  const startY = bubbleY + padY + lineHeight / 2;
+  lines.forEach((line, i) => ctx.fillText(line, W / 2, startY + i * lineHeight));
+  ctx.restore();
+}
+
 function drawMainTitle(text, alpha) {
   if (!text || titlePosEl.value === 'hide') return;
+  if (titlePosEl.value === 'bubble') { drawSpeechBubbleTitle(text, alpha); return; }
   const fontFamily = titleFontEl.value;
   const color = titleColorEl.value;
   let fontSize = 60;
@@ -1000,6 +1121,70 @@ function drawSubtitle(text, alpha) {
   ctx.restore();
 }
 
+function drawHighlightSubtitle(words, spokenCount, alpha) {
+  if (!words || words.length === 0) return;
+  ctx.save();
+  const fontSize = parseInt(subsSizeEl.value);
+  const posPct = parseInt(subsPosEl.value) / 100;
+  const color = subsColorEl.value;
+  const fontFamily = document.getElementById('subsFont')?.value || "'Inter', sans-serif";
+  const isMono = fontFamily.includes('Special Elite') || fontFamily.includes('Courier');
+  const isHandwritten = fontFamily.includes('Caveat') || fontFamily.includes('Permanent Marker') || fontFamily.includes('Kalam');
+  const weight = (isMono || isHandwritten) ? 700 : 900;
+  ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
+  ctx.textBaseline = 'middle';
+
+  // Layout words across multiple lines, word-wrap-aware
+  const maxWidth = W - 80;
+  const spaceW = ctx.measureText(' ').width;
+  const lines = [[]];
+  let currentLineWidth = 0;
+  for (let i = 0; i < words.length; i++) {
+    const w = ctx.measureText(words[i]).width;
+    if (currentLineWidth + w + (lines[lines.length - 1].length ? spaceW : 0) > maxWidth && lines[lines.length - 1].length) {
+      lines.push([]);
+      currentLineWidth = 0;
+    }
+    lines[lines.length - 1].push({ word: words[i], width: w, idx: i });
+    currentLineWidth += w + spaceW;
+  }
+
+  const lineHeight = fontSize * 1.25;
+  const blockH = lineHeight * lines.length;
+  const centerY = H * posPct;
+  const startY = centerY - blockH / 2 + lineHeight / 2;
+
+  const rgb = hex => {
+    const h = hex.replace('#', '');
+    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  };
+  const [r, g, b] = rgb(color);
+
+  ctx.lineJoin = 'round';
+  ctx.miterLimit = 2;
+
+  lines.forEach((lineWords, rowIdx) => {
+    const totalWidth = lineWords.reduce((s, w, i) => s + w.width + (i ? spaceW : 0), 0);
+    let x = (W - totalWidth) / 2;
+    const y = startY + rowIdx * lineHeight;
+    lineWords.forEach((w, i) => {
+      const isSpoken = w.idx < spokenCount;
+      const fillAlpha = isSpoken ? alpha : alpha * 0.3;
+      const wordX = x + w.width / 2;
+      // Stroke for readability (heavier on spoken words)
+      ctx.strokeStyle = `rgba(0, 0, 0, ${isSpoken ? alpha : alpha * 0.4})`;
+      ctx.lineWidth = Math.max(6, fontSize * 0.12);
+      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${fillAlpha})`;
+      ctx.textAlign = 'center';
+      ctx.strokeText(w.word, wordX, y);
+      ctx.fillText(w.word, wordX, y);
+      x += w.width + spaceW;
+    });
+  });
+
+  ctx.restore();
+}
+
 function drawScene(sceneIdx, tInScene, sceneDuration) {
   drawConcrete();
   if (!script || !script.scenes[sceneIdx]) return;
@@ -1019,10 +1204,18 @@ function drawScene(sceneIdx, tInScene, sceneDuration) {
     const narrationDuration = audios[sceneIdx]
       ? audios[sceneIdx].duration
       : Math.max(0.5, sceneDuration - 0.2);
-    const wordsPerChunk = parseInt(subsWordsEl.value);
-    const chunks = chunkWords(scene.narration, wordsPerChunk);
-    const currentChunk = getCurrentChunk(chunks, tInScene, narrationDuration);
-    drawSubtitle(currentChunk, fade);
+    const subsStyle = document.getElementById('subsStyle')?.value || 'chunks';
+    if (subsStyle === 'highlight') {
+      const words = (scene.narration || '').trim().split(/\s+/).filter(w => w);
+      const progress = Math.min(1, tInScene / Math.max(0.1, narrationDuration));
+      const spokenCount = Math.floor(progress * words.length);
+      drawHighlightSubtitle(words, spokenCount, fade);
+    } else {
+      const wordsPerChunk = parseInt(subsWordsEl.value);
+      const chunks = chunkWords(scene.narration, wordsPerChunk);
+      const currentChunk = getCurrentChunk(chunks, tInScene, narrationDuration);
+      drawSubtitle(currentChunk, fade);
+    }
   }
 
   // Scene indicator (bottom right)
@@ -1805,6 +1998,7 @@ $('downloadBtn').onclick = async () => {
   el.addEventListener('change', drawStaticPreview)
 );
 $('subsFont').addEventListener('change', drawStaticPreview);
+$('subsStyle').addEventListener('change', drawStaticPreview);
 $('bgVariant').addEventListener('change', () => {
   buildConcrete($('bgVariant').value);
   drawStaticPreview();
@@ -1848,7 +2042,7 @@ function collectSettings() {
     captionColor: captionColorEl.value, darken: darkenEl.value, illScale: illScaleEl.value,
     illMode: $('illMode')?.value, subsEnabled: subsEnabledEl.checked, subsWords: subsWordsEl.value,
     subsColor: subsColorEl.value, subsFont: $('subsFont')?.value, subsPos: subsPosEl.value,
-    subsSize: subsSizeEl.value, bgVariant: $('bgVariant')?.value,
+    subsSize: subsSizeEl.value, subsStyle: $('subsStyle')?.value, bgVariant: $('bgVariant')?.value,
     bgBrightness: $('bgBrightness')?.value, duration: durationSelect.value
   };
 }
@@ -1863,6 +2057,7 @@ function applySettings(s) {
   if (s.subsEnabled !== undefined) subsEnabledEl.checked = s.subsEnabled;
   if (s.illMode && $('illMode')) $('illMode').value = s.illMode;
   if (s.subsFont && $('subsFont')) $('subsFont').value = s.subsFont;
+  if (s.subsStyle && $('subsStyle')) $('subsStyle').value = s.subsStyle;
   if (s.bgVariant && $('bgVariant')) $('bgVariant').value = s.bgVariant;
   if (s.darken !== undefined) { darkenEl.value = s.darken; darkenValEl.textContent = s.darken + '%'; }
   if (s.illScale !== undefined) { illScaleEl.value = s.illScale; illScaleValEl.textContent = s.illScale + '%'; }
