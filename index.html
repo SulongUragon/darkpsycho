@@ -54,6 +54,20 @@
     .layout > div:first-child::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
   }
   @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+  /* ── Mobile small screen ── */
+  @media (max-width: 600px) {
+    body { padding: 10px; }
+    h1 { font-size: 24px !important; letter-spacing: 3px !important; }
+    .layout { gap: 12px; }
+    .row-2, .row-3 { grid-template-columns: 1fr !important; }
+    .button-row { grid-template-columns: 1fr !important; }
+    canvas { max-width: 100% !important; }
+    .panel { padding: 12px; }
+    .api-row { flex-direction: column; gap: 4px; }
+    .api-label { width: auto !important; padding: 0 !important; }
+    .scene-dot { min-width: 32px; padding: 4px 8px; font-size: 9px; }
+  }
+
   .panel { background: #121212; border: 1px solid #1f1f1f; border-radius: 10px; padding: 20px; }
   .panel + .panel { margin-top: 14px; }
   .panel h2 {
@@ -226,6 +240,13 @@
   }
   details[open] summary { color: #aaa; }
   details > *:not(summary) { margin-top: 10px; }
+  @keyframes canvasPulse {
+    0%, 100% { box-shadow: 0 20px 60px rgba(139,0,0,0.15); }
+    50% { box-shadow: 0 20px 80px rgba(139,0,0,0.55); }
+  }
+  canvas.generating { animation: canvasPulse 1.2s ease-in-out infinite; }
+  .retry-bar { display:none; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .retry-bar.show { display:flex; }
   .hidden { display: none !important; }
   .progress-track {
     height: 4px; background: #1a1a1a; border-radius: 2px; overflow: hidden;
@@ -257,6 +278,11 @@
         <div class="scene-nav" id="sceneNav"></div>
         <div id="status" class="status info" style="display:none"></div>
         <div class="progress-track" style="display:none" id="progressTrack"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="retry-bar" id="retryBar">
+        <button class="small secondary" onclick="regenerateScript()">↺ Script</button>
+        <button class="small secondary" onclick="regenerateAllImages()">↺ Images</button>
+        <button class="small secondary" onclick="regenerateVoice()">↺ Voice</button>
+      </div>
       </div>
 
       <div class="panel">
@@ -299,6 +325,7 @@
           <input type="password" id="elevenKey" placeholder="xi-… (TTS)" autocomplete="off">
         </div>
         <button id="saveKeys" class="secondary">Save All Keys Locally</button>
+        <div style="font-size:10px;color:#555;margin-top:8px;line-height:1.5;letter-spacing:0.5px;">⚠ Keys are stored in your browser's localStorage. Never share this page with others while keys are saved.</div>
         <div class="cost-note">Cost per video ≈ $0.05 (FLUX schnell + TTS) · <a href="https://fal.ai/dashboard/keys" target="_blank">Get FAL key</a></div>
       </div>
 
@@ -356,7 +383,7 @@
         <h2><span><span class="num">3</span>Script</span>
           <div style="display:flex;gap:6px">
             <button id="customScriptBtn" class="small secondary">+ Custom</button>
-            <button id="regenScriptBtn" class="small secondary">Regenerate</button>
+            <div style="display:flex;gap:6px"><button class="small secondary" id="copyScriptBtn" title="Copy all narration">⎘ Copy</button><button id="regenScriptBtn" class="small secondary">Regenerate</button></div>
           </div>
         </h2>
         <div class="field">
@@ -505,6 +532,10 @@
               <option value="#8b0000">Blood Red</option>
               <option value="none" selected>Hide captions</option>
             </select>
+          </div>
+          <div class="field" style="border-top:1px solid #222;padding-top:12px;margin-top:12px">
+            <label>Scene gap after narration (<span id="gapValDisplay">0.2</span>s)</label>
+            <div class="slider-row"><input type="range" id="sceneGap" min="0" max="30" value="2" step="1"><span class="slider-val" id="sceneGapVal">0.2s</span></div>
           </div>
           <div class="field" style="border-top:1px solid #222;padding-top:12px;margin-top:12px">
             <label>Burn-in subtitles (narration captions)</label>
@@ -734,6 +765,8 @@ function buildConcrete(variant) {
 
 // ----- Status / progress helpers
 function setStatus(msg, type = 'info') {
+  const rb = document.getElementById('retryBar');
+  if (rb) rb.classList.toggle('show', type === 'error' && !!script);
   if (!msg) { statusEl.style.display = 'none'; return; }
   statusEl.style.display = 'block';
   statusEl.className = 'status ' + type;
@@ -1447,6 +1480,7 @@ async function runGenerateAll() {
   const sceneCount = parseInt(sceneCountEl.value);
 
   disableControls(true);
+  canvas.classList.add('generating');
   try {
     // Step 1: Script
     setStatus('Claude writing script…', 'info');
@@ -1459,6 +1493,7 @@ async function runGenerateAll() {
     audioMp3s = new Array(script.scenes.length).fill(null);
     currentProjectId = null;
     mainTitleEl.value = script.mainTitle;
+  document.title = script.mainTitle + ' — DARK PSYCHO';
     scriptJsonEl.value = JSON.stringify(script.scenes, null, 2);
     populatePostBundle();
     scriptStatusEl.textContent = `✓ Script · ${script.scenes.length} scenes`;
@@ -1503,6 +1538,7 @@ async function runGenerateAll() {
     setProgress(null);
   } finally {
     disableControls(false);
+    canvas.classList.remove('generating');
   }
 }
 
@@ -1522,6 +1558,7 @@ async function regenerateScript() {
     audioMp3s = new Array(script.scenes.length).fill(null);
     currentProjectId = null;
     mainTitleEl.value = script.mainTitle;
+  document.title = script.mainTitle + ' — DARK PSYCHO';
     scriptJsonEl.value = JSON.stringify(script.scenes, null, 2);
     populatePostBundle();
     scriptStatusEl.textContent = `✓ Script · ${script.scenes.length} scenes`;
@@ -1808,7 +1845,7 @@ function computeTimings() {
   const timings = [];
   let t = 0;
   for (let i = 0; i < script.scenes.length; i++) {
-    const dur = (audios[i] ? audios[i].duration : 3.0) + 0.2;
+    const dur = (audios[i] ? audios[i].duration : 3.0) + (typeof getSceneGap === "function" ? getSceneGap() : 0.2);
     timings.push({ start: t, duration: dur });
     t += dur;
   }
@@ -2602,6 +2639,35 @@ async function refreshProjectList() {
   }
   list.querySelectorAll('.project-load-btn').forEach(b => b.onclick = () => loadProject(b.dataset.id));
   list.querySelectorAll('.project-del-btn').forEach(b => b.onclick = () => deleteProjectAction(b.dataset.id, b.dataset.name));
+}
+
+// Copy script narration
+const copyScriptBtn = document.getElementById('copyScriptBtn');
+if (copyScriptBtn) {
+  copyScriptBtn.onclick = () => {
+    if (!script) return;
+    const text = script.scenes.map((s,i) => `Scene ${i+1}: ${s.title}\n${s.narration}`).join('\n\n');
+    navigator.clipboard.writeText(text).then(() => {
+      copyScriptBtn.textContent = '✓ Copied';
+      setTimeout(() => copyScriptBtn.textContent = '⎘ Copy', 1600);
+    });
+  };
+}
+
+// Scene gap slider
+const sceneGapEl2 = document.getElementById('sceneGap');
+if (sceneGapEl2) {
+  sceneGapEl2.addEventListener('input', () => {
+    const v = (parseInt(sceneGapEl2.value)/10).toFixed(1);
+    const d = document.getElementById('sceneGapVal');
+    const d2 = document.getElementById('gapValDisplay');
+    if (d) d.textContent = v + 's';
+    if (d2) d2.textContent = v;
+  });
+}
+function getSceneGap() {
+  const el = document.getElementById('sceneGap');
+  return el ? parseInt(el.value)/10 : 0.2;
 }
 
 // Init
