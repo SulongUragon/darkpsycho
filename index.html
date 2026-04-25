@@ -416,8 +416,19 @@
         </h2>
         <div class="thumb-grid" id="thumbGrid"></div>
         <div class="cost-note" id="assetsStatus">No assets yet</div>
-        <details style="margin-top:12px">
+        <details style="margin-top:12px" open>
           <summary>Style &amp; audio options</summary>
+          <div class="field" style="margin-top:12px;background:#0a0a0a;padding:12px;border-radius:6px;border:1px solid #1f1f1f">
+            <label>★ Style preset</label>
+            <div style="display:flex;gap:6px">
+              <select id="presetSelect" style="flex:1">
+                <option value="">— Pick preset to apply —</option>
+              </select>
+              <button id="presetSaveBtn" class="small secondary" style="flex-shrink:0;padding:6px 10px">+ Save</button>
+              <button id="presetDeleteBtn" class="small secondary" style="flex-shrink:0;padding:6px 10px">✕</button>
+            </div>
+            <div class="cost-note" style="margin-top:6px;text-align:left;text-transform:none;letter-spacing:normal;font-size:10px">Save your favorite style combos. Built-ins included.</div>
+          </div>
           <div class="field" style="margin-top:10px">
             <label>Background texture</label>
             <select id="bgVariant">
@@ -1971,12 +1982,15 @@ const fsaSupported = 'showDirectoryPicker' in window;
 
 function openIDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('darkpsycho', 2);
+    const req = indexedDB.open('darkpsycho', 3);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains('handles')) db.createObjectStore('handles');
       if (!db.objectStoreNames.contains('projects')) {
         db.createObjectStore('projects', { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains('presets')) {
+        db.createObjectStore('presets', { keyPath: 'name' });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -2243,6 +2257,153 @@ subsSizeEl.addEventListener('input', () => {
 });
 
 // =========================================================
+//  STYLE PRESETS (IndexedDB)
+// =========================================================
+const BUILT_IN_PRESETS = {
+  'Dark Concrete (default)': {
+    bgVariant: 'concrete', bgBrightness: '0',
+    titleFont: "'Montserrat', sans-serif", titleColor: '#000000', titlePos: 'top', titleBgOpacity: '100',
+    subsFont: "'Inter', sans-serif", subsColor: '#ffffff', subsStyle: 'chunks', subsWords: '2',
+    subsAllCaps: true, subsOffset: '0', subsPos: '75', subsSize: '56', subsEnabled: true,
+    illMode: 'baked', illScale: '100', illBgRemove: '0',
+    captionColor: 'none', darken: '15'
+  },
+  'Bright Bubble (TikTok hex)': {
+    bgVariant: 'paperLight', bgBrightness: '0',
+    titleFont: "'Permanent Marker', cursive", titleColor: '#000000', titlePos: 'bubble', titleBgOpacity: '100',
+    subsFont: "'Kalam', cursive", subsColor: '#000000', subsStyle: 'highlight', subsWords: '2',
+    subsAllCaps: false, subsOffset: '0', subsPos: '85', subsSize: '50', subsEnabled: true,
+    illMode: 'clean', illScale: '90', illBgRemove: '0',
+    captionColor: 'none', darken: '0'
+  },
+  'Blood Red Drama': {
+    bgVariant: 'blood', bgBrightness: '20',
+    titleFont: "'Anton', sans-serif", titleColor: '#ffffff', titlePos: 'top', titleBgOpacity: '0',
+    subsFont: "'Anton', sans-serif", subsColor: '#ffe600', subsStyle: 'highlight', subsWords: '2',
+    subsAllCaps: true, subsOffset: '0', subsPos: '78', subsSize: '60', subsEnabled: true,
+    illMode: 'clean', illScale: '95', illBgRemove: '0',
+    captionColor: 'none', darken: '20'
+  },
+  'Sepia Vintage': {
+    bgVariant: 'sepia', bgBrightness: '0',
+    titleFont: "'Special Elite', monospace", titleColor: '#000000', titlePos: 'top', titleBgOpacity: '70',
+    subsFont: "'Special Elite', monospace", subsColor: '#ffffff', subsStyle: 'chunks', subsWords: '2',
+    subsAllCaps: false, subsOffset: '0', subsPos: '80', subsSize: '50', subsEnabled: true,
+    illMode: 'baked', illScale: '100', illBgRemove: '0',
+    captionColor: 'none', darken: '20'
+  },
+  'Pure Black Minimal': {
+    bgVariant: 'black', bgBrightness: '0',
+    titleFont: "'Inter', sans-serif", titleColor: '#ffffff', titlePos: 'top', titleBgOpacity: '0',
+    subsFont: "'Inter', sans-serif", subsColor: '#ffffff', subsStyle: 'chunks', subsWords: '2',
+    subsAllCaps: true, subsOffset: '0', subsPos: '78', subsSize: '54', subsEnabled: true,
+    illMode: 'clean', illScale: '85', illBgRemove: '0',
+    captionColor: 'none', darken: '10'
+  }
+};
+
+async function listPresets() {
+  const db = await openIDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('presets', 'readonly');
+    const r = tx.objectStore('presets').getAll();
+    r.onsuccess = () => res(r.result || []);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function savePreset(name, settings) {
+  const db = await openIDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('presets', 'readwrite');
+    tx.objectStore('presets').put({ name, settings, updatedAt: Date.now() });
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  });
+}
+async function deletePresetIDB(name) {
+  const db = await openIDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('presets', 'readwrite');
+    tx.objectStore('presets').delete(name);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  });
+}
+
+async function refreshPresetSelect() {
+  const sel = $('presetSelect');
+  if (!sel) return;
+  const customPresets = await listPresets();
+  sel.innerHTML = '<option value="">— Pick preset to apply —</option>';
+  // Built-ins first
+  const builtinGroup = document.createElement('optgroup');
+  builtinGroup.label = 'Built-in';
+  Object.keys(BUILT_IN_PRESETS).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = 'builtin:' + name;
+    opt.textContent = name;
+    builtinGroup.appendChild(opt);
+  });
+  sel.appendChild(builtinGroup);
+  if (customPresets.length > 0) {
+    const customGroup = document.createElement('optgroup');
+    customGroup.label = 'Saved';
+    customPresets.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = 'custom:' + p.name;
+      opt.textContent = p.name;
+      customGroup.appendChild(opt);
+    });
+    sel.appendChild(customGroup);
+  }
+}
+
+async function applyPresetByValue(value) {
+  if (!value) return;
+  const [kind, ...rest] = value.split(':');
+  const name = rest.join(':');
+  let settings = null;
+  if (kind === 'builtin') settings = BUILT_IN_PRESETS[name];
+  else {
+    const stored = (await listPresets()).find(p => p.name === name);
+    settings = stored?.settings;
+  }
+  if (!settings) { setStatus('Preset not found', 'error'); return; }
+  applySettings(settings);
+  drawStaticPreview();
+  setStatus(`Applied preset: ${name}`, 'success');
+  setTimeout(() => setStatus(''), 1500);
+}
+
+async function saveCurrentPreset() {
+  const name = prompt('Name your preset:');
+  if (!name) return;
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  if (BUILT_IN_PRESETS[trimmed]) {
+    setStatus('Cannot overwrite a built-in preset name', 'error');
+    return;
+  }
+  await savePreset(trimmed, collectSettings());
+  await refreshPresetSelect();
+  $('presetSelect').value = 'custom:' + trimmed;
+  setStatus(`Saved preset: ${trimmed}`, 'success');
+  setTimeout(() => setStatus(''), 1500);
+}
+
+async function deleteSelectedPreset() {
+  const value = $('presetSelect').value;
+  if (!value || !value.startsWith('custom:')) {
+    setStatus('Pick a saved preset to delete (built-ins cannot be removed)', 'error');
+    return;
+  }
+  const name = value.slice('custom:'.length);
+  if (!confirm(`Delete preset "${name}"?`)) return;
+  await deletePresetIDB(name);
+  await refreshPresetSelect();
+  setStatus(`Deleted: ${name}`, 'success');
+  setTimeout(() => setStatus(''), 1500);
+}
+
+// =========================================================
 //  PROJECT LIBRARY (IndexedDB)
 // =========================================================
 function collectSettings() {
@@ -2451,6 +2612,12 @@ function init() {
   drawStaticPreview();
   if ($('saveProjectBtn')) $('saveProjectBtn').onclick = saveCurrentProject;
   refreshProjectList();
+  if ($('presetSelect')) {
+    $('presetSelect').addEventListener('change', () => applyPresetByValue($('presetSelect').value));
+    $('presetSaveBtn').onclick = saveCurrentPreset;
+    $('presetDeleteBtn').onclick = deleteSelectedPreset;
+    refreshPresetSelect();
+  }
 }
 document.fonts.ready.then(init);
 </script>
