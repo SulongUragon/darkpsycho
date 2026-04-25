@@ -655,6 +655,7 @@ let imageBlobs = [];        // Blob[] per scene (raw FAL image, for project save
 let processedImages = [];   // Canvas[] with bg-removed pixels (lazy-rebuilt)
 let processedThreshold = -1;
 let audios = [];            // AudioBuffer[] per scene (may be null)
+let wordTimings = [];       // [{word,start,end}][] per scene — from ElevenLabs timestamps
 let audioMp3s = [];         // ArrayBuffer[] per scene (raw ElevenLabs MP3, for project save)
 let currentProjectId = null;
 let concreteBg = null;      // Pre-rendered concrete texture canvas
@@ -925,6 +926,33 @@ function loadImage(src) {
 // =========================================================
 //  ELEVENLABS — TTS
 // =========================================================
+// Build word-level timings from ElevenLabs character alignment
+function buildWordTimings(alignment) {
+  if (!alignment || !alignment.characters) return null;
+  const chars = alignment.characters;
+  const starts = alignment.character_start_times_seconds;
+  const ends = alignment.character_end_times_seconds;
+  const result = [];
+  let wordChars = '';
+  let wordStart = null;
+  for (let i = 0; i < chars.length; i++) {
+    const ch = chars[i];
+    if (!ch || ch === ' ' || ch === '\n' || ch === '\r') {
+      if (wordChars.trim()) {
+        result.push({ word: wordChars.trim(), start: wordStart, end: ends[i - 1] ?? (starts[i] || 0) });
+      }
+      wordChars = ''; wordStart = null;
+    } else {
+      if (wordStart === null) wordStart = starts[i];
+      wordChars += ch;
+    }
+  }
+  if (wordChars.trim()) {
+    result.push({ word: wordChars.trim(), start: wordStart, end: ends[ends.length - 1] });
+  }
+  return result.length ? result : null;
+}
+
 async function generateSpeech(text, voiceId, apiKey, audioCtx) {
   const body = {
     text: text,
@@ -936,12 +964,13 @@ async function generateSpeech(text, voiceId, apiKey, audioCtx) {
       use_speaker_boost: true
     }
   };
-  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`, {
+  // Use /with-timestamps for exact word-level sync
+  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps`, {
     method: 'POST',
     headers: {
       'xi-api-key': apiKey,
       'Content-Type': 'application/json',
-      'Accept': 'audio/mpeg'
+      'Accept': 'application/json'
     },
     body: JSON.stringify(body)
   });
@@ -950,9 +979,16 @@ async function generateSpeech(text, voiceId, apiKey, audioCtx) {
     try { detail = (await response.json()).detail?.message || (await response.text()); } catch (e) {}
     throw new Error(`ElevenLabs ${response.status}: ${detail || response.statusText}`);
   }
-  const arrayBuf = await response.arrayBuffer();
+  const data = await response.json();
+  // Decode base64 audio → ArrayBuffer
+  const b64 = data.audio_base64;
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const arrayBuf = bytes.buffer;
   const audioBuf = await audioCtx.decodeAudioData(arrayBuf.slice(0));
-  return { audioBuffer: audioBuf, mp3Buffer: arrayBuf };
+  const wt = buildWordTimings(data.alignment || data.normalized_alignment);
+  return { audioBuffer: audioBuf, mp3Buffer: arrayBuf, wordTimings: wt };
 }
 
 // =========================================================
@@ -1198,6 +1234,24 @@ function drawSceneCaption(text, alpha, position = 'bottom') {
   ctx.restore();
 }
 
+
+function getChunkFromWordTimings(timings, tInScene, wordsPerChunk) {
+  if (!timings || timings.length === 0) return null;
+  // Before speech starts — show nothing
+  if (tInScene < (timings[0].start - 0.05)) return '';
+  // After last word
+  if (tInScene > timings[timings.length - 1].end + 0.1) return timings[timings.length - 1].word;
+  // Find active word index
+  let activeIdx = 0;
+  for (let i = 0; i < timings.length; i++) {
+    if (tInScene >= timings[i].start) activeIdx = i;
+    else break;
+  }
+  // Get chunk containing active word
+  const chunkStart = Math.floor(activeIdx / wordsPerChunk) * wordsPerChunk;
+  return timings.slice(chunkStart, chunkStart + wordsPerChunk).map(t => t.word).join(' ');
+}
+
 function chunkWords(text, wordsPerChunk) {
   const words = (text || '').trim().split(/\s+/).filter(w => w);
   const chunks = [];
@@ -1376,8 +1430,15 @@ function drawScene(sceneIdx, tInScene, sceneDuration) {
       drawHighlightSubtitle(words, spokenCount, fade);
     } else {
       const wordsPerChunk = parseInt(subsWordsEl.value);
-      const chunks = chunkWords(scene.narration, wordsPerChunk);
-      const currentChunk = getCurrentChunk(chunks, adjT, narrationDuration);
+      // Use exact word timings from ElevenLabs if available; else fall back to estimation
+      const wt = wordTimings[sceneIdx];
+      let currentChunk;
+      if (wt) {
+        currentChunk = getChunkFromWordTimings(wt, adjT, wordsPerChunk);
+      } else {
+        const chunks = chunkWords(scene.narration, wordsPerChunk);
+        currentChunk = getCurrentChunk(chunks, adjT, narrationDuration);
+      }
       drawSubtitle(currentChunk, fade);
     }
   }
@@ -1520,7 +1581,7 @@ async function runGenerateAll() {
     const voiceId = voiceEl.value;
     const voicePromises = script.scenes.map((s, i) =>
       generateSpeech(s.narration, voiceId, elevenKey, audioCtx)
-        .then(r => { audios[i] = r.audioBuffer; audioMp3s[i] = r.mp3Buffer; })
+        .then(r => { audios[i] = r.audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = r.wordTimings || null; })
     );
     await Promise.all(voicePromises);
     setProgress(95);
@@ -1731,7 +1792,7 @@ async function regenerateVoice() {
     const voiceId = voiceEl.value;
     const voicePromises = script.scenes.map((s, i) =>
       generateSpeech(s.narration, voiceId, key, audioCtx)
-        .then(r => { audios[i] = r.audioBuffer; audioMp3s[i] = r.mp3Buffer; })
+        .then(r => { audios[i] = r.audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = r.wordTimings || null; })
     );
     await Promise.all(voicePromises);
     const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
