@@ -601,6 +601,7 @@
             <select id="illMode">
               <option value="baked" selected>Baked (gray concrete built into image)</option>
               <option value="clean">Clean (multiply blend — bg shows through)</option>
+              <option value="colored">Colored (vibrant full-color illustrations)</option>
             </select>
             <div class="cost-note" id="illModeNote" style="margin-top:6px">Changing this requires re-generating images</div>
           </div>
@@ -1154,10 +1155,11 @@ CRITICAL RULES:
 const STYLE_PREFIX_BAKED = "Minimalist cartoon illustration, clean hand-drawn black ink sketch linework, simple 2D vector style, thin outlines, centered composition with clear negative space, on a medium gray textured concrete wall background with subtle grain and shadow, vertical 9:16 framing, viral dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
 
 const STYLE_PREFIX_CLEAN = "Bold minimalist cartoon illustration, clean thick black ink outlines, 2D vector style, SINGLE centered subject isolated on a PLAIN FLAT SOLID PURE WHITE BACKGROUND (#FFFFFF, absolutely completely white everywhere, NO texture, NO shadow, NO gradient, NO background elements, NO wall, NO floor, NO scenery), vertical 9:16 aspect ratio, viral social media aesthetic. ABSOLUTELY NO TEXT. NO watermarks. NO logos. NO borders. NO background objects. Subject: ";
+const STYLE_PREFIX_COLORED = "Vibrant full-color digital illustration, rich saturated colors, smooth cel-shading style, bold outlines, cinematic dramatic lighting, high contrast, deep rich background with dark moody atmosphere, vertical 9:16 framing, viral dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
 
 function getStylePrefix() {
   const mode = document.getElementById('illMode')?.value || 'baked';
-  return mode === 'clean' ? STYLE_PREFIX_CLEAN : STYLE_PREFIX_BAKED;
+  return mode === 'clean' ? STYLE_PREFIX_CLEAN : mode === 'colored' ? STYLE_PREFIX_COLORED : STYLE_PREFIX_BAKED;
 }
 
 async function generateImageForScene(scenePrompt, apiKey, isCartoon = false) {
@@ -1366,7 +1368,7 @@ function drawIllustration(img, zoom, alpha) {
   ctx.save();
   ctx.globalAlpha = alpha;
   const illMode = document.getElementById('illMode')?.value || 'baked';
-  if (illMode === 'clean') {
+  if (illMode === 'clean' || illMode === 'colored') {
     ctx.globalCompositeOperation = 'multiply';
   }
   ctx.drawImage(img, dx, dy, dw, dh);
@@ -2691,8 +2693,11 @@ $('titleBgOpacity').addEventListener('input', () => {
 });
 $('illMode').addEventListener('change', () => {
   const note = $('illModeNote');
-  note.textContent = $('illMode').value === 'clean'
+  const mv = $('illMode').value;
+  note.textContent = mv === 'clean'
     ? '⚠ Re-gen Images to produce white-bg illustrations for this mode'
+    : mv === 'colored'
+    ? '⚠ Re-gen Images to produce vibrant colored illustrations for this mode'
     : '⚠ Re-gen Images to produce concrete-bg illustrations for this mode';
   drawStaticPreview();
 });
