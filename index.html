@@ -3585,9 +3585,26 @@ async function postViaAyrshare(videoUrl, caption, platforms, scheduleDate, apiKe
     return await r2.json().catch(() => ({}));
   }
 
+  // Ayrshare returns per-platform results — check if all failed
   if (!res.ok || data.status === 'error') {
-    const msg = data.message || data.error || data.errors?.join(', ') || JSON.stringify(data) || res.status;
-    throw new Error('Ayrshare error: ' + msg);
+    let msg = '';
+    if (typeof data.message === 'object') {
+      // Per-platform results object
+      const failures = Object.entries(data.message || {})
+        .filter(([k, v]) => v?.status === 'error')
+        .map(([k, v]) => `${k}: ${v?.message || v?.error || 'unknown'}`);
+      msg = failures.length ? failures.join(' | ') : JSON.stringify(data.message);
+    } else {
+      msg = data.message || data.error || data.errors?.join(', ') || JSON.stringify(data) || String(res.status);
+    }
+    throw new Error(msg || 'Unknown Ayrshare error (status ' + res.status + ')');
+  }
+  // Check for partial success (some platforms may have failed)
+  if (data.message && typeof data.message === 'object') {
+    const failures = Object.entries(data.message)
+      .filter(([k, v]) => v?.status === 'error')
+      .map(([k, v]) => k);
+    if (failures.length) console.warn('Partial failures:', failures);
   }
   return data;
 }
