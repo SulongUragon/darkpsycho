@@ -2650,7 +2650,7 @@ $('downloadBtn').onclick = async () => {
 );
 $('subsFont').addEventListener('change', drawStaticPreview);
 $('subsStyle').addEventListener('change', drawStaticPreview);
-$('subsAllCaps').addEventListener('change', drawStaticPreview);
+// subsAllCaps replaced by subsCase dropdown
 $('subsOffset').addEventListener('input', () => {
   const v = parseFloat($('subsOffset').value);
   $('subsOffsetVal').textContent = (v >= 0 ? '+' : '') + v.toFixed(2) + 's';
@@ -2709,7 +2709,7 @@ const BUILT_IN_PRESETS = {
     bgVariant: 'concrete', bgBrightness: '0',
     titleFont: "'Montserrat', sans-serif", titleColor: '#000000', titlePos: 'top', titleBgOpacity: '100',
     subsFont: "'Inter', sans-serif", subsColor: '#ffffff', subsStyle: 'chunks', subsWords: '2',
-    subsAllCaps: true, subsOffset: '0', subsPos: '75', subsSize: '56', subsEnabled: true,
+    subsCase: 'upper', subsOffset: '0', subsPos: '75', subsSize: '56', subsEnabled: true,
     illMode: 'baked', illScale: '100', illBgRemove: '0',
     captionColor: 'none', darken: '15'
   },
@@ -2717,7 +2717,7 @@ const BUILT_IN_PRESETS = {
     bgVariant: 'paperLight', bgBrightness: '0',
     titleFont: "'Permanent Marker', cursive", titleColor: '#000000', titlePos: 'bubble', titleBgOpacity: '100',
     subsFont: "'Kalam', cursive", subsColor: '#000000', subsStyle: 'highlight', subsWords: '2',
-    subsAllCaps: false, subsOffset: '0', subsPos: '85', subsSize: '50', subsEnabled: true,
+    subsCase: 'original', subsOffset: '0', subsPos: '85', subsSize: '50', subsEnabled: true,
     illMode: 'clean', illScale: '90', illBgRemove: '0',
     captionColor: 'none', darken: '0'
   },
@@ -2725,7 +2725,7 @@ const BUILT_IN_PRESETS = {
     bgVariant: 'blood', bgBrightness: '20',
     titleFont: "'Anton', sans-serif", titleColor: '#ffffff', titlePos: 'top', titleBgOpacity: '0',
     subsFont: "'Anton', sans-serif", subsColor: '#ffe600', subsStyle: 'highlight', subsWords: '2',
-    subsAllCaps: true, subsOffset: '0', subsPos: '78', subsSize: '60', subsEnabled: true,
+    subsCase: 'upper', subsOffset: '0', subsPos: '78', subsSize: '60', subsEnabled: true,
     illMode: 'clean', illScale: '95', illBgRemove: '0',
     captionColor: 'none', darken: '20'
   },
@@ -2733,7 +2733,7 @@ const BUILT_IN_PRESETS = {
     bgVariant: 'sepia', bgBrightness: '0',
     titleFont: "'Special Elite', monospace", titleColor: '#000000', titlePos: 'top', titleBgOpacity: '70',
     subsFont: "'Special Elite', monospace", subsColor: '#ffffff', subsStyle: 'chunks', subsWords: '2',
-    subsAllCaps: false, subsOffset: '0', subsPos: '80', subsSize: '50', subsEnabled: true,
+    subsCase: 'original', subsOffset: '0', subsPos: '80', subsSize: '50', subsEnabled: true,
     illMode: 'baked', illScale: '100', illBgRemove: '0',
     captionColor: 'none', darken: '20'
   },
@@ -2741,7 +2741,7 @@ const BUILT_IN_PRESETS = {
     bgVariant: 'black', bgBrightness: '0',
     titleFont: "'Inter', sans-serif", titleColor: '#ffffff', titlePos: 'top', titleBgOpacity: '0',
     subsFont: "'Inter', sans-serif", subsColor: '#ffffff', subsStyle: 'chunks', subsWords: '2',
-    subsAllCaps: true, subsOffset: '0', subsPos: '78', subsSize: '54', subsEnabled: true,
+    subsCase: 'upper', subsOffset: '0', subsPos: '78', subsSize: '54', subsEnabled: true,
     illMode: 'clean', illScale: '85', illBgRemove: '0',
     captionColor: 'none', darken: '10'
   }
@@ -2861,7 +2861,7 @@ function collectSettings() {
     illMode: $('illMode')?.value, subsEnabled: subsEnabledEl.checked, subsWords: subsWordsEl.value,
     subsColor: subsColorEl.value, subsFont: $('subsFont')?.value, subsPos: subsPosEl.value,
     subsSize: subsSizeEl.value, subsStyle: $('subsStyle')?.value,
-    subsAllCaps: $('subsAllCaps')?.checked, subsOffset: $('subsOffset')?.value,
+    subsCase: $('subsCase')?.value || 'upper', subsOffset: $('subsOffset')?.value,
     bgVariant: $('bgVariant')?.value,
     bgBrightness: $('bgBrightness')?.value, duration: durationSelect.value
   };
@@ -2882,7 +2882,7 @@ function applySettings(s) {
   if (s.illMode && $('illMode')) $('illMode').value = s.illMode;
   if (s.subsFont && $('subsFont')) $('subsFont').value = s.subsFont;
   if (s.subsStyle && $('subsStyle')) $('subsStyle').value = s.subsStyle;
-  if (s.subsAllCaps !== undefined && $('subsAllCaps')) $('subsAllCaps').checked = s.subsAllCaps;
+  if (s.subsCase && $('subsCase')) $('subsCase').value = s.subsCase;
   if (s.subsOffset !== undefined && $('subsOffset')) {
     $('subsOffset').value = s.subsOffset;
     const v = parseFloat(s.subsOffset);
@@ -3099,7 +3099,7 @@ function applySubsPreset(name) {
   set('subsWords', p.words);
   set('subsSize', p.size);
   set('subsPos', p.pos);
-  const sc = document.getElementById('subsCase'); if (sc) sc.value = p.allCaps ? 'upper' : 'original';
+  const sc = document.getElementById('subsCase'); if (sc) sc.value = p.subsCase || (p.allCaps ? 'upper' : 'original');
   set('subsBgEnabled', p.bgEnabled, 'checked');
   set('subsBgColor', p.bgColor);
   set('subsBgOpacity', p.bgOpacity);
@@ -3157,7 +3157,7 @@ if (subsBgEnabledEl) {
 }
 
 // All other subs controls
-['subsStyle','subsWords','subsFont','subsAllCaps','subsEnabled','subsCase'].forEach(id => {
+['subsStyle','subsWords','subsFont','subsEnabled','subsCase'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', drawStaticPreview);
 });
@@ -3316,14 +3316,7 @@ function updateStatusPill(row, status, posted, pill) {
   p.textContent = s === 'posted' ? 'POSTED' : s === 'done' ? 'DONE' : s === 'planned' ? 'PLANNED' : 'EMPTY';
 }
 
-function updateStatusPill(row, day) {
-  const pill = row.querySelector('.cal-status');
-  if (!pill) return;
-  if (day.posted) { pill.className = 'cal-status posted'; pill.textContent = 'POSTED'; }
-  else if (day.status === 'done') { pill.className = 'cal-status done'; pill.textContent = 'DONE'; }
-  else if (day.status === 'planned') { pill.className = 'cal-status planned'; pill.textContent = 'PLANNED'; }
-  else { pill.className = 'cal-status empty'; pill.textContent = 'EMPTY'; }
-}
+// updateStatusPill (merged above)
 
 function updateCalStatus() {
   // Don't overwrite user-set status messages from plan/generate actions
