@@ -2830,11 +2830,16 @@ function saveCurrentPreset() {
     setStatus('Cannot overwrite a built-in preset name', 'error');
     return;
   }
-  savePreset(trimmed, collectSettings());
-  refreshPresetSelect();
-  $('presetSelect').value = 'custom:' + trimmed;
-  setStatus(`Saved preset: ${trimmed}`, 'success');
-  setTimeout(() => setStatus(''), 1500);
+  try {
+    savePreset(trimmed, collectSettings());
+    refreshPresetSelect();
+    $('presetSelect').value = 'custom:' + trimmed;
+    setStatus(`Saved preset: ${trimmed}`, 'success');
+    setTimeout(() => setStatus(''), 1500);
+  } catch(e) {
+    setStatus('Save failed: ' + e.message, 'error');
+    console.error('Preset save error:', e);
+  }
 }
 
 function deleteSelectedPreset() {
@@ -2866,7 +2871,7 @@ function collectSettings() {
     subsSize: subsSizeEl.value, subsStyle: $('subsStyle')?.value,
     subsCase: $('subsCase')?.value || 'upper', subsOffset: $('subsOffset')?.value,
     bgVariant: $('bgVariant')?.value,
-    bgBrightness: $('bgBrightness')?.value, duration: durationSelect.value
+    bgBrightness: $('bgBrightness')?.value, duration: $('duration')?.value
   };
 }
 
@@ -2879,7 +2884,7 @@ function applySettings(s) {
     $('titleBgOpacity').value = s.titleBgOpacity;
     $('titleBgOpacityVal').textContent = s.titleBgOpacity + '%';
   }
-  set(captionColorEl, s.captionColor); set(durationSelect, s.duration);
+  set(captionColorEl, s.captionColor); if (s.duration && $('duration')) $('duration').value = s.duration;
   set(subsWordsEl, s.subsWords); set(subsColorEl, s.subsColor);
   if (s.subsEnabled !== undefined) subsEnabledEl.checked = s.subsEnabled;
   if (s.illMode && $('illMode')) $('illMode').value = s.illMode;
