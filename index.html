@@ -625,6 +625,31 @@
             <label>Title bg opacity (<span id="titleBgOpacityVal">100%</span>) · 0 = fully transparent</label>
             <input type="range" id="titleBgOpacity" min="0" max="100" value="100">
           </div>
+          <div class="field" style="border-top:1px solid #1e1e1e;padding-top:12px;margin-top:4px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#ccc;">✂️ Silence Remover</div>
+                <div style="font-size:10px;color:#555;margin-top:2px;">Cut dead air between words</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="silenceRemoveEnabled">
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div id="silenceOptions" style="display:none;">
+              <label>Threshold (<span id="silenceThreshVal">2%</span>) · lower = more aggressive</label>
+              <div class="slider-row">
+                <input type="range" id="silenceThresh" min="1" max="10" value="2">
+                <span class="slider-val" id="silenceThreshDisplay">2%</span>
+              </div>
+              <label style="margin-top:8px;display:block;">Min silence to cut (<span id="silenceMinVal">0.15s</span>)</label>
+              <div class="slider-row">
+                <input type="range" id="silenceMin" min="5" max="50" value="15">
+                <span class="slider-val" id="silenceMinDisplay">0.15s</span>
+              </div>
+              <div style="font-size:10px;color:#555;margin-top:6px;">Applied at generate time — re-gen voice to apply changes</div>
+            </div>
+          </div>
           <div class="field">
             <label>Darken illustration (<span id="darkenVal">15%</span>)</label>
             <input type="range" id="darken" min="0" max="70" value="15">
@@ -1878,7 +1903,17 @@ async function runGenerateAll() {
       setStatus(`Generating voice ${i + 1}/${script.scenes.length}…`, 'info');
       setProgress(60 + ((i / script.scenes.length) * 35));
       const r = await generateSpeech(script.scenes[i].narration, voiceId, elevenKey, audioCtx);
-      audios[i] = r.audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = r.wordTimings || null;
+      let audioBuffer = r.audioBuffer;
+      let wt = r.wordTimings || null;
+      // Apply silence removal if enabled
+      if (document.getElementById('silenceRemoveEnabled')?.checked) {
+        const thresh = parseInt(document.getElementById('silenceThresh')?.value || 2);
+        const minSil = parseInt(document.getElementById('silenceMin')?.value || 15) / 100;
+        const { buffer: trimmed, timeMap } = removeSilenceFromBuffer(audioBuffer, thresh, minSil);
+        audioBuffer = trimmed;
+        if (wt && timeMap) wt = remapWordTimings(wt, timeMap);
+      }
+      audios[i] = audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = wt;
     }
     setProgress(95);
     const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
@@ -3610,6 +3645,134 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === document.getElementById('scheduleModal')) closeScheduleModal();
   });
 });
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  SILENCE REMOVER
+// ═══════════════════════════════════════════════════════════════════════════════
+function removeSilenceFromBuffer(audioBuffer, thresholdPct = 2, minSilenceSec = 0.15, paddingSec = 0.04) {
+  const threshold = thresholdPct / 100;
+  const sampleRate = audioBuffer.sampleRate;
+  const minSilenceSamples = Math.floor(minSilenceSec * sampleRate);
+  const paddingSamples = Math.floor(paddingSec * sampleRate);
+  const numChannels = audioBuffer.numberOfChannels;
+  const totalSamples = audioBuffer.length;
+
+  // Build RMS-based loudness map (per 256-sample frame)
+  const frameSize = 256;
+  const numFrames = Math.ceil(totalSamples / frameSize);
+  const rms = new Float32Array(numFrames);
+  const ch0 = audioBuffer.getChannelData(0);
+  for (let f = 0; f < numFrames; f++) {
+    let sum = 0;
+    const start = f * frameSize;
+    const end = Math.min(start + frameSize, totalSamples);
+    for (let i = start; i < end; i++) sum += ch0[i] * ch0[i];
+    rms[f] = Math.sqrt(sum / (end - start));
+  }
+
+  // Find keep regions (non-silent stretches with padding)
+  const keepRanges = []; // [{start, end}] in samples
+  let i = 0;
+  while (i < totalSamples) {
+    const frame = Math.floor(i / frameSize);
+    if (rms[frame] > threshold) {
+      // Speech found — extend forward until silence that's long enough
+      let end = i;
+      while (end < totalSamples) {
+        const f2 = Math.floor(end / frameSize);
+        if (rms[f2] <= threshold) {
+          // Check if silence is long enough to cut
+          let silenceEnd = end;
+          while (silenceEnd < totalSamples && rms[Math.floor(silenceEnd / frameSize)] <= threshold) {
+            silenceEnd += frameSize;
+          }
+          if (silenceEnd - end >= minSilenceSamples) break; // cut here
+          else end = silenceEnd; // short silence — keep
+        } else {
+          end += frameSize;
+        }
+      }
+      const rangeStart = Math.max(0, i - paddingSamples);
+      const rangeEnd = Math.min(totalSamples, end + paddingSamples);
+      keepRanges.push({ start: rangeStart, end: rangeEnd });
+      i = rangeEnd;
+    } else {
+      i += frameSize;
+    }
+  }
+
+  if (keepRanges.length === 0) return { buffer: audioBuffer, timeMap: null };
+
+  // Merge overlapping ranges
+  const merged = [keepRanges[0]];
+  for (let k = 1; k < keepRanges.length; k++) {
+    const last = merged[merged.length - 1];
+    if (keepRanges[k].start <= last.end) last.end = Math.max(last.end, keepRanges[k].end);
+    else merged.push(keepRanges[k]);
+  }
+
+  // Build new buffer
+  const newLength = merged.reduce((s, r) => s + (r.end - r.start), 0);
+  const newBuffer = new AudioBuffer({ numberOfChannels: numChannels, length: newLength, sampleRate });
+  const timeMap = []; // [{origStart, origEnd, newStart}] for remapping word timings
+
+  let offset = 0;
+  for (const range of merged) {
+    const len = range.end - range.start;
+    timeMap.push({ origStart: range.start / sampleRate, origEnd: range.end / sampleRate, newStart: offset / sampleRate });
+    for (let ch = 0; ch < numChannels; ch++) {
+      const src = audioBuffer.getChannelData(ch);
+      const dst = newBuffer.getChannelData(ch);
+      dst.set(src.subarray(range.start, range.end), offset);
+    }
+    offset += len;
+  }
+
+  return { buffer: newBuffer, timeMap };
+}
+
+function remapWordTimings(wordTimings, timeMap) {
+  if (!wordTimings || !timeMap) return wordTimings;
+  return wordTimings.map(wt => {
+    // Find which kept region contains this word's start time
+    for (const seg of timeMap) {
+      if (wt.start >= seg.origStart && wt.start < seg.origEnd) {
+        const offset = wt.start - seg.origStart;
+        const newStart = seg.newStart + offset;
+        const duration = wt.end - wt.start;
+        return { word: wt.word, start: newStart, end: newStart + duration };
+      }
+    }
+    return wt; // fallback: keep original
+  });
+}
+
+// Wire silence remover toggle
+const silenceToggle = document.getElementById('silenceRemoveEnabled');
+const silenceOptions = document.getElementById('silenceOptions');
+if (silenceToggle) {
+  silenceToggle.addEventListener('change', () => {
+    if (silenceOptions) silenceOptions.style.display = silenceToggle.checked ? 'block' : 'none';
+  });
+}
+const silenceThreshEl = document.getElementById('silenceThresh');
+if (silenceThreshEl) {
+  silenceThreshEl.addEventListener('input', () => {
+    const v = silenceThreshEl.value;
+    const d = document.getElementById('silenceThreshVal'); if (d) d.textContent = v + '%';
+    const d2 = document.getElementById('silenceThreshDisplay'); if (d2) d2.textContent = v + '%';
+  });
+}
+const silenceMinEl = document.getElementById('silenceMin');
+if (silenceMinEl) {
+  silenceMinEl.addEventListener('input', () => {
+    const v = (parseInt(silenceMinEl.value) / 100).toFixed(2);
+    const d = document.getElementById('silenceMinVal'); if (d) d.textContent = v + 's';
+    const d2 = document.getElementById('silenceMinDisplay'); if (d2) d2.textContent = v + 's';
+  });
+}
 
 
 // Init
