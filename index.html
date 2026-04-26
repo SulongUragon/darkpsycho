@@ -3480,20 +3480,18 @@ const CLOUDINARY_CLOUD = 'dpqcljia';
 
 async function uploadToCloudinary(videoBlob, preset) {
   const formData = new FormData();
-  formData.append('file', videoBlob, 'video.mp4');
+  formData.append('file', videoBlob, 'darkpsycho_video.mp4');
   formData.append('upload_preset', preset);
-  formData.append('folder', 'darkpsycho');
-  formData.append('resource_type', 'video');
+  // Note: resource_type goes in URL, folder only if preset allows it
 
   const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`, {
     method: 'POST',
     body: formData
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error('Cloudinary: ' + (err.error?.message || res.statusText));
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) {
+    throw new Error('Cloudinary: ' + (data.error?.message || res.statusText));
   }
-  const data = await res.json();
   return data.secure_url;
 }
 
