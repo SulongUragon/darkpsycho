@@ -399,7 +399,11 @@
         <div style="border-top:1px solid #1e1e1e;margin-top:12px;padding-top:12px;">
           <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px;">☁️ Auto-Schedule Setup</div>
           <div class="api-row">
-            <div class="api-label">Cloudinary</div>
+            <div class="api-label">Cloud Name</div>
+            <input type="text" id="cloudinaryCloud" placeholder="Your Cloudinary cloud name" autocomplete="off">
+          </div>
+          <div class="api-row">
+            <div class="api-label">Preset</div>
             <input type="text" id="cloudinaryPreset" placeholder="Upload preset name (unsigned)" autocomplete="off">
           </div>
           <div class="api-row">
@@ -1021,6 +1025,7 @@ $('saveKeys').onclick = () => {
   localStorage.setItem('anthropic_api_key', anthropicKeyEl.value.trim());
   localStorage.setItem('fal_api_key', falKeyEl.value.trim());
   localStorage.setItem('elevenlabs_api_key', elevenKeyEl.value.trim());
+  localStorage.setItem('cloudinary_cloud', document.getElementById('cloudinaryCloud')?.value.trim() || '');
   localStorage.setItem('cloudinary_preset', document.getElementById('cloudinaryPreset')?.value.trim() || '');
   localStorage.setItem('ayrshare_key', document.getElementById('ayrshareKey')?.value.trim() || '');
   setStatus('All keys saved locally', 'success');
@@ -1031,6 +1036,7 @@ function loadKeys() {
   anthropicKeyEl.value = localStorage.getItem('anthropic_api_key') || '';
   falKeyEl.value = localStorage.getItem('fal_api_key') || '';
   elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
+  const ccEl = document.getElementById('cloudinaryCloud'); if (ccEl) ccEl.value = localStorage.getItem('cloudinary_cloud') || '';
   const cpEl = document.getElementById('cloudinaryPreset'); if (cpEl) cpEl.value = localStorage.getItem('cloudinary_preset') || '';
   const ayEl = document.getElementById('ayrshareKey'); if (ayEl) ayEl.value = localStorage.getItem('ayrshare_key') || '';
 }
@@ -3476,7 +3482,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 //  CLOUDINARY UPLOAD + MAKE.COM SCHEDULE
 // ═══════════════════════════════════════════════════════════════════════════════
-const CLOUDINARY_CLOUD = 'dpqcljia';
+function getCloudinaryCloud() { return document.getElementById('cloudinaryCloud')?.value.trim() || localStorage.getItem('cloudinary_cloud') || ''; }
 
 async function uploadToCloudinary(videoBlob, preset) {
   const formData = new FormData();
@@ -3484,7 +3490,9 @@ async function uploadToCloudinary(videoBlob, preset) {
   formData.append('upload_preset', preset);
   // Note: resource_type goes in URL, folder only if preset allows it
 
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`, {
+  const cloud = getCloudinaryCloud();
+  if (!cloud) throw new Error('Cloudinary: Enter your Cloud Name in API Keys');
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/video/upload`, {
     method: 'POST',
     body: formData
   });
