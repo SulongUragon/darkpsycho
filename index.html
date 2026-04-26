@@ -416,6 +416,12 @@
           </div>
         </div>
         <button id="saveKeys" class="secondary">Save All Keys Locally</button>
+        <div class="button-row" style="margin-top:8px;">
+          <button id="exportKeysBtn" class="secondary small">📤 Export Keys</button>
+          <button id="importKeysBtn" class="secondary small">📥 Import Keys</button>
+        </div>
+        <textarea id="keysCodeArea" style="display:none;width:100%;min-height:70px;margin-top:8px;font-size:10px;font-family:monospace;background:#050505;border:1px solid #252525;color:#aaa;padding:8px;border-radius:6px;resize:none;" placeholder="Paste your keys code here…"></textarea>
+        <button id="importKeysConfirmBtn" style="display:none;margin-top:6px;width:100%;">✅ Restore Keys</button>
         <div style="font-size:10px;color:#555;margin-top:8px;line-height:1.5;letter-spacing:0.5px;">⚠ Keys are stored in your browser's localStorage. Never share this page with others while keys are saved.</div>
         <div class="cost-note">Cost per video ≈ $0.05 (FLUX schnell + TTS) · <a href="https://fal.ai/dashboard/keys" target="_blank">Get FAL key</a></div>
       </div>
@@ -3786,6 +3792,81 @@ if (silenceMinEl) {
     const d2 = document.getElementById('silenceMinDisplay'); if (d2) d2.textContent = v + 's';
   });
 }
+
+
+
+// ── Keys Export / Import ───────────────────────────────────────────────────────
+function getAllKeys() {
+  return {
+    anthropic: document.getElementById('anthropicKey')?.value || localStorage.getItem('anthropic_api_key') || '',
+    fal: document.getElementById('falKey')?.value || localStorage.getItem('fal_api_key') || '',
+    eleven: document.getElementById('elevenKey')?.value || localStorage.getItem('elevenlabs_api_key') || '',
+    cloudName: document.getElementById('cloudinaryCloud')?.value || localStorage.getItem('cloudinary_cloud') || '',
+    cloudPreset: document.getElementById('cloudinaryPreset')?.value || localStorage.getItem('cloudinary_preset') || '',
+    ayrshare: document.getElementById('ayrshareKey')?.value || localStorage.getItem('ayrshare_key') || '',
+    makeWebhook: document.getElementById('makeWebhook')?.value || localStorage.getItem('make_webhook') || ''
+  };
+}
+
+function applyKeys(keys) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  set('anthropicKey', keys.anthropic);
+  set('falKey', keys.fal);
+  set('elevenKey', keys.eleven);
+  set('cloudinaryCloud', keys.cloudName);
+  set('cloudinaryPreset', keys.cloudPreset);
+  set('ayrshareKey', keys.ayrshare);
+  set('makeWebhook', keys.makeWebhook);
+  // Save to localStorage
+  if (keys.anthropic) localStorage.setItem('anthropic_api_key', keys.anthropic);
+  if (keys.fal) localStorage.setItem('fal_api_key', keys.fal);
+  if (keys.eleven) localStorage.setItem('elevenlabs_api_key', keys.eleven);
+  if (keys.cloudName) localStorage.setItem('cloudinary_cloud', keys.cloudName);
+  if (keys.cloudPreset) localStorage.setItem('cloudinary_preset', keys.cloudPreset);
+  if (keys.ayrshare) localStorage.setItem('ayrshare_key', keys.ayrshare);
+  if (keys.makeWebhook) localStorage.setItem('make_webhook', keys.makeWebhook);
+}
+
+document.getElementById('exportKeysBtn')?.addEventListener('click', () => {
+  const keys = getAllKeys();
+  const code = btoa(JSON.stringify(keys));
+  const area = document.getElementById('keysCodeArea');
+  const importBtn = document.getElementById('importKeysConfirmBtn');
+  area.style.display = 'block';
+  area.value = code;
+  area.select();
+  document.execCommand('copy');
+  area.readOnly = true;
+  if (importBtn) importBtn.style.display = 'none';
+  const btn = document.getElementById('exportKeysBtn');
+  btn.textContent = '✓ Copied!';
+  setTimeout(() => btn.textContent = '📤 Export Keys', 2000);
+});
+
+document.getElementById('importKeysBtn')?.addEventListener('click', () => {
+  const area = document.getElementById('keysCodeArea');
+  const importBtn = document.getElementById('importKeysConfirmBtn');
+  area.style.display = 'block';
+  area.readOnly = false;
+  area.value = '';
+  area.placeholder = 'Paste your keys code here…';
+  if (importBtn) importBtn.style.display = 'block';
+  area.focus();
+});
+
+document.getElementById('importKeysConfirmBtn')?.addEventListener('click', () => {
+  const area = document.getElementById('keysCodeArea');
+  try {
+    const keys = JSON.parse(atob(area.value.trim()));
+    applyKeys(keys);
+    area.style.display = 'none';
+    document.getElementById('importKeysConfirmBtn').style.display = 'none';
+    setStatus('✅ All keys restored!', 'success');
+    setTimeout(() => setStatus(''), 2000);
+  } catch (e) {
+    setStatus('❌ Invalid keys code', 'error');
+  }
+});
 
 
 // Init
