@@ -395,6 +395,17 @@
           <div class="api-label">ElevenLabs</div>
           <input type="password" id="elevenKey" placeholder="xi-… (TTS)" autocomplete="off">
         </div>
+        <div style="border-top:1px solid #1e1e1e;margin-top:12px;padding-top:12px;">
+          <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px;">☁️ Auto-Schedule Setup</div>
+          <div class="api-row">
+            <div class="api-label">Cloudinary</div>
+            <input type="text" id="cloudinaryPreset" placeholder="Upload preset name (unsigned)" autocomplete="off">
+          </div>
+          <div class="api-row">
+            <div class="api-label">Make.com</div>
+            <input type="text" id="makeWebhook" placeholder="https://hook.us2.make.com/…" autocomplete="off" value="https://hook.us2.make.com/vz7tdtaf6l8h1jx3q1ivt4s9qglrutle">
+          </div>
+        </div>
         <button id="saveKeys" class="secondary">Save All Keys Locally</button>
         <div style="font-size:10px;color:#555;margin-top:8px;line-height:1.5;letter-spacing:0.5px;">⚠ Keys are stored in your browser's localStorage. Never share this page with others while keys are saved.</div>
         <div class="cost-note">Cost per video ≈ $0.05 (FLUX schnell + TTS) · <a href="https://fal.ai/dashboard/keys" target="_blank">Get FAL key</a></div>
@@ -788,6 +799,43 @@
   </div>
 
 
+
+  <!-- ══ SCHEDULE MODAL ══ -->
+  <div id="scheduleModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;align-items:center;justify-content:center;">
+    <div style="background:#111;border:1px solid #2a2a2a;border-radius:14px;padding:28px;width:100%;max-width:420px;margin:20px;">
+      <h2 style="font-size:14px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#e5e5e5;margin-bottom:20px;">☁️ Upload &amp; Schedule</h2>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label>Caption</label>
+        <textarea id="schedCaption" style="min-height:80px;font-size:12px;" placeholder="Post caption…"></textarea>
+      </div>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label>Schedule Time</label>
+        <input type="datetime-local" id="schedTime" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px 12px;border-radius:6px;font-family:inherit;font-size:13px;">
+      </div>
+
+      <div class="field" style="margin-bottom:20px;">
+        <label style="margin-bottom:10px;display:block;">Platforms</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <label class="check-row"><input type="checkbox" id="platTikTok" checked> TikTok</label>
+          <label class="check-row"><input type="checkbox" id="platInstagram" checked> Instagram</label>
+          <label class="check-row"><input type="checkbox" id="platYouTube"> YouTube Shorts</label>
+        </div>
+      </div>
+
+      <div id="schedStatus" style="font-size:11px;color:#888;margin-bottom:14px;min-height:16px;text-align:center;"></div>
+      <div style="progress-track" id="schedProgress" style="display:none;height:3px;background:#1a1a1a;border-radius:2px;margin-bottom:12px;overflow:hidden;">
+        <div id="schedProgressBar" style="height:100%;background:linear-gradient(90deg,#8b0000,#ff3b3b);width:0;transition:width 0.3s;"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button class="secondary" id="schedCancelBtn">Cancel</button>
+        <button id="schedConfirmBtn">🚀 Schedule</button>
+      </div>
+    </div>
+  </div>
+
   <div class="footer-note">Local · No backend · Your keys stay in your browser</div>
 </div>
 
@@ -972,6 +1020,8 @@ $('saveKeys').onclick = () => {
   localStorage.setItem('anthropic_api_key', anthropicKeyEl.value.trim());
   localStorage.setItem('fal_api_key', falKeyEl.value.trim());
   localStorage.setItem('elevenlabs_api_key', elevenKeyEl.value.trim());
+  localStorage.setItem('cloudinary_preset', document.getElementById('cloudinaryPreset')?.value.trim() || '');
+  localStorage.setItem('make_webhook', document.getElementById('makeWebhook')?.value.trim() || '');
   setStatus('All keys saved locally', 'success');
   setTimeout(() => setStatus(''), 2000);
 };
@@ -980,6 +1030,8 @@ function loadKeys() {
   anthropicKeyEl.value = localStorage.getItem('anthropic_api_key') || '';
   falKeyEl.value = localStorage.getItem('fal_api_key') || '';
   elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
+  const cpEl = document.getElementById('cloudinaryPreset'); if (cpEl) cpEl.value = localStorage.getItem('cloudinary_preset') || '';
+  const mwEl = document.getElementById('makeWebhook'); if (mwEl && !mwEl.value) mwEl.value = localStorage.getItem('make_webhook') || 'https://hook.us2.make.com/vz7tdtaf6l8h1jx3q1ivt4s9qglrutle';
 }
 
 // =========================================================
@@ -2265,6 +2317,7 @@ async function runPlayback(record) {
     currentBlob = new Blob(chunks, { type: mimeType });
     currentExt = ext;
     $('downloadBtn').disabled = false;
+  const schedBtn = document.getElementById('scheduleBtn'); if (schedBtn) schedBtn.disabled = false;
     setStatus(`Done · ${(currentBlob.size / 1024 / 1024).toFixed(1)} MB · ${ext.toUpperCase()}`, 'success');
   } else {
     setStatus('');
@@ -3415,6 +3468,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Default: variety
   setCalMode('variety');
+});
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  CLOUDINARY UPLOAD + MAKE.COM SCHEDULE
+// ═══════════════════════════════════════════════════════════════════════════════
+const CLOUDINARY_CLOUD = 'dpqcljia';
+
+async function uploadToCloudinary(videoBlob, preset) {
+  const formData = new FormData();
+  formData.append('file', videoBlob, 'video.mp4');
+  formData.append('upload_preset', preset);
+  formData.append('folder', 'darkpsycho');
+  formData.append('resource_type', 'video');
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`, {
+    method: 'POST',
+    body: formData
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error('Cloudinary: ' + (err.error?.message || res.statusText));
+  }
+  const data = await res.json();
+  return data.secure_url;
+}
+
+async function sendToMake(payload, webhookUrl) {
+  const res = await fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('Make.com webhook failed: ' + res.statusText);
+}
+
+// Open schedule modal
+function openScheduleModal() {
+  if (!currentBlob) return;
+
+  // Pre-fill caption from generated script
+  const captionEl = document.getElementById('schedCaption');
+  if (captionEl && script?.caption) captionEl.value = script.caption;
+
+  // Default schedule: next round hour
+  const timeEl = document.getElementById('schedTime');
+  if (timeEl) {
+    const now = new Date();
+    now.setHours(now.getHours() + 1, 0, 0, 0);
+    // Format for datetime-local input
+    const pad = n => String(n).padStart(2, '0');
+    timeEl.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:00`;
+  }
+
+  document.getElementById('schedStatus').textContent = '';
+  const modal = document.getElementById('scheduleModal');
+  modal.style.display = 'flex';
+}
+
+// Close modal
+function closeScheduleModal() {
+  document.getElementById('scheduleModal').style.display = 'none';
+}
+
+// Execute upload + schedule
+async function executeSchedule() {
+  const preset = document.getElementById('cloudinaryPreset')?.value.trim();
+  const webhook = document.getElementById('makeWebhook')?.value.trim();
+  const caption = document.getElementById('schedCaption')?.value.trim();
+  const schedTime = document.getElementById('schedTime')?.value;
+  const platforms = [];
+  if (document.getElementById('platTikTok')?.checked) platforms.push('tiktok');
+  if (document.getElementById('platInstagram')?.checked) platforms.push('instagram');
+  if (document.getElementById('platYouTube')?.checked) platforms.push('youtube');
+
+  if (!preset) { document.getElementById('schedStatus').textContent = '⚠ Add Cloudinary upload preset in API Keys (Section 1)'; return; }
+  if (!webhook) { document.getElementById('schedStatus').textContent = '⚠ Add Make.com webhook URL in API Keys (Section 1)'; return; }
+  if (!schedTime) { document.getElementById('schedStatus').textContent = '⚠ Set a schedule time'; return; }
+  if (platforms.length === 0) { document.getElementById('schedStatus').textContent = '⚠ Select at least one platform'; return; }
+  if (!currentBlob) { document.getElementById('schedStatus').textContent = '⚠ Record a video first'; return; }
+
+  const confirmBtn = document.getElementById('schedConfirmBtn');
+  confirmBtn.disabled = true;
+  const bar = document.getElementById('schedProgressBar');
+
+  try {
+    // Step 1: Upload to Cloudinary
+    document.getElementById('schedStatus').textContent = '☁️ Uploading to Cloudinary…';
+    bar.style.width = '30%';
+    const videoUrl = await uploadToCloudinary(currentBlob, preset);
+    bar.style.width = '70%';
+
+    // Step 2: Send to Make.com
+    document.getElementById('schedStatus').textContent = '📡 Sending to Make.com…';
+    const payload = {
+      video_url: videoUrl,
+      caption: caption || '',
+      title: script?.mainTitle || 'Dark Psycho Video',
+      platforms,
+      schedule_time: new Date(schedTime).toISOString(),
+      hashtags: script?.hashtags?.map(h => '#' + h).join(' ') || '',
+      keywords: script?.keywords || []
+    };
+    await sendToMake(payload, webhook);
+    bar.style.width = '100%';
+
+    document.getElementById('schedStatus').textContent = `✅ Scheduled for ${new Date(schedTime).toLocaleString()} on ${platforms.join(', ')}!`;
+    setTimeout(() => closeScheduleModal(), 3000);
+  } catch (err) {
+    document.getElementById('schedStatus').textContent = '❌ ' + err.message;
+    bar.style.width = '0';
+  } finally {
+    confirmBtn.disabled = false;
+  }
+}
+
+// Wire schedule buttons
+document.addEventListener('DOMContentLoaded', () => {
+  const schedBtn = document.getElementById('scheduleBtn');
+  const cancelBtn = document.getElementById('schedCancelBtn');
+  const confirmBtn = document.getElementById('schedConfirmBtn');
+  if (schedBtn) schedBtn.onclick = openScheduleModal;
+  if (cancelBtn) cancelBtn.onclick = closeScheduleModal;
+  if (confirmBtn) confirmBtn.onclick = executeSchedule;
+
+  // Close on backdrop click
+  document.getElementById('scheduleModal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('scheduleModal')) closeScheduleModal();
+  });
 });
 
 
