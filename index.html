@@ -402,8 +402,8 @@
             <input type="text" id="cloudinaryPreset" placeholder="Upload preset name (unsigned)" autocomplete="off">
           </div>
           <div class="api-row">
-            <div class="api-label">Make.com</div>
-            <input type="text" id="makeWebhook" placeholder="https://hook.us2.make.com/…" autocomplete="off" value="https://hook.us2.make.com/vz7tdtaf6l8h1jx3q1ivt4s9qglrutle">
+            <div class="api-label">Ayrshare</div>
+            <input type="password" id="ayrshareKey" placeholder="Ayrshare API key" autocomplete="off">
           </div>
         </div>
         <button id="saveKeys" class="secondary">Save All Keys Locally</button>
@@ -1021,7 +1021,7 @@ $('saveKeys').onclick = () => {
   localStorage.setItem('fal_api_key', falKeyEl.value.trim());
   localStorage.setItem('elevenlabs_api_key', elevenKeyEl.value.trim());
   localStorage.setItem('cloudinary_preset', document.getElementById('cloudinaryPreset')?.value.trim() || '');
-  localStorage.setItem('make_webhook', document.getElementById('makeWebhook')?.value.trim() || '');
+  localStorage.setItem('ayrshare_key', document.getElementById('ayrshareKey')?.value.trim() || '');
   setStatus('All keys saved locally', 'success');
   setTimeout(() => setStatus(''), 2000);
 };
@@ -1031,7 +1031,7 @@ function loadKeys() {
   falKeyEl.value = localStorage.getItem('fal_api_key') || '';
   elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
   const cpEl = document.getElementById('cloudinaryPreset'); if (cpEl) cpEl.value = localStorage.getItem('cloudinary_preset') || '';
-  const mwEl = document.getElementById('makeWebhook'); if (mwEl && !mwEl.value) mwEl.value = localStorage.getItem('make_webhook') || 'https://hook.us2.make.com/vz7tdtaf6l8h1jx3q1ivt4s9qglrutle';
+  const ayEl = document.getElementById('ayrshareKey'); if (ayEl) ayEl.value = localStorage.getItem('ayrshare_key') || '';
 }
 
 // =========================================================
@@ -3496,13 +3496,26 @@ async function uploadToCloudinary(videoBlob, preset) {
   return data.secure_url;
 }
 
-async function sendToMake(payload, webhookUrl) {
-  const res = await fetch(webhookUrl, {
+async function postViaAyrshare(videoUrl, caption, platforms, scheduleDate, apiKey) {
+  const body = {
+    post: caption,
+    platforms,
+    mediaUrls: [videoUrl],
+    isVideo: true
+  };
+  if (scheduleDate) body.scheduleDate = scheduleDate;
+
+  const res = await fetch('https://app.ayrshare.com/api/post', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey
+    },
+    body: JSON.stringify(body)
   });
-  if (!res.ok) throw new Error('Make.com webhook failed: ' + res.statusText);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error('Ayrshare: ' + (data.message || data.error || res.statusText));
+  return data;
 }
 
 // Open schedule modal
@@ -3536,7 +3549,7 @@ function closeScheduleModal() {
 // Execute upload + schedule
 async function executeSchedule() {
   const preset = document.getElementById('cloudinaryPreset')?.value.trim();
-  const webhook = document.getElementById('makeWebhook')?.value.trim();
+  const ayrshareKey = document.getElementById('ayrshareKey')?.value.trim();
   const caption = document.getElementById('schedCaption')?.value.trim();
   const schedTime = document.getElementById('schedTime')?.value;
   const platforms = [];
@@ -3544,8 +3557,8 @@ async function executeSchedule() {
   if (document.getElementById('platInstagram')?.checked) platforms.push('instagram');
   if (document.getElementById('platYouTube')?.checked) platforms.push('youtube');
 
-  if (!preset) { document.getElementById('schedStatus').textContent = '⚠ Add Cloudinary upload preset in API Keys (Section 1)'; return; }
-  if (!webhook) { document.getElementById('schedStatus').textContent = '⚠ Add Make.com webhook URL in API Keys (Section 1)'; return; }
+  if (!preset) { document.getElementById('schedStatus').textContent = '⚠ Add Cloudinary upload preset in API Keys'; return; }
+  if (!ayrshareKey) { document.getElementById('schedStatus').textContent = '⚠ Add Ayrshare API key in API Keys'; return; }
   if (!schedTime) { document.getElementById('schedStatus').textContent = '⚠ Set a schedule time'; return; }
   if (platforms.length === 0) { document.getElementById('schedStatus').textContent = '⚠ Select at least one platform'; return; }
   if (!currentBlob) { document.getElementById('schedStatus').textContent = '⚠ Record a video first'; return; }
@@ -3557,25 +3570,19 @@ async function executeSchedule() {
   try {
     // Step 1: Upload to Cloudinary
     document.getElementById('schedStatus').textContent = '☁️ Uploading to Cloudinary…';
-    bar.style.width = '30%';
+    bar.style.width = '35%';
     const videoUrl = await uploadToCloudinary(currentBlob, preset);
     bar.style.width = '70%';
 
-    // Step 2: Send to Make.com
-    document.getElementById('schedStatus').textContent = '📡 Sending to Make.com…';
-    const payload = {
-      video_url: videoUrl,
-      caption: caption || '',
-      title: script?.mainTitle || 'Dark Psycho Video',
-      platforms,
-      schedule_time: new Date(schedTime).toISOString(),
-      hashtags: script?.hashtags?.map(h => '#' + h).join(' ') || '',
-      keywords: script?.keywords || []
-    };
-    await sendToMake(payload, webhook);
+    // Step 2: Post via Ayrshare
+    document.getElementById('schedStatus').textContent = '📡 Scheduling via Ayrshare…';
+    const fullCaption = [caption, script?.hashtags?.map(h => '#'+h).join(' ')].filter(Boolean).join('\n\n');
+    const schedISO = new Date(schedTime).toISOString();
+    await postViaAyrshare(videoUrl, fullCaption, platforms, schedISO, ayrshareKey);
     bar.style.width = '100%';
 
-    document.getElementById('schedStatus').textContent = `✅ Scheduled for ${new Date(schedTime).toLocaleString()} on ${platforms.join(', ')}!`;
+    const timeStr = new Date(schedTime).toLocaleString('en-PH', { dateStyle:'medium', timeStyle:'short' });
+    document.getElementById('schedStatus').textContent = `✅ Scheduled for ${timeStr} on ${platforms.join(' + ')}!`;
     setTimeout(() => closeScheduleModal(), 3000);
   } catch (err) {
     document.getElementById('schedStatus').textContent = '❌ ' + err.message;
