@@ -407,6 +407,10 @@
             <input type="text" id="cloudinaryPreset" placeholder="Upload preset name (unsigned)" autocomplete="off">
           </div>
           <div class="api-row">
+            <div class="api-label">Make.com</div>
+            <input type="text" id="makeWebhook" placeholder="https://hook.us2.make.com/…" autocomplete="off" value="https://hook.us2.make.com/vz7tdtaf6l8h1jx3q1ivt4s9qglrutle">
+          </div>
+          <div class="api-row">
             <div class="api-label">Ayrshare</div>
             <input type="password" id="ayrshareKey" placeholder="Ayrshare API key" autocomplete="off">
           </div>
@@ -1051,6 +1055,7 @@ $('saveKeys').onclick = () => {
   localStorage.setItem('fal_api_key', falKeyEl.value.trim());
   localStorage.setItem('elevenlabs_api_key', elevenKeyEl.value.trim());
   localStorage.setItem('cloudinary_cloud', document.getElementById('cloudinaryCloud')?.value.trim() || '');
+  localStorage.setItem('make_webhook', document.getElementById('makeWebhook')?.value.trim() || '');
   localStorage.setItem('cloudinary_preset', document.getElementById('cloudinaryPreset')?.value.trim() || '');
   localStorage.setItem('ayrshare_key', document.getElementById('ayrshareKey')?.value.trim() || '');
   setStatus('All keys saved locally', 'success');
@@ -1061,6 +1066,7 @@ function loadKeys() {
   anthropicKeyEl.value = localStorage.getItem('anthropic_api_key') || '';
   falKeyEl.value = localStorage.getItem('fal_api_key') || '';
   elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
+  const mwEl = document.getElementById('makeWebhook'); if (mwEl && !mwEl.value) mwEl.value = localStorage.getItem('make_webhook') || 'https://hook.us2.make.com/vz7tdtaf6l8h1jx3q1ivt4s9qglrutle';
   const ccEl = document.getElementById('cloudinaryCloud'); if (ccEl) ccEl.value = localStorage.getItem('cloudinary_cloud') || '';
   const cpEl = document.getElementById('cloudinaryPreset'); if (cpEl) cpEl.value = localStorage.getItem('cloudinary_preset') || '';
   const ayEl = document.getElementById('ayrshareKey'); if (ayEl) ayEl.value = localStorage.getItem('ayrshare_key') || '';
@@ -3566,9 +3572,14 @@ async function postViaAyrshare(videoUrl, caption, platforms, scheduleDate, apiKe
 function openScheduleModal() {
   if (!currentBlob) return;
 
-  // Pre-fill caption from generated script
+  // Pre-fill caption + hashtags from generated script
   const captionEl = document.getElementById('schedCaption');
-  if (captionEl && script?.caption) captionEl.value = script.caption;
+  if (captionEl) {
+    const parts = [];
+    if (script?.caption) parts.push(script.caption);
+    if (script?.hashtags?.length) parts.push(script.hashtags.map(h => '#' + h).join(' '));
+    captionEl.value = parts.join('\n\n');
+  }
 
   // Default schedule: next round hour
   const timeEl = document.getElementById('schedTime');
