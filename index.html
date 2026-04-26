@@ -767,11 +767,12 @@
               <input type="range" id="subsOffset" min="-1" max="1" step="0.05" value="0">
             </div>
             <div class="subs-toggle-row" style="border:none;padding:4px 0 0;">
-              <span class="subs-toggle-label">ALL CAPS</span>
-              <label class="toggle-switch">
-                <input type="checkbox" id="subsAllCaps" checked>
-                <div class="toggle-track"></div>
-              </label>
+              <span class="subs-toggle-label">Text Case</span>
+              <select id="subsCase" style="background:#0d0d0d;border:1px solid #252525;color:#e5e5e5;padding:5px 10px;border-radius:6px;font-size:11px;font-family:inherit;">
+                <option value="upper" selected>ALL CAPS</option>
+                <option value="lower">all lowercase</option>
+                <option value="original">Original</option>
+              </select>
             </div>
           </div>
         </details>
@@ -1586,7 +1587,7 @@ function drawSubtitle(text, alpha) {
   const fontFamily = document.getElementById('subsFont')?.value || "'Inter', sans-serif";
   const isMono = fontFamily.includes('Special Elite') || fontFamily.includes('Courier') || fontFamily.includes('Kalam') || fontFamily.includes('Caveat') || fontFamily.includes('Marker');
   const weight = isMono ? 700 : 900;
-  const allCaps = document.getElementById('subsAllCaps')?.checked !== false;
+  const subsCase = document.getElementById('subsCase')?.value || 'upper';
   const bgEnabled = document.getElementById('subsBgEnabled')?.checked;
   const bgColor = document.getElementById('subsBgColor')?.value || '#000000';
   const bgOpacity = parseInt(document.getElementById('subsBgOpacity')?.value ?? 60) / 100;
@@ -1597,7 +1598,7 @@ function drawSubtitle(text, alpha) {
 
   const maxWidth = W - 80;
   const stripped = text.replace(/[.,:;!?"'''…\-–—()\[\]]/g, '').trim();
-  const displayText = allCaps ? stripped.toUpperCase() : stripped;
+  const displayText = subsCase === 'upper' ? stripped.toUpperCase() : subsCase === 'lower' ? stripped.toLowerCase() : stripped;
   const lines = wrapText(displayText, maxWidth);
   const lineHeight = fontSize * 1.2;
   const blockH = lineHeight * lines.length;
@@ -1662,12 +1663,13 @@ function drawHighlightSubtitle(words, spokenCount, alpha) {
   const posPct = parseInt(subsPosEl.value) / 100;
   const color = subsColorEl.value;
   const fontFamily = document.getElementById('subsFont')?.value || "'Inter', sans-serif";
-  const allCaps = document.getElementById('subsAllCaps')?.checked !== false;
+  const subsCase = document.getElementById('subsCase')?.value || 'upper';
   const weight = fontWeightFor(fontFamily, 900);
   ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
   ctx.textBaseline = 'middle';
   words = words.map(w => w.replace(/[.,:;!?"'''…\-–—()\[\]]/g, '').trim()).filter(w => w);
-  if (allCaps) words = words.map(w => w.toUpperCase());
+  if (subsCase === 'upper') words = words.map(w => w.toUpperCase());
+  else if (subsCase === 'lower') words = words.map(w => w.toLowerCase());
 
   // Layout words across multiple lines, word-wrap-aware
   const maxWidth = W - 80;
@@ -3085,7 +3087,7 @@ function applySubsPreset(name) {
   set('subsWords', p.words);
   set('subsSize', p.size);
   set('subsPos', p.pos);
-  set('subsAllCaps', p.allCaps, 'checked');
+  const sc = document.getElementById('subsCase'); if (sc) sc.value = p.allCaps ? 'upper' : 'original';
   set('subsBgEnabled', p.bgEnabled, 'checked');
   set('subsBgColor', p.bgColor);
   set('subsBgOpacity', p.bgOpacity);
@@ -3143,7 +3145,7 @@ if (subsBgEnabledEl) {
 }
 
 // All other subs controls
-['subsStyle','subsWords','subsFont','subsAllCaps','subsEnabled'].forEach(id => {
+['subsStyle','subsWords','subsFont','subsAllCaps','subsEnabled','subsCase'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', drawStaticPreview);
 });
