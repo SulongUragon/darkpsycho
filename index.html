@@ -1226,21 +1226,26 @@ function buildWordTimings(alignment) {
   const result = [];
   let wordChars = '';
   let wordStart = null;
+  let wordEnd = null;
+
+  const flush = () => {
+    const w = wordChars.replace(/[.,!?;:'"\-–—]/g, '').trim();
+    if (w) result.push({ word: w, start: wordStart, end: wordEnd });
+    wordChars = ''; wordStart = null; wordEnd = null;
+  };
+
   for (let i = 0; i < chars.length; i++) {
     const ch = chars[i];
-    if (!ch || ch === ' ' || ch === '\n' || ch === '\r') {
-      if (wordChars.trim()) {
-        result.push({ word: wordChars.trim(), start: wordStart, end: ends[i - 1] ?? (starts[i] || 0) });
-      }
-      wordChars = ''; wordStart = null;
+    const isSep = !ch || ch === ' ' || ch === '\n' || ch === '\r' || ch === '\t';
+    if (isSep) {
+      if (wordChars) flush();
     } else {
-      if (wordStart === null) wordStart = starts[i];
+      if (wordStart === null) wordStart = starts[i] ?? 0;
+      wordEnd = ends[i] ?? starts[i] ?? 0;
       wordChars += ch;
     }
   }
-  if (wordChars.trim()) {
-    result.push({ word: wordChars.trim(), start: wordStart, end: ends[ends.length - 1] });
-  }
+  if (wordChars) flush();
   return result.length ? result : null;
 }
 
@@ -1528,17 +1533,20 @@ function drawSceneCaption(text, alpha, position = 'bottom') {
 
 function getChunkFromWordTimings(timings, tInScene, wordsPerChunk) {
   if (!timings || timings.length === 0) return null;
-  // Before speech starts — show nothing
-  if (tInScene < (timings[0].start - 0.05)) return '';
-  // After last word
-  if (tInScene > timings[timings.length - 1].end + 0.1) return timings[timings.length - 1].word;
-  // Find active word index
+  // Before speech starts
+  if (tInScene < (timings[0].start - 0.08)) return '';
+  // After speech ends — keep last chunk visible
+  const last = timings[timings.length - 1];
+  if (tInScene > last.end + 0.15) {
+    const lastChunkStart = Math.floor((timings.length - 1) / wordsPerChunk) * wordsPerChunk;
+    return timings.slice(lastChunkStart, lastChunkStart + wordsPerChunk).map(t => t.word).join(' ');
+  }
+  // Find last word that has started — scan ALL, no early break
   let activeIdx = 0;
   for (let i = 0; i < timings.length; i++) {
     if (tInScene >= timings[i].start) activeIdx = i;
-    else break;
   }
-  // Get chunk containing active word
+  // Show the chunk containing the active word
   const chunkStart = Math.floor(activeIdx / wordsPerChunk) * wordsPerChunk;
   return timings.slice(chunkStart, chunkStart + wordsPerChunk).map(t => t.word).join(' ');
 }
