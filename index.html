@@ -1858,14 +1858,8 @@ function drawScene(sceneIdx, tInScene, sceneDuration) {
     }
   }
 
-  // Scene indicator (bottom right)
-  ctx.save();
-  ctx.fillStyle = `rgba(255,255,255,${0.5 * fade})`;
-  ctx.font = `600 20px 'Inter', sans-serif`;
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'bottom';
-  ctx.fillText(`${sceneIdx + 1} / ${script.scenes.length}`, W - 40, H - 40);
-  ctx.restore();
+  // Draw logo watermark bottom center
+  drawLogoWatermark(fade);
 }
 
 function drawStaticPreview() {
@@ -4067,6 +4061,37 @@ if (zoomIntensityEl) {
 
 
 
+
+// ── Logo Watermark ────────────────────────────────────────────────────────────
+let _logoImg = null;
+function ensureLogoImg() {
+  if (_logoImg) return;
+  // Grab logo from the header img tag
+  const headerImg = document.querySelector('header img');
+  if (headerImg && headerImg.complete) {
+    _logoImg = headerImg;
+  } else if (headerImg) {
+    headerImg.onload = () => { _logoImg = headerImg; };
+  }
+}
+
+function drawLogoWatermark(alpha) {
+  ensureLogoImg();
+  if (!_logoImg) return;
+  const size = 48;
+  const x = W/2 - size/2;
+  const y = H - size - 28;
+  ctx.save();
+  ctx.globalAlpha = (alpha || 1) * 0.5;
+  // Circular clip
+  ctx.beginPath();
+  ctx.arc(W/2, y + size/2, size/2, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.drawImage(_logoImg, x, y, size, size);
+  ctx.restore();
+}
+
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  ANIMATED BACKGROUNDS FOR QUOTES MODE
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -4344,11 +4369,8 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   ctx.beginPath(); ctx.moveTo(80, H*0.72); ctx.lineTo(W-80, H*0.72); ctx.stroke();
 
   // Scene counter
-  ctx.font = `600 20px 'Inter', sans-serif`;
-  ctx.fillStyle = `rgba(255,255,255,0.35)`;
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'bottom';
-  ctx.fillText(`${sceneIdx + 1} / ${script.scenes.length}`, W - 40, H - 40);
+  // Draw logo watermark bottom center
+  drawLogoWatermark(fade);
 
   ctx.restore();
 
