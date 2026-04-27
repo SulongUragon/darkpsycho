@@ -491,6 +491,7 @@
               <option value="'Anton', sans-serif">Anton</option>
               <option value="'Archivo Black', sans-serif">Archivo Black</option>
               <option value="'Inter', sans-serif">Inter 900</option>
+              <option value="'Special Elite', monospace">Special Elite (typewriter)</option>
               <option value="'Permanent Marker', cursive">Permanent Marker</option>
               <option value="'Caveat', cursive">Caveat (handwritten)</option>
               <option value="'Kalam', cursive">Kalam (handwritten)</option>
@@ -691,6 +692,20 @@
             <div class="slider-row">
               <input type="range" id="zoomIntensity" min="2" max="25" value="25">
               <span class="slider-val" id="zoomIntensityDisplay">8%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Title Line Spacing (<span id="titleLineSpacingVal">1.05</span>)</label>
+            <div class="slider-row">
+              <input type="range" id="titleLineSpacing" min="80" max="180" value="105">
+              <span class="slider-val" id="titleLineSpacingDisplay">1.05</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Title Letter Spacing (<span id="titleLetterSpacingVal">0px</span>)</label>
+            <div class="slider-row">
+              <input type="range" id="titleLetterSpacing" min="-5" max="30" value="0">
+              <span class="slider-val" id="titleLetterSpacingDisplay">0px</span>
             </div>
           </div>
           <div class="field">
@@ -1513,7 +1528,9 @@ function drawMainTitle(text, alpha) {
     ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
     lines = wrapText(text.toUpperCase(), maxWidth);
   }
-  const lineHeight = fontSize * 1.05;
+  const lineSpacingMult = (parseInt(document.getElementById('titleLineSpacing')?.value) || 105) / 100;
+  const letterSpacingPx = parseInt(document.getElementById('titleLetterSpacing')?.value) || 0;
+  const lineHeight = fontSize * lineSpacingMult;
   const blockH = lineHeight * lines.length;
   const isBottom = titlePosEl.value === 'bottom';
   const yStart = isBottom ? H - blockH - 70 : 80;
@@ -1528,7 +1545,9 @@ function drawMainTitle(text, alpha) {
   ctx.fillStyle = color === '#ffffff' ? `rgba(255,255,255,${alpha})` : color === '#8b0000' ? `rgba(139,0,0,${alpha})` : `rgba(0,0,0,${alpha})`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
+  ctx.letterSpacing = letterSpacingPx + 'px';
   lines.forEach((line, i) => ctx.fillText(line, W/2, yStart + i * lineHeight));
+  ctx.letterSpacing = '0px';
   ctx.restore();
 }
 
@@ -4014,6 +4033,26 @@ document.getElementById('copyUrlBtn')?.addEventListener('click', () => {
   });
 });
 
+
+// Title spacing sliders
+const titleLineSpacingEl = document.getElementById('titleLineSpacing');
+if (titleLineSpacingEl) {
+  titleLineSpacingEl.addEventListener('input', () => {
+    const v = (parseInt(titleLineSpacingEl.value)/100).toFixed(2);
+    const d = document.getElementById('titleLineSpacingVal'); if (d) d.textContent = v;
+    const d2 = document.getElementById('titleLineSpacingDisplay'); if (d2) d2.textContent = v;
+    drawStaticPreview();
+  });
+}
+const titleLetterSpacingEl = document.getElementById('titleLetterSpacing');
+if (titleLetterSpacingEl) {
+  titleLetterSpacingEl.addEventListener('input', () => {
+    const v = titleLetterSpacingEl.value + 'px';
+    const d = document.getElementById('titleLetterSpacingVal'); if (d) d.textContent = v;
+    const d2 = document.getElementById('titleLetterSpacingDisplay'); if (d2) d2.textContent = v;
+    drawStaticPreview();
+  });
+}
 
 // Zoom intensity slider
 const zoomIntensityEl = document.getElementById('zoomIntensity');
