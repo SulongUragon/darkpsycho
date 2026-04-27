@@ -4156,6 +4156,9 @@ function setContentMode(mode) {
   contentMode = mode;
   const bgRow = document.getElementById('quoteBgRow');
   if (bgRow) bgRow.style.display = mode === 'quotes' ? 'block' : 'none';
+  // Auto-toggle subtitles: off for quotes (text already shown big), on for listicle
+  const subsToggle = document.getElementById('subsEnabled');
+  if (subsToggle) subsToggle.checked = mode !== 'quotes';
   const lb = document.getElementById('modeListicle');
   const qb = document.getElementById('modeQuotes');
   if (lb) lb.className = 'cal-btn' + (mode === 'listicle' ? ' primary' : '');
@@ -4196,6 +4199,7 @@ RULES:
 - No quotation marks inside the quote field
 - Each quote must be distinctly different angle on the topic
 - imagePrompt must be vivid and cinematic — match the emotional tone of the quote
+- NEVER use long dashes (—), em dashes, hyphens, or any dash characters in the quote text
 - NO MARKDOWN. Raw JSON only.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
