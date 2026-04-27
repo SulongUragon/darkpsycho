@@ -662,6 +662,23 @@
             </div>
           </div>
           <div class="field">
+            <label>Camera Movement</label>
+            <select id="zoomStyle">
+              <option value="in">Zoom In (slow push)</option>
+              <option value="out">Zoom Out (pull back)</option>
+              <option value="alternate" selected>Alternate (in/out per scene)</option>
+              <option value="pulse">Pulse (breathe in/out)</option>
+              <option value="none">None (static)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Zoom Intensity (<span id="zoomIntensityVal">8%</span>)</label>
+            <div class="slider-row">
+              <input type="range" id="zoomIntensity" min="2" max="25" value="8">
+              <span class="slider-val" id="zoomIntensityDisplay">8%</span>
+            </div>
+          </div>
+          <div class="field">
             <label>Darken illustration (<span id="darkenVal">15%</span>)</label>
             <input type="range" id="darken" min="0" max="70" value="15">
           </div>
@@ -1751,8 +1768,28 @@ function drawScene(sceneIdx, tInScene, sceneDuration) {
   const img = images[sceneIdx];
   // Fade in first 0.35s
   const fade = Math.min(1, tInScene / 0.35);
-  // Ken Burns: zoom 1.0 → 1.06
-  const zoom = 1 + 0.06 * (tInScene / Math.max(1, sceneDuration));
+  // Camera movement
+  const zoomStyle = document.getElementById('zoomStyle')?.value || 'alternate';
+  const zoomIntensity = (parseInt(document.getElementById('zoomIntensity')?.value) || 8) / 100;
+  const progress = Math.min(1, tInScene / Math.max(0.5, sceneDuration));
+  let zoom = 1;
+  if (zoomStyle === 'none') {
+    zoom = 1;
+  } else if (zoomStyle === 'in') {
+    zoom = 1 + zoomIntensity * progress;
+  } else if (zoomStyle === 'out') {
+    zoom = (1 + zoomIntensity) - zoomIntensity * progress;
+  } else if (zoomStyle === 'alternate') {
+    // Alternate per scene: even scenes zoom in, odd scenes zoom out
+    const isEven = sceneIdx % 2 === 0;
+    zoom = isEven
+      ? 1 + zoomIntensity * progress
+      : (1 + zoomIntensity) - zoomIntensity * progress;
+  } else if (zoomStyle === 'pulse') {
+    // Smooth breathe: zoom in first half, zoom out second half
+    const t = progress < 0.5 ? progress * 2 : (1 - progress) * 2;
+    zoom = 1 + zoomIntensity * t;
+  }
   drawIllustration(img, zoom, fade);
   drawMainTitle(script.mainTitle, fade);
   const capPos = (titlePosEl.value === 'bottom') ? 'top' : 'bottom';
@@ -2656,7 +2693,7 @@ $('downloadBtn').onclick = async () => {
 };
 
 // Live style updates
-[titleFontEl, titleColorEl, titlePosEl, captionColorEl, subsEnabledEl, subsWordsEl, subsColorEl].forEach(el =>
+[titleFontEl, titleColorEl, titlePosEl, captionColorEl, subsEnabledEl, subsWordsEl, subsColorEl, document.getElementById('zoomStyle')].forEach(el =>
   el.addEventListener('change', drawStaticPreview)
 );
 $('subsFont').addEventListener('change', drawStaticPreview);
@@ -3933,6 +3970,17 @@ document.getElementById('copyUrlBtn')?.addEventListener('click', () => {
   });
 });
 
+
+// Zoom intensity slider
+const zoomIntensityEl = document.getElementById('zoomIntensity');
+if (zoomIntensityEl) {
+  zoomIntensityEl.addEventListener('input', () => {
+    const v = zoomIntensityEl.value + '%';
+    const d = document.getElementById('zoomIntensityVal'); if (d) d.textContent = v;
+    const d2 = document.getElementById('zoomIntensityDisplay'); if (d2) d2.textContent = v;
+    drawStaticPreview();
+  });
+}
 
 // Init
 function init() {
