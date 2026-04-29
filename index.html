@@ -2700,6 +2700,7 @@ async function runPlayback(record) {
   let recorder = null;
   let chunks = [];
   let audioDest = null;
+  let audioRecordTarget = null; // mono mixer in front of audioDest when recording
   let mimeType = '';
   let ext = 'webm';
 
@@ -2745,6 +2746,17 @@ async function runPlayback(record) {
     else ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
     canvasStream = canvas.captureStream(30);
     audioDest = audioCtx.createMediaStreamDestination();
+    // Force mono downmix BEFORE reaching the recorder. This guarantees L === R
+    // in the MP4, which prevents "audio overlap" symptoms when external editors
+    // (CapCut, TikTok) downmix stereo to mono — if L != R, the downmix would
+    // sum two different signals and sound like an echo/overlap. With this
+    // mixer, both channels carry identical content.
+    const monoMixer = audioCtx.createGain();
+    monoMixer.channelCount = 1;
+    monoMixer.channelCountMode = 'explicit';
+    monoMixer.channelInterpretation = 'speakers';
+    monoMixer.connect(audioDest);
+    audioRecordTarget = monoMixer;
     const audioTrack = audioDest.stream.getAudioTracks()[0];
     if (audioTrack) canvasStream.addTrack(audioTrack);
     recorder = new MediaRecorder(canvasStream, { mimeType, videoBitsPerSecond: 6_000_000 });
@@ -2762,8 +2774,10 @@ async function runPlayback(record) {
   if (audioCtx.state === 'suspended') {
     try { await audioCtx.resume(); } catch (e) {}
   }
-  // Start audio
-  const { sources, monitorEl } = playAudioSequence(audioCtx, audioDest);
+  // Start audio — pass the mono mixer (when recording) so the recorded track
+  // is forced to mono. This prevents L/R divergence that downstream editors
+  // (CapCut, TikTok) would interpret as "audio overlap" after their downmix.
+  const { sources, monitorEl } = playAudioSequence(audioCtx, audioRecordTarget);
   if (record) recorder.start(100);
   const start = performance.now();
 
