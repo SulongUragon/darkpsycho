@@ -14,7 +14,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Montserrat:wght@800;900&family=Anton&family=Archivo+Black&family=Special+Elite&family=Caveat:wght@500;700&family=Permanent+Marker&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Montserrat:wght@800;900&family=Anton&family=Archivo+Black&family=Special+Elite&family=Cutive+Mono&family=Share+Tech+Mono&family=VT323&family=Nixie+One&family=Caveat:wght@500;700&family=Permanent+Marker&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -993,6 +993,17 @@
                 <option value="'Kalam', cursive">Kalam (handwritten)</option>
               </select>
             </div>
+            <div class="field" id="typewriterFontStyleRow" style="display:none">
+              <label>Typewriter Style</label>
+              <select id="typewriterFontStyle">
+                <option value="'Special Elite', monospace" selected>Special Elite — Worn Keys</option>
+                <option value="'Courier New', Courier, monospace">Courier New — Classic</option>
+                <option value="'Cutive Mono', monospace">Cutive Mono — Clean Mono</option>
+                <option value="'Share Tech Mono', monospace">Share Tech Mono — Tech Mono</option>
+                <option value="'VT323', monospace">VT323 — Pixel Terminal</option>
+                <option value="'Nixie One', monospace">Nixie One — Elegant Type</option>
+              </select>
+            </div>
             <div class="subs-row">
               <div class="field">
                 <label>Color</label>
@@ -1764,7 +1775,7 @@ function fontWeightFor(fontFamily, defaultWeight = 900) {
   if (fontFamily.includes('Permanent Marker')) return 400;
   if (fontFamily.includes('Caveat')) return 700;
   if (fontFamily.includes('Kalam')) return 700;
-  if (fontFamily.includes('Special Elite') || fontFamily.includes('Courier')) return 700;
+  if (fontFamily.includes('Special Elite') || fontFamily.includes('Courier') || fontFamily.includes('Cutive') || fontFamily.includes('Share Tech') || fontFamily.includes('VT323') || fontFamily.includes('Nixie')) return 700;
   return defaultWeight;
 }
 
@@ -1957,8 +1968,12 @@ function drawSubtitle(text, alpha) {
   const color = document.getElementById('subsColor')?.value || '#ffffff';
   const strokeColor = document.getElementById('subsStrokeColor')?.value || '#000000';
   const strokeWeight = parseInt(document.getElementById('subsStroke')?.value ?? 12);
-  const fontFamily = document.getElementById('subsFont')?.value || "'Inter', sans-serif";
-  const isMono = fontFamily.includes('Special Elite') || fontFamily.includes('Courier') || fontFamily.includes('Kalam') || fontFamily.includes('Caveat') || fontFamily.includes('Marker');
+  let fontFamily = document.getElementById('subsFont')?.value || "'Inter', sans-serif";
+  // If a typewriter font is selected in subsFont, use the typewriterFontStyle variant instead
+  if (fontFamily.includes('Special Elite') || fontFamily.includes('Courier')) {
+    fontFamily = document.getElementById('typewriterFontStyle')?.value || fontFamily;
+  }
+  const isMono = fontFamily.includes('Special Elite') || fontFamily.includes('Courier') || fontFamily.includes('Cutive') || fontFamily.includes('Share Tech') || fontFamily.includes('VT323') || fontFamily.includes('Nixie') || fontFamily.includes('Kalam') || fontFamily.includes('Caveat') || fontFamily.includes('Marker');
   const weight = isMono ? 700 : 900;
   const subsCase = document.getElementById('subsCase')?.value || 'upper';
   const bgEnabled = document.getElementById('subsBgEnabled')?.checked;
@@ -2006,7 +2021,7 @@ function drawSubtitle(text, alpha) {
   ctx.fillStyle = `rgba(${fr},${fg},${fb},${alpha})`;
 
   // Typewriter: slight scale-pop on new chunk
-  const isTypewriter = fontFamily.includes('Special Elite') || fontFamily.includes('Courier');
+  const isTypewriter = fontFamily.includes('Special Elite') || fontFamily.includes('Courier') || fontFamily.includes('Cutive') || fontFamily.includes('Share Tech') || fontFamily.includes('VT323') || fontFamily.includes('Nixie');
   const now = performance.now() / 1000;
   if (text !== _lastSubChunk) { _lastSubChunk = text; _lastSubChunkT = now; }
   const popAge = now - _lastSubChunkT;
@@ -3095,7 +3110,15 @@ $('downloadBtn').onclick = async () => {
 [titleFontEl, titleColorEl, titlePosEl, captionColorEl, subsEnabledEl, subsWordsEl, subsColorEl, document.getElementById('zoomStyle')].forEach(el =>
   el.addEventListener('change', drawStaticPreview)
 );
-$('subsFont').addEventListener('change', drawStaticPreview);
+function updateTypewriterFontStyleVisibility() {
+  const subsFontEl = document.getElementById('subsFont');
+  const twRow = document.getElementById('typewriterFontStyleRow');
+  if (!subsFontEl || !twRow) return;
+  const isTypewriterFont = subsFontEl.value.includes('Special Elite') || subsFontEl.value.includes('Courier');
+  twRow.style.display = isTypewriterFont ? 'block' : 'none';
+}
+$('subsFont').addEventListener('change', () => { updateTypewriterFontStyleVisibility(); drawStaticPreview(); });
+$('typewriterFontStyle')?.addEventListener('change', drawStaticPreview);
 $('subsStyle').addEventListener('change', drawStaticPreview);
 // subsAllCaps replaced by subsCase dropdown
 $('subsOffset').addEventListener('input', () => {
@@ -3557,6 +3580,7 @@ function applySubsPreset(name) {
   const sp = document.getElementById('subsPosVal'); if (sp) sp.textContent = p.pos + '%';
   const spd = document.getElementById('subsPosDisplay'); if (spd) spd.textContent = p.pos + '%';
   const bo = document.getElementById('subsBgOptions'); if (bo) bo.style.display = p.bgEnabled ? 'grid' : 'none';
+  if (typeof updateTypewriterFontStyleVisibility === 'function') updateTypewriterFontStyleVisibility();
   const boVal = document.getElementById('subsBgOpacityVal'); if (boVal) boVal.textContent = p.bgOpacity + '%';
   // Active button
   document.querySelectorAll('.subs-preset-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === name));
