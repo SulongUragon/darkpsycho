@@ -611,6 +611,7 @@
           <select id="voiceProvider" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:11px 13px;border-radius:6px;font-family:inherit;font-size:14px;">
             <option value="elevenlabs">ElevenLabs</option>
             <option value="openai">OpenAI TTS</option>
+            <option value="upload">🎙️ Upload My Own Audio</option>
           </select>
         </div>
         <!-- ElevenLabs fields (shown when provider = elevenlabs) -->
@@ -636,6 +637,12 @@
               <option value="nova">Nova (female)</option>
               <option value="shimmer">Shimmer (soft female)</option>
             </select>
+          </div>
+        </div>
+        <!-- Upload audio fields (shown when provider = upload) -->
+        <div id="uploadAudioFields" style="display:none;">
+          <div style="background:#0a0a0a;border:1px solid #252525;border-radius:6px;padding:12px;margin-bottom:10px;">
+            <div style="font-size:11px;color:#aaa;line-height:1.6;">🎙️ Upload audio for each scene below after generating your script. Accepted formats: MP3, WAV, M4A, OGG.</div>
           </div>
         </div>
         <div style="border-top:1px solid #1e1e1e;margin-top:12px;padding-top:12px;">
@@ -1497,15 +1504,20 @@ function setProgress(pct) {
 // ----- Voice provider UI toggle
 function applyVoiceProviderUI(provider) {
   const isOpenAI = provider === 'openai';
+  const isUpload = provider === 'upload';
   const elFields = $('elevenLabsKeyFields');
   const oaFields = $('openaiKeyFields');
+  const upFields = $('uploadAudioFields');
   const elVoiceConfig = $('elevenVoiceConfigFields');
   const elModelConfig = $('elevenModelConfigField');
-  if (elFields) elFields.style.display = isOpenAI ? 'none' : '';
+  if (elFields) elFields.style.display = (isOpenAI || isUpload) ? 'none' : '';
   if (oaFields) oaFields.style.display = isOpenAI ? '' : 'none';
-  if (elVoiceConfig) elVoiceConfig.style.display = isOpenAI ? 'none' : '';
-  if (elModelConfig) elModelConfig.style.display = isOpenAI ? 'none' : '';
+  if (upFields) upFields.style.display = isUpload ? '' : 'none';
+  if (elVoiceConfig) elVoiceConfig.style.display = (isOpenAI || isUpload) ? 'none' : '';
+  if (elModelConfig) elModelConfig.style.display = (isOpenAI || isUpload) ? 'none' : '';
   localStorage.setItem('voice_provider', provider);
+  // Rebuild thumb grid to show/hide per-scene upload buttons
+  rebuildThumbGrid();
 }
 
 $('voiceProvider')?.addEventListener('change', function() {
@@ -2401,6 +2413,7 @@ function rebuildSceneNav() {
 function rebuildThumbGrid() {
   thumbGridEl.innerHTML = '';
   if (!script) return;
+  const isUploadProvider = (document.getElementById('voiceProvider')?.value || 'elevenlabs') === 'upload';
   script.scenes.forEach((s, i) => {
     const t = document.createElement('div');
     t.className = 'thumb';
@@ -2422,6 +2435,49 @@ function rebuildThumbGrid() {
       t.classList.add('empty');
       t.textContent = '—';
     }
+    // Per-scene audio upload button (shown when provider = upload)
+    if (isUploadProvider) {
+      const uploadBtn = document.createElement('div');
+      uploadBtn.title = 'Upload audio for this scene';
+      uploadBtn.style.cssText = 'position:absolute;bottom:4px;left:4px;background:rgba(30,30,30,0.92);color:#bbb;font-size:9px;padding:3px 5px;border-radius:6px;cursor:pointer;font-weight:700;letter-spacing:0.3px;z-index:5;border:1px solid #333;';
+      if (audios[i]) {
+        uploadBtn.textContent = '✅';
+        uploadBtn.title = `Scene ${i+1} audio loaded (${audios[i].duration.toFixed(1)}s) — click to replace`;
+        uploadBtn.style.background = 'rgba(0,60,20,0.9)';
+        uploadBtn.style.borderColor = '#1a4a1a';
+        uploadBtn.style.color = '#80ff99';
+      } else {
+        uploadBtn.textContent = '🎙️';
+      }
+      uploadBtn.onclick = (e) => {
+        e.stopPropagation();
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.mp3,.wav,.m4a,.ogg,audio/*';
+        fileInput.onchange = async () => {
+          const file = fileInput.files[0];
+          if (!file) return;
+          try {
+            const arrayBuf = await file.arrayBuffer();
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const audioBuf = await audioCtx.decodeAudioData(arrayBuf);
+            audios[i] = audioBuf;
+            audioMp3s[i] = arrayBuf;
+            wordTimings[i] = null;
+            rebuildThumbGrid();
+            // Update assets status
+            const uploaded = audios.filter(a => a !== null).length;
+            assetsStatusEl.textContent = `${uploaded}/${script.scenes.length} scenes have uploaded audio`;
+            setStatus(`✅ Scene ${i+1} audio uploaded (${audioBuf.duration.toFixed(1)}s)`, 'success');
+            setTimeout(() => setStatus(''), 2000);
+          } catch (err) {
+            setStatus(`Error decoding audio for scene ${i+1}: ${err.message}`, 'error');
+          }
+        };
+        fileInput.click();
+      };
+      t.appendChild(uploadBtn);
+    }
     t.onclick = () => {
       previewScene = i;
       rebuildSceneNav();
@@ -2440,7 +2496,7 @@ async function runGenerateAll() {
   const elevenKey = elevenKeyEl.value.trim();
   const _provider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
   const _oKey = document.getElementById('openaiKey')?.value.trim() || '';
-  const _voiceKeyOk = _provider === 'openai' ? !!_oKey : !!elevenKey;
+  const _voiceKeyOk = _provider === 'upload' ? true : (_provider === 'openai' ? !!_oKey : !!elevenKey);
   if (!anthropicKey || !falKey || !_voiceKeyOk) {
     const _missing = _provider === 'openai' ? 'OpenAI' : 'ElevenLabs';
     setStatus(`Need all 3 API keys (Anthropic, FAL.ai, ${_missing})`, 'error');
@@ -2514,37 +2570,45 @@ async function runGenerateAll() {
     assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations ready`;
 
     // Step 3: Voices (sequential — avoids ElevenLabs concurrent request limit)
-    setStatus('Generating voiceovers…', 'info');
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const voiceId = voiceEl.value;
-    for (let i = 0; i < script.scenes.length; i++) {
-      setStatus(`Generating voice ${i + 1}/${script.scenes.length}…`, 'info');
-      setProgress(60 + ((i / script.scenes.length) * 35));
-      const r = await generateSpeech(script.scenes[i].narration, voiceId, elevenKey, audioCtx);
-      if (r === null) {
-        // Voice skipped (quota/auth) — keep audio slot null so generation continues
-        audios[i] = null; audioMp3s[i] = null; wordTimings[i] = null;
-      } else {
-        let audioBuffer = r.audioBuffer;
-        let wt = r.wordTimings || null;
-        // Apply silence removal if enabled (ElevenLabs only — OpenAI TTS doesn't need it)
-        const _currProvider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
-        if (_currProvider === 'elevenlabs' && document.getElementById('silenceRemoveEnabled')?.checked) {
-          const thresh = parseInt(document.getElementById('silenceThresh')?.value || 2);
-          const minSil = parseInt(document.getElementById('silenceMin')?.value || 15) / 100;
-          const { buffer: trimmed, timeMap } = removeSilenceFromBuffer(audioBuffer, thresh, minSil);
-          audioBuffer = trimmed;
-          if (wt && timeMap) wt = remapWordTimings(wt, timeMap);
+    const _genProvider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
+    if (_genProvider === 'upload') {
+      // Upload mode: no voice generation — user uploads per-scene audio via thumb grid
+      setProgress(95);
+      const _uploadedCount = audios.filter(a => a !== null).length;
+      assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations · 🎙️ upload audio per scene below (${_uploadedCount}/${script.scenes.length} uploaded)`;
+    } else {
+      setStatus('Generating voiceovers…', 'info');
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const voiceId = voiceEl.value;
+      for (let i = 0; i < script.scenes.length; i++) {
+        setStatus(`Generating voice ${i + 1}/${script.scenes.length}…`, 'info');
+        setProgress(60 + ((i / script.scenes.length) * 35));
+        const r = await generateSpeech(script.scenes[i].narration, voiceId, elevenKey, audioCtx);
+        if (r === null) {
+          // Voice skipped (quota/auth) — keep audio slot null so generation continues
+          audios[i] = null; audioMp3s[i] = null; wordTimings[i] = null;
+        } else {
+          let audioBuffer = r.audioBuffer;
+          let wt = r.wordTimings || null;
+          // Apply silence removal if enabled (ElevenLabs only — OpenAI TTS doesn't need it)
+          const _currProvider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
+          if (_currProvider === 'elevenlabs' && document.getElementById('silenceRemoveEnabled')?.checked) {
+            const thresh = parseInt(document.getElementById('silenceThresh')?.value || 2);
+            const minSil = parseInt(document.getElementById('silenceMin')?.value || 15) / 100;
+            const { buffer: trimmed, timeMap } = removeSilenceFromBuffer(audioBuffer, thresh, minSil);
+            audioBuffer = trimmed;
+            if (wt && timeMap) wt = remapWordTimings(wt, timeMap);
+          }
+          audios[i] = audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = wt;
         }
-        audios[i] = audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = wt;
       }
+      setProgress(95);
+      const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
+      const _voiceSkipped = window.voiceSkipped || audios.every(a => a === null);
+      assetsStatusEl.textContent = _voiceSkipped
+        ? `✓ ${script.scenes.length} illustrations · ⚠️ voice skipped (quota exceeded)`
+        : `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
     }
-    setProgress(95);
-    const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
-    const _voiceSkipped = window.voiceSkipped || audios.every(a => a === null);
-    assetsStatusEl.textContent = _voiceSkipped
-      ? `✓ ${script.scenes.length} illustrations · ⚠️ voice skipped (quota exceeded)`
-      : `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
     refreshAudioDownloadBtn();
 
     setProgress(100);
@@ -2746,6 +2810,11 @@ async function regenerateOneImage(idx) {
 async function regenerateVoice() {
   if (!script) { setStatus('Generate a script first', 'error'); return; }
   const _regenProvider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
+  if (_regenProvider === 'upload') {
+    setStatus('Upload mode: use the 🎙️ buttons on each scene thumbnail to upload audio', 'info');
+    rebuildThumbGrid();
+    return;
+  }
   const key = _regenProvider === 'openai'
     ? (document.getElementById('openaiKey')?.value.trim() || '')
     : elevenKeyEl.value.trim();
