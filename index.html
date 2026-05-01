@@ -1440,6 +1440,14 @@ function loadKeys() {
 // =========================================================
 //  CLAUDE — Script generator
 // =========================================================
+// Strip em dashes and en dashes from all string values in a parsed object/array
+function stripDashes(obj) {
+  if (typeof obj === 'string') return obj.replace(/[—–]/g, ',');
+  if (Array.isArray(obj)) { obj.forEach((v, i) => { obj[i] = stripDashes(v); }); }
+  else if (obj && typeof obj === 'object') { Object.keys(obj).forEach(k => { obj[k] = stripDashes(obj[k]); }); }
+  return obj;
+}
+
 async function generateScript(topic, sceneCount, apiKey) {
   const cartoonMode = document.getElementById('cartoonMode')?.checked;
   const cartoonInstruction = cartoonMode
@@ -1475,7 +1483,8 @@ CRITICAL RULES:
 - keywords: EXACTLY 10 entries, all lowercase strings, NO # prefix
 - hashtags: EXACTLY 5 entries, all lowercase strings, NO # prefix in the array values
 - No emojis anywhere
-- NO MARKDOWN CODE BLOCKS. Output only the raw JSON starting with { and ending with }`;
+- NO MARKDOWN CODE BLOCKS. Output only the raw JSON starting with { and ending with }
+- NEVER use em dashes (—) or en dashes (–). Use commas, periods, or colons instead.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -1504,6 +1513,8 @@ CRITICAL RULES:
   if (!parsed.mainTitle || !Array.isArray(parsed.scenes)) {
     throw new Error('Claude returned malformed JSON');
   }
+  // Strip any em/en dashes that slipped through
+  stripDashes(parsed);
   return parsed;
 }
 
@@ -2422,7 +2433,8 @@ Output STRICTLY valid JSON in this exact shape:
   "hashtags": ["EXACTLY 5 lowercase strings WITHOUT the # prefix; mix broad and niche"]
 }
 
-Output ONLY the JSON. No preamble. No markdown code blocks.`;
+Output ONLY the JSON. No preamble. No markdown code blocks.
+- NEVER use em dashes (—) or en dashes (–). Use commas, periods, or colons instead.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -2448,6 +2460,8 @@ Output ONLY the JSON. No preamble. No markdown code blocks.`;
   text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
   const parsed = JSON.parse(text);
   if (!Array.isArray(parsed.scenes)) throw new Error('Claude did not return a scenes array');
+  // Strip any em/en dashes that slipped through
+  stripDashes(parsed);
   return parsed; // { scenes, caption, keywords, hashtags }
 }
 
@@ -3825,7 +3839,8 @@ Output STRICTLY valid JSON — an array of exactly 7 strings:
 ["Episode 1 sub-topic", "Episode 2 sub-topic", ..., "Episode 7 sub-topic"]
 
 Story arc example pattern: Setup → Deepen → Reveal → Twist → Consequence → Solution → Call to action
-NO MARKDOWN. Raw JSON array only.`;
+NO MARKDOWN. Raw JSON array only.
+- NEVER use em dashes (—) or en dashes (–). Use commas, periods, or colons instead.`;
     } else if (isDebateMode) {
       prompt = `You are a viral content strategist. A creator posts TWICE per day using a debate format.
 
@@ -3842,7 +3857,8 @@ Output STRICTLY valid JSON — an array of exactly 7 objects:
 
 - All 7 aspects must be distinctly different (social life, work, relationships, self-care, communication, creativity, energy)
 - Make each title a strong viral hook that sparks debate
-- NO MARKDOWN. Raw JSON array only.`;
+- NO MARKDOWN. Raw JSON array only.
+- NEVER use em dashes (—) or en dashes (–). Use commas, periods, or colons instead.`;
     } else {
       const today = CAL_DAYS[todayDayIndex()];
       prompt = `You are a viral dark-psychology content strategist. Generate a 7-day content calendar of unique, varied dark-psychology video topics for a creator on TikTok/Reels.
@@ -3854,7 +3870,8 @@ Output STRICTLY valid JSON — an array of exactly 7 strings, one topic per day 
 
 - Each topic MAX 12 words, viral-hook style
 - No repetition — all 7 must be distinctly different angles
-- NO MARKDOWN. Raw JSON array only.`;
+- NO MARKDOWN. Raw JSON array only.
+- NEVER use em dashes (—) or en dashes (–). Use commas, periods, or colons instead.`;
     }
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -3866,6 +3883,8 @@ Output STRICTLY valid JSON — an array of exactly 7 strings, one topic per day 
     let text = data.content[0].text.trim().replace(/^```json?\s*/i,'').replace(/```$/,'').trim();
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed) || parsed.length !== 7) throw new Error('Bad response');
+    // Strip any em/en dashes that slipped through
+    stripDashes(parsed);
 
     const todayIdx = todayDayIndex();
     if (isDebateMode) {
@@ -4870,7 +4889,7 @@ RULES:
 - No quotation marks inside the quote field
 - Each quote must be distinctly different angle on the topic
 - imagePrompt must be vivid and cinematic — match the emotional tone of the quote
-- NEVER use long dashes (—), em dashes, hyphens, or any dash characters in the quote text
+- NEVER use em dashes (—) or en dashes (–) anywhere in the output. Use commas, periods, or colons instead.
 - NO MARKDOWN. Raw JSON only.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -4882,6 +4901,8 @@ RULES:
   const data = await response.json();
   let text = data.content[0].text.trim().replace(/^```json\s*/i,'').replace(/```$/,'').trim();
   const parsed = JSON.parse(text);
+  // Strip any em/en dashes that slipped through
+  stripDashes(parsed);
   // Normalize: use quote as title for each scene
   parsed.scenes = parsed.scenes.map(s => ({
     ...s,
