@@ -2845,7 +2845,17 @@ async function regenerateVoice() {
       if (r === null) {
         audios[i] = null; audioMp3s[i] = null; wordTimings[i] = null;
       } else {
-        audios[i] = r.audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = r.wordTimings || null;
+        let audioBuffer = r.audioBuffer;
+        let wt = r.wordTimings || null;
+        // Apply silence removal if enabled (ElevenLabs only — same guard as main generation)
+        if (_regenProvider === 'elevenlabs' && document.getElementById('silenceRemoveEnabled')?.checked) {
+          const thresh = parseInt(document.getElementById('silenceThresh')?.value || 2);
+          const minSil = parseInt(document.getElementById('silenceMin')?.value || 15) / 100;
+          const { buffer: trimmed, timeMap } = removeSilenceFromBuffer(audioBuffer, thresh, minSil);
+          audioBuffer = trimmed;
+          if (wt && timeMap) wt = remapWordTimings(wt, timeMap);
+        }
+        audios[i] = audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = wt;
       }
     }
     const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
