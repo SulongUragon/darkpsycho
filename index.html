@@ -5294,11 +5294,13 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   let fontSize = parseInt(document.getElementById('quoteFontSize')?.value) || 72;
   const maxW = W - 120;
   ctx.font = `800 ${fontSize}px ${quoteFont}`;
-  let lines = wrapText(quote.toUpperCase(), maxW);
+  const subsCase = document.getElementById('subsCase')?.value || 'upper';
+  const processedQuote = subsCase === 'upper' ? quote.toUpperCase() : subsCase === 'lower' ? quote.toLowerCase() : quote;
+  let lines = wrapText(processedQuote, maxW);
   while (lines.length > 5 && fontSize > 40) {
     fontSize -= 4;
     ctx.font = `800 ${fontSize}px ${quoteFont}`;
-    lines = wrapText(quote.toUpperCase(), maxW);
+    lines = wrapText(processedQuote, maxW);
   }
   const lineH = fontSize * 1.2;
   const blockH = lineH * lines.length;
@@ -5320,7 +5322,8 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   ctx.font = `600 28px 'Inter', sans-serif`;
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.letterSpacing = '3px';
-  ctx.fillText('— ' + attribution.toUpperCase(), W/2, startY + blockH + 30);
+  const processedAttribution = subsCase === 'upper' ? attribution.toUpperCase() : subsCase === 'lower' ? attribution.toLowerCase() : attribution;
+  ctx.fillText('— ' + processedAttribution, W/2, startY + blockH + 30);
 
   // Decorative bottom line
   ctx.strokeStyle = 'rgba(255,255,255,0.3)';
