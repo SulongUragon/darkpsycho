@@ -2956,18 +2956,40 @@ function computeTimings() {
 
 function playAudioSequence(audioCtx, recordDest) {
   const { timings } = computeTimings();
-  // Monitor via MediaStreamDestination -> HTMLAudioElement so iOS treats
-  // playback as media (respects ringer/media volume, NOT the silent switch)
-  const monitorDest = audioCtx.createMediaStreamDestination();
-  const monitorEl = document.createElement('audio');
-  monitorEl.srcObject = monitorDest.stream;
-  monitorEl.playsInline = true;
-  monitorEl.autoplay = true;
-  monitorEl.style.display = 'none';
-  document.body.appendChild(monitorEl);
-  const playPromise = monitorEl.play();
-  if (playPromise && typeof playPromise.catch === 'function') {
-    playPromise.catch(err => console.warn('monitor element play() rejected', err));
+
+  // FIX (mobile double-audio): On iOS/Android during recording, using a
+  // MediaStream-backed <audio> element as a monitor can bleed into the
+  // MediaRecorder output — iOS may capture the active audio session
+  // (including the monitor stream) as a second audio source alongside the
+  // explicit Web Audio track we added to the canvas stream. The result is
+  // double/overlapping audio in the exported MP4 on TikTok/CapCut.
+  //
+  // Solution: when recording on mobile, skip the MediaStream monitor entirely
+  // and connect audio sources directly to audioCtx.destination for playback.
+  // This bypasses the MediaStream path that iOS can accidentally re-capture.
+  //
+  // On desktop, and during preview-only (recordDest is null), we keep the
+  // original MediaStream → <audio> element approach so that iOS respects
+  // ringer/media volume instead of the silent switch.
+  const isMobileRecording = !!recordDest && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  let monitorDest = null;
+  let monitorEl = null;
+
+  if (!isMobileRecording) {
+    // Desktop / preview: Monitor via MediaStreamDestination -> HTMLAudioElement
+    // so iOS treats playback as media (respects ringer/media volume, NOT the silent switch)
+    monitorDest = audioCtx.createMediaStreamDestination();
+    monitorEl = document.createElement('audio');
+    monitorEl.srcObject = monitorDest.stream;
+    monitorEl.playsInline = true;
+    monitorEl.autoplay = true;
+    monitorEl.style.display = 'none';
+    document.body.appendChild(monitorEl);
+    const playPromise = monitorEl.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(err => console.warn('monitor element play() rejected', err));
+    }
   }
 
   const sources = [];
@@ -2976,7 +2998,12 @@ function playAudioSequence(audioCtx, recordDest) {
     const src = audioCtx.createBufferSource();
     src.buffer = audios[i];
     if (recordDest) src.connect(recordDest);
-    src.connect(monitorDest);
+    if (isMobileRecording) {
+      // Mobile recording: monitor via direct output, no MediaStream in the loop
+      src.connect(audioCtx.destination);
+    } else {
+      src.connect(monitorDest);
+    }
     src.start(audioCtx.currentTime + timings[i].start);
     sources.push(src);
   }
@@ -3040,6 +3067,12 @@ async function runPlayback(record) {
     if (forceExt) ext = forceExt;
     else ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
     canvasStream = canvas.captureStream(30);
+    // FIX (mobile double-audio): Remove any audio tracks captureStream() may
+    // have included. Canvas elements have no audio, but some mobile browsers
+    // return a stream with unexpected audio tracks. Adding our Web Audio track
+    // on top of those would give the MediaRecorder two audio sources → double
+    // audio in the exported video on TikTok/CapCut.
+    canvasStream.getAudioTracks().forEach(t => canvasStream.removeTrack(t));
     audioDest = audioCtx.createMediaStreamDestination();
     // Force mono downmix BEFORE reaching the recorder. This guarantees L === R
     // in the MP4, which prevents "audio overlap" symptoms when external editors
