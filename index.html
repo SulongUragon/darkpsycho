@@ -2996,7 +2996,10 @@ function playAudioSequence(audioCtx, recordDest) {
   // On desktop, and during preview-only (recordDest is null), we keep the
   // original MediaStream → <audio> element approach so that iOS respects
   // ringer/media volume instead of the silent switch.
-  const isMobileRecording = !!recordDest && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  // iPadOS 13+ reports 'Macintosh' in userAgent — detect via maxTouchPoints fallback
+  const _isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isMobileRecording = !!recordDest && (_isIOSDevice || /Android/i.test(navigator.userAgent));
 
   let monitorDest = null;
   let monitorEl = null;
@@ -3112,7 +3115,12 @@ async function runPlayback(record) {
     audioRecordTarget = monoMixer;
     const audioTrack = audioDest.stream.getAudioTracks()[0];
     if (audioTrack) canvasStream.addTrack(audioTrack);
-    recorder = new MediaRecorder(canvasStream, { mimeType, videoBitsPerSecond: 6_000_000 });
+    // Fix C: guarantee exactly 1 audio track enters MediaRecorder — iOS can
+    // silently add extra tracks; two audio tracks cause doubled audio on TikTok.
+    const _vTracks = canvasStream.getVideoTracks();
+    const _aTracks = canvasStream.getAudioTracks();
+    const _safeStream = new MediaStream([..._vTracks, ...(_aTracks.length > 0 ? [_aTracks[0]] : [])]);
+    recorder = new MediaRecorder(_safeStream, { mimeType, videoBitsPerSecond: 6_000_000 });
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
   }
 
