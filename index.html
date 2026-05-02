@@ -154,6 +154,16 @@
     width: 110px; font-size: 10px; color: #888; text-transform: uppercase;
     letter-spacing: 1px; padding: 11px 0; flex-shrink: 0; font-weight: 600;
   }
+
+  /* Voice-provider pill toggle */
+  .vp-btn {
+    flex: 1; padding: 9px 6px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px; border-radius: 20px; border: 1px solid #333;
+    background: #141414; color: #888; cursor: pointer; transition: all 0.15s;
+    font-family: inherit; text-align: center;
+  }
+  .vp-btn:hover { border-color: #555; color: #ccc; }
+  .vp-btn.active { background: #e53935; border-color: #e53935; color: #fff; }
   .check-row {
     display: flex; align-items: center; gap: 8px; font-size: 12px; color: #aaa;
     cursor: pointer; padding: 6px 0;
@@ -605,28 +615,28 @@
           <div class="api-label">FAL.ai</div>
           <input type="password" id="falKey" placeholder="fal-… (FLUX images)" autocomplete="off">
         </div>
-        <!-- Voice Provider Selector -->
-        <div class="api-row" style="margin-bottom:10px;">
-          <div class="api-label">Voice Provider</div>
-          <select id="voiceProvider" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:11px 13px;border-radius:6px;font-family:inherit;font-size:14px;">
-            <option value="elevenlabs">ElevenLabs</option>
-            <option value="openai">OpenAI TTS</option>
-            <option value="upload">🎙️ Upload My Own Audio</option>
-          </select>
-        </div>
-        <!-- ElevenLabs fields (shown when provider = elevenlabs) -->
-        <div id="elevenLabsKeyFields">
-          <div class="api-row">
-            <div class="api-label">ElevenLabs</div>
-            <input type="password" id="elevenKey" placeholder="xi-… (TTS)" autocomplete="off">
+        <!-- Voice Provider Pill Toggle -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px;">Voice Provider</div>
+          <div id="voiceProviderToggle" style="display:flex;gap:4px;">
+            <button onclick="setVoiceProvider('elevenlabs')" id="vpBtn_elevenlabs" class="vp-btn active">🎤 ElevenLabs</button>
+            <button onclick="setVoiceProvider('openai')" id="vpBtn_openai" class="vp-btn">🤖 OpenAI TTS</button>
+            <button onclick="setVoiceProvider('upload')" id="vpBtn_upload" class="vp-btn">📁 Upload Audio</button>
           </div>
+          <input type="hidden" id="voiceProvider" value="elevenlabs">
         </div>
-        <!-- OpenAI TTS fields (shown when provider = openai) -->
-        <div id="openaiKeyFields" style="display:none;">
-          <div class="api-row">
-            <div class="api-label">OpenAI Key</div>
-            <input type="password" id="openaiKey" placeholder="sk-… (TTS)" autocomplete="off">
-          </div>
+        <!-- ElevenLabs Key — always visible -->
+        <div class="api-row">
+          <div class="api-label">ElevenLabs</div>
+          <input type="password" id="elevenKey" placeholder="xi-… (TTS)" autocomplete="off">
+        </div>
+        <!-- OpenAI Key — always visible -->
+        <div class="api-row">
+          <div class="api-label">OpenAI Key</div>
+          <input type="password" id="openaiKey" placeholder="sk-… (TTS)" autocomplete="off">
+        </div>
+        <!-- OpenAI Voice config — shown only when OpenAI active -->
+        <div id="openaiVoiceConfig" style="display:none;">
           <div class="api-row" style="margin-top:8px;">
             <div class="api-label">OpenAI Voice</div>
             <select id="openaiVoice" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:11px 13px;border-radius:6px;font-family:inherit;font-size:14px;">
@@ -1502,16 +1512,26 @@ function setProgress(pct) {
 }
 
 // ----- Voice provider UI toggle
+function setVoiceProvider(provider) {
+  applyVoiceProviderUI(provider);
+}
 function applyVoiceProviderUI(provider) {
   const isOpenAI = provider === 'openai';
   const isUpload = provider === 'upload';
-  const elFields = $('elevenLabsKeyFields');
-  const oaFields = $('openaiKeyFields');
+  // Update hidden input so all existing code reading voiceProvider.value still works
+  const vpInput = $('voiceProvider');
+  if (vpInput) vpInput.value = provider;
+  // Update pill toggle button active states
+  ['elevenlabs', 'openai', 'upload'].forEach(p => {
+    const btn = $('vpBtn_' + p);
+    if (btn) btn.classList.toggle('active', p === provider);
+  });
+  // Show/hide voice CONFIG sections only (key fields are always visible)
+  const oaVoiceConfig = $('openaiVoiceConfig');
   const upFields = $('uploadAudioFields');
   const elVoiceConfig = $('elevenVoiceConfigFields');
   const elModelConfig = $('elevenModelConfigField');
-  if (elFields) elFields.style.display = (isOpenAI || isUpload) ? 'none' : '';
-  if (oaFields) oaFields.style.display = isOpenAI ? '' : 'none';
+  if (oaVoiceConfig) oaVoiceConfig.style.display = isOpenAI ? '' : 'none';
   if (upFields) upFields.style.display = isUpload ? '' : 'none';
   if (elVoiceConfig) elVoiceConfig.style.display = (isOpenAI || isUpload) ? 'none' : '';
   if (elModelConfig) elModelConfig.style.display = (isOpenAI || isUpload) ? 'none' : '';
@@ -1519,11 +1539,6 @@ function applyVoiceProviderUI(provider) {
   // Rebuild thumb grid to show/hide per-scene upload buttons
   rebuildThumbGrid();
 }
-
-$('voiceProvider')?.addEventListener('change', function() {
-  applyVoiceProviderUI(this.value);
-  localStorage.setItem('openai_voice', $('openaiVoice')?.value || 'onyx');
-});
 
 // ----- Save keys
 $('saveKeys').onclick = () => {
@@ -1546,7 +1561,7 @@ function loadKeys() {
   falKeyEl.value = localStorage.getItem('fal_api_key') || '';
   elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
   const _oKey = localStorage.getItem('openai_api_key'); if (_oKey && $('openaiKey')) $('openaiKey').value = _oKey;
-  const _vp = localStorage.getItem('voice_provider'); if (_vp && $('voiceProvider')) { $('voiceProvider').value = _vp; applyVoiceProviderUI(_vp); }
+  const _vp = localStorage.getItem('voice_provider'); if (_vp) { applyVoiceProviderUI(_vp); } else { applyVoiceProviderUI('elevenlabs'); }
   const _ov = localStorage.getItem('openai_voice'); if (_ov && $('openaiVoice')) $('openaiVoice').value = _ov;
   const mwEl = document.getElementById('makeWebhook'); if (mwEl && !mwEl.value) mwEl.value = localStorage.getItem('make_webhook') || 'https://hook.us2.make.com/vz7tdtaf6l8h1jx3q1ivt4s9qglrutle';
   const ccEl = document.getElementById('cloudinaryCloud'); if (ccEl) ccEl.value = localStorage.getItem('cloudinary_cloud') || '';
@@ -4868,7 +4883,7 @@ function applyKeys(keys) {
   set('falKey', keys.fal);
   set('elevenKey', keys.eleven);
   set('openaiKey', keys.openai);
-  if (keys.voiceProvider && $('voiceProvider')) { $('voiceProvider').value = keys.voiceProvider; applyVoiceProviderUI(keys.voiceProvider); }
+  if (keys.voiceProvider) { applyVoiceProviderUI(keys.voiceProvider); }
   if (keys.openaiVoice) set('openaiVoice', keys.openaiVoice);
   set('cloudinaryCloud', keys.cloudName);
   set('cloudinaryPreset', keys.cloudPreset);
