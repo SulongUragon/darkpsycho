@@ -5883,9 +5883,9 @@ function drawEpisodePoster(lines) {
     if (!fits) fontSize -= 4;
   }
 
-  const lineHeight = fontSize * 1.35;
-  const totalBlockH = 4 * lineHeight;
-  const startY = (H - totalBlockH) / 2;
+  const totalBlockHeight = 4 * (fontSize * 1.35);
+  let startY = 120 + (1040 - totalBlockHeight) / 2 + fontSize;
+  startY = Math.max(160, startY);
 
   // ── Draw 4 lines centered ─────────────────────────────────────────────────
   ctx.save();
@@ -5894,7 +5894,7 @@ function drawEpisodePoster(lines) {
   ctx.font = "800 " + fontSize + "px " + quoteFont;
 
   formattedLines.forEach((line, i) => {
-    const lineY = startY + i * lineHeight;
+    const lineY = startY + i * (fontSize * 1.35);
 
     // Thin separator above each line (except first)
     if (i > 0) {
@@ -5902,7 +5902,7 @@ function drawEpisodePoster(lines) {
       ctx.strokeStyle = 'rgba(255,255,255,0.1)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(60, lineY - lineHeight * 0.15);
+      ctx.moveTo(60, lineY - (fontSize * 1.35) * 0.15);
       ctx.lineTo(W - 60, lineY - lineHeight * 0.15);
       ctx.stroke();
       ctx.restore();
@@ -5947,10 +5947,11 @@ async function generatePoster() {
     });
     if (!res.ok) throw new Error('API error ' + res.status);
     const data = await res.json();
-    let raw = data.content[0].text.trim().replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```$/,'').trim();
-    let lines = JSON.parse(raw);
-    if (!Array.isArray(lines) || lines.length !== 4) throw new Error('Expected 4-line array, got: ' + raw);
-    lines = stripDashes(lines);
+    let rawContent = data.content[0].text.trim();
+    rawContent = rawContent.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/,'').trim();
+    let lines = JSON.parse(rawContent);
+    if (!Array.isArray(lines) || lines.length !== 4) throw new Error('Expected 4-line array, got: ' + rawContent);
+    lines = lines.map(l => String(l).replace(/[—–]/g, ','));
     window.posterQuotes = lines;
     if (st) { st.style.background='#102510'; st.style.color='#80ff99'; st.style.border='1px solid #1a401a'; st.textContent='✓ Quote generated — canvas updated'; }
     drawEpisodePoster(lines);
