@@ -2969,13 +2969,15 @@ async function runGenerateAll() {
         } else {
           let audioBuffer = r.audioBuffer;
           let wt = r.wordTimings || null;
-          // Apply silence removal if enabled (ElevenLabs only — OpenAI TTS doesn't need it)
+          // Apply silence removal if enabled — works for all providers (ElevenLabs + OpenAI TTS)
           const _currProvider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
-          if (_currProvider === 'elevenlabs' && document.getElementById('silenceRemoveEnabled')?.checked) {
+          if (document.getElementById('silenceRemoveEnabled')?.checked) {
             const thresh = parseInt(document.getElementById('silenceThresh')?.value || 2);
             const minSil = parseInt(document.getElementById('silenceMin')?.value || 15) / 100;
+            const durBefore = audioBuffer.duration.toFixed(2);
             const { buffer: trimmed, timeMap } = removeSilenceFromBuffer(audioBuffer, thresh, minSil);
             audioBuffer = trimmed;
+            console.log(`[SilenceRemover] scene ${i+1} | provider=${_currProvider} | ${durBefore}s → ${audioBuffer.duration.toFixed(2)}s | thresh=${thresh}% minSil=${minSil}s`);
             if (wt && timeMap) wt = remapWordTimings(wt, timeMap);
           }
           audios[i] = audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = wt;
@@ -3211,12 +3213,14 @@ async function regenerateVoice() {
       } else {
         let audioBuffer = r.audioBuffer;
         let wt = r.wordTimings || null;
-        // Apply silence removal if enabled (ElevenLabs only — same guard as main generation)
-        if (_regenProvider === 'elevenlabs' && document.getElementById('silenceRemoveEnabled')?.checked) {
+        // Apply silence removal if enabled — works for all providers (ElevenLabs + OpenAI TTS)
+        if (document.getElementById('silenceRemoveEnabled')?.checked) {
           const thresh = parseInt(document.getElementById('silenceThresh')?.value || 2);
           const minSil = parseInt(document.getElementById('silenceMin')?.value || 15) / 100;
+          const durBefore = audioBuffer.duration.toFixed(2);
           const { buffer: trimmed, timeMap } = removeSilenceFromBuffer(audioBuffer, thresh, minSil);
           audioBuffer = trimmed;
+          console.log(`[SilenceRemover] regen scene ${i+1} | provider=${_regenProvider} | ${durBefore}s → ${audioBuffer.duration.toFixed(2)}s | thresh=${thresh}% minSil=${minSil}s`);
           if (wt && timeMap) wt = remapWordTimings(wt, timeMap);
         }
         audios[i] = audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = wt;
