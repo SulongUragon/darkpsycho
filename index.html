@@ -14,697 +14,566 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Montserrat:wght@800;900&family=Anton&family=Archivo+Black&family=Special+Elite&family=Cutive+Mono&family=Share+Tech+Mono&family=VT323&family=Nixie+One&family=Caveat:wght@500;700&family=Permanent+Marker&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  /* ═══════════════════════════════════════════════════════
-     DARK PSYCHO — Premium Dark Studio UI
-     Redesign: Inter font, #0a0a0a bg, gold accents, pill CTAs
-  ═══════════════════════════════════════════════════════ */
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #0a0a0a; }
-  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
-
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: #0a0a0a;
-    color: #e0e0e0;
-    min-height: 100vh;
-    padding: 24px;
-    -webkit-font-smoothing: antialiased;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #070707; color: #e5e5e5; min-height: 100vh; padding: 24px;
   }
-
   .container { max-width: 1200px; margin: 0 auto; }
-
-  /* ── Header ── */
   header {
-    display: flex; align-items: center; justify-content: flex-start; gap: 18px;
-    margin-bottom: 28px; padding: 16px 24px;
+    display: flex; align-items: center; justify-content: center; gap: 18px;
+    margin-bottom: 20px; padding: 14px 0;
     position: sticky; top: 0; z-index: 20;
-    background: rgba(10,10,10,0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    border-radius: 0 0 16px 16px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    background: rgba(7, 7, 7, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
   header .logo {
-    width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
-    box-shadow: 0 0 20px rgba(229,57,53,0.5);
+    width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+    box-shadow: 0 0 18px rgba(139, 0, 0, 0.6);
   }
   header .brand-text { text-align: left; }
   h1 {
-    font-size: 28px; font-weight: 900; letter-spacing: 6px;
-    background: linear-gradient(135deg, #ff4444, #cc2222);
+    font-size: 36px; font-weight: 900; letter-spacing: 8px;
+    background: linear-gradient(135deg, #ff3b3b, #8b0000);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-bottom: 3px;
+    margin-bottom: 6px;
   }
-  .subtitle {
-    color: #555; font-size: 10px; letter-spacing: 0.25em;
-    text-transform: uppercase; font-weight: 500;
-  }
-
-  /* ── Layout ── */
+  .subtitle { color: #555; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; }
   .layout { display: grid; grid-template-columns: 1fr 480px; gap: 24px; align-items: start; }
   @media (min-width: 961px) {
     .layout > div:first-child {
-      position: sticky; top: 110px; align-self: start;
-      max-height: calc(100vh - 130px); overflow-y: auto;
+      position: sticky; top: 130px; align-self: start;
+      max-height: calc(100vh - 150px); overflow-y: auto;
       padding-right: 4px;
     }
-    .layout > div:first-child::-webkit-scrollbar { width: 5px; }
+    .layout > div:first-child::-webkit-scrollbar { width: 6px; }
     .layout > div:first-child::-webkit-scrollbar-track { background: transparent; }
-    .layout > div:first-child::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+    .layout > div:first-child::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
   }
   @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
-
-  /* ── Mobile ── */
+  /* ── Mobile small screen ── */
   @media (max-width: 600px) {
     body { padding: 10px; }
-    h1 { font-size: 22px !important; letter-spacing: 3px !important; }
+    h1 { font-size: 24px !important; letter-spacing: 3px !important; }
     .layout { gap: 12px; }
     .row-2, .row-3 { grid-template-columns: 1fr !important; }
     .button-row { grid-template-columns: 1fr !important; }
     canvas { max-width: 100% !important; }
-    .panel { padding: 16px; }
+    .panel { padding: 12px; }
     .api-row { flex-direction: column; gap: 4px; }
     .api-label { width: auto !important; padding: 0 !important; }
     .scene-dot { min-width: 32px; padding: 4px 8px; font-size: 9px; }
   }
 
-  /* ── Panel / Card ── */
-  .panel {
-    background: #111111;
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-    transition: box-shadow 0.2s;
-  }
-  .panel:hover { box-shadow: 0 6px 32px rgba(0,0,0,0.55); }
-  .panel + .panel { margin-top: 16px; }
-
+  .panel { background: #121212; border: 1px solid #1f1f1f; border-radius: 10px; padding: 20px; }
+  .panel + .panel { margin-top: 14px; }
   .panel h2 {
-    font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
-    color: #666; margin-bottom: 18px; font-weight: 600;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 3px;
+    color: #888; margin-bottom: 14px; font-weight: 600;
     display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding-bottom: 12px;
   }
   .panel h2 .num {
-    background: transparent;
-    color: #c9a84c;
-    width: auto; height: auto;
-    border-radius: 0;
-    display: inline;
-    font-size: 11px;
-    font-weight: 800;
-    font-family: 'Inter', monospace;
-    letter-spacing: 0.05em;
-    margin-right: 10px;
-    padding: 0;
+    background: #8b0000; color: #fff; width: 22px; height: 22px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 10px;
+    font-weight: 800; margin-right: 8px;
   }
-
-  /* ── Labels ── */
   label {
-    display: block; font-size: 10px; color: #777; text-transform: uppercase;
-    letter-spacing: 0.1em; margin-bottom: 7px; font-weight: 600;
+    display: block; font-size: 10px; color: #666; text-transform: uppercase;
+    letter-spacing: 2px; margin-bottom: 6px; font-weight: 600;
   }
-
-  /* ── Inputs ── */
   input[type=text], input[type=password], input[type=number], select, textarea {
-    width: 100%;
-    background: #1a1a1a;
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #e0e0e0;
-    padding: 11px 14px;
-    border-radius: 8px;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 13px;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%; background: #080808; border: 1px solid #252525; color: #e5e5e5;
+    padding: 11px 13px; border-radius: 6px; font-family: inherit; font-size: 14px;
   }
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: rgba(229,57,53,0.6);
-    box-shadow: 0 0 0 3px rgba(229,57,53,0.12);
-  }
-  textarea {
-    resize: vertical; min-height: 140px;
-    font-family: 'Inter', monospace; font-size: 13px; line-height: 1.65;
-  }
-
-  /* ── Range slider ── */
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #8b0000; }
+  textarea { resize: vertical; min-height: 140px; font-family: 'Inter', monospace; font-size: 13px; line-height: 1.6; }
   input[type=range] {
-    width: 100%; height: 3px;
-    background: #222; border-radius: 2px;
+    width: 100%; height: 4px; background: #1a1a1a; border-radius: 2px;
     -webkit-appearance: none; outline: none;
   }
   input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none;
-    width: 16px; height: 16px;
-    background: #e53935; border-radius: 50%; cursor: pointer;
-    box-shadow: 0 0 8px rgba(229,57,53,0.5);
+    -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
+    background: #8b0000; border-radius: 50%; cursor: pointer;
+    box-shadow: 0 0 8px rgba(139, 0, 0, 0.5);
   }
-
-  /* ── Fields ── */
-  .field { margin-bottom: 16px; }
+  .field { margin-bottom: 14px; }
   .field:last-child { margin-bottom: 0; }
   .slider-row { display: flex; align-items: center; gap: 10px; }
   .slider-row input[type=range] { flex: 1; }
   .slider-val {
-    min-width: 46px; text-align: right;
-    font-family: 'Inter', monospace; font-size: 12px; color: #888;
+    min-width: 46px; text-align: right; font-family: 'Inter', monospace;
+    font-size: 13px; color: #999;
   }
-
-  /* ── Buttons ── */
   button {
-    background: #e53935;
-    color: #fff;
-    border: none;
-    padding: 13px 20px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-    transition: transform 0.1s, opacity 0.2s, box-shadow 0.2s;
-    width: 100%;
-    font-family: 'Inter', system-ui, sans-serif;
-    box-shadow: 0 2px 12px rgba(229,57,53,0.25);
+    background: linear-gradient(135deg, #8b0000, #3b0000); color: #fff; border: none;
+    padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 2px; font-weight: 700;
+    transition: transform 0.1s, opacity 0.2s; width: 100%; font-family: inherit;
   }
-  button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(229,57,53,0.4);
-  }
-  button:active:not(:disabled) { transform: translateY(0); }
-  button:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
-
-  button.secondary {
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.12);
-    color: #999;
-    box-shadow: none;
-    border-radius: 8px;
-  }
-  button.secondary:hover:not(:disabled) {
-    border-color: rgba(229,57,53,0.5);
-    color: #e0e0e0;
-    box-shadow: none;
-    background: rgba(229,57,53,0.06);
-  }
-
-  button.small {
-    padding: 6px 12px; font-size: 10px; width: auto;
-    letter-spacing: 0.08em; border-radius: 6px;
-    box-shadow: none;
-  }
-  button.small:hover:not(:disabled) { transform: none; }
-
-  .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  button:hover:not(:disabled) { transform: translateY(-1px); }
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+  button.secondary { background: transparent; border: 1px solid #2a2a2a; color: #aaa; }
+  button.secondary:hover:not(:disabled) { border-color: #8b0000; color: #fff; }
+  button.small { padding: 6px 10px; font-size: 10px; width: auto; letter-spacing: 1px; }
+  .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
   .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-
-  /* ── Canvas / Studio Monitor ── */
   canvas {
-    width: 100%; max-width: 380px; aspect-ratio: 9 / 16;
-    background: #0d0d0d;
-    border-radius: 12px;
-    display: block; margin: 0 auto;
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 20px 60px rgba(0,0,0,0.7), inset 0 0 40px rgba(0,0,0,0.5);
+    width: 100%; max-width: 380px; aspect-ratio: 9 / 16; background: #1a1a1a;
+    border-radius: 10px; display: block; margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(139, 0, 0, 0.15);
   }
-  .preview-wrapper {
-    display: flex; justify-content: center;
-    padding: 16px 0 8px;
-    background: #0d0d0d;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.04);
-    margin-bottom: 12px;
-  }
-
-  /* ── Scene nav dots ── */
+  .preview-wrapper { display: flex; justify-content: center; padding: 10px 0; }
   .scene-nav {
     display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
-    margin-top: 12px; padding: 0 4px;
+    margin-top: 14px; padding: 0 8px;
   }
   .scene-dot {
-    padding: 5px 10px; background: #161616;
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 20px; font-size: 10px; cursor: pointer; color: #777;
-    letter-spacing: 0.08em; min-width: 38px; text-align: center;
+    padding: 6px 10px; background: #161616; border: 1px solid #252525;
+    border-radius: 14px; font-size: 10px; cursor: pointer; color: #888;
+    letter-spacing: 1px; min-width: 40px; text-align: center;
     transition: all 0.12s;
-    font-family: 'Inter', monospace;
   }
-  .scene-dot:hover { border-color: #444; color: #ccc; }
-  .scene-dot.active { background: #e53935; border-color: #e53935; color: #fff; box-shadow: 0 2px 10px rgba(229,57,53,0.4); }
-
-  /* ── Status pills ── */
+  .scene-dot:hover { border-color: #555; color: #ccc; }
+  .scene-dot.active { background: #8b0000; border-color: #8b0000; color: #fff; }
   .status {
-    margin-top: 12px; padding: 10px 16px; border-radius: 8px; font-size: 11px;
-    text-align: center; letter-spacing: 0.08em; font-family: 'Inter', monospace;
+    margin-top: 12px; padding: 10px 14px; border-radius: 6px; font-size: 12px;
+    text-align: center; letter-spacing: 1px;
   }
-  .status.info  { background: #0c1428; color: #6b8fd4; border: 1px solid #1a2d54; }
-  .status.error { background: #1e0a0a; color: #e57373; border: 1px solid #3d1515; }
-  .status.success { background: #0a1e0e; color: #66bb6a; border: 1px solid #154421; }
-
-  /* ── API Row ── */
+  .status.info { background: #0f1525; color: #8ba3ff; border: 1px solid #1a2340; }
+  .status.error { background: #251010; color: #ff8080; border: 1px solid #401a1a; }
+  .status.success { background: #102510; color: #80ff99; border: 1px solid #1a401a; }
   .api-row { display: flex; gap: 8px; margin-bottom: 10px; }
   .api-row input { flex: 1; }
-  .api-row button { width: auto; padding: 11px 16px; border-radius: 8px; }
+  .api-row button { width: auto; padding: 11px 16px; }
   .api-row:last-child { margin-bottom: 0; }
   .api-label {
-    width: 110px; font-size: 10px; color: #666;
-    text-transform: uppercase; letter-spacing: 0.1em;
-    padding: 12px 0; flex-shrink: 0; font-weight: 600;
+    width: 110px; font-size: 10px; color: #888; text-transform: uppercase;
+    letter-spacing: 1px; padding: 11px 0; flex-shrink: 0; font-weight: 600;
   }
-
-  /* ── Voice-provider pill toggle ── */
-  .vp-btn {
-    flex: 1; padding: 9px 6px; font-size: 10px; font-weight: 700;
-    letter-spacing: 0.04em; border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: #161616; color: #777; cursor: pointer; transition: all 0.15s;
-    font-family: 'Inter', system-ui, sans-serif; text-align: center;
-    box-shadow: none; width: auto;
-  }
-  .vp-btn:hover { border-color: rgba(255,255,255,0.2); color: #ccc; transform: none; box-shadow: none; }
-  .vp-btn.active {
-    background: #e53935; border-color: #e53935; color: #fff;
-    box-shadow: 0 2px 10px rgba(229,57,53,0.35);
-  }
-
-  /* ── Checkbox row ── */
   .check-row {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12px; color: #aaa; cursor: pointer; padding: 6px 0;
+    display: flex; align-items: center; gap: 8px; font-size: 12px; color: #aaa;
+    cursor: pointer; padding: 6px 0;
   }
-  .check-row input { width: 16px; height: 16px; accent-color: #e53935; cursor: pointer; }
-
-  /* ── Footer ── */
+  .check-row input { width: 16px; height: 16px; accent-color: #8b0000; cursor: pointer; }
   .footer-note {
-    text-align: center; color: #333; font-size: 10px; margin-top: 40px;
-    letter-spacing: 0.2em; text-transform: uppercase;
+    text-align: center; color: #444; font-size: 10px; margin-top: 30px;
+    letter-spacing: 2px; text-transform: uppercase;
   }
-  a { color: #e53935; text-decoration: none; }
-  a:hover { color: #ff6b6b; }
-
-  /* ── Thumbnails ── */
+  a { color: #8b0000; text-decoration: none; }
+  a:hover { color: #ff3b3b; }
   .thumb-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: 8px; margin-top: 10px;
   }
   .thumb {
-    aspect-ratio: 1/1; background: #0d0d0d;
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 8px; overflow: hidden; position: relative; cursor: pointer;
-    transition: border-color 0.15s;
+    aspect-ratio: 1/1; background: #0a0a0a; border: 1px solid #252525;
+    border-radius: 6px; overflow: hidden; position: relative; cursor: pointer;
   }
-  .thumb:hover { border-color: rgba(229,57,53,0.4); }
   .thumb img { width: 100%; height: 100%; object-fit: cover; }
   .thumb .idx {
-    position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.8);
-    color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px;
-    font-weight: 700; font-family: 'Inter', monospace;
+    position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7);
+    color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 8px;
+    font-weight: 700;
   }
   .thumb .regen {
-    position: absolute; bottom: 4px; right: 4px; background: rgba(229,57,53,0.9);
-    color: #fff; font-size: 9px; padding: 3px 7px; border-radius: 8px;
-    cursor: pointer; font-weight: 700; letter-spacing: 0.04em;
+    position: absolute; bottom: 4px; right: 4px; background: rgba(139,0,0,0.85);
+    color: #fff; font-size: 9px; padding: 3px 6px; border-radius: 8px;
+    cursor: pointer; font-weight: 700; letter-spacing: 0.5px;
   }
-  .thumb.empty { display: flex; align-items: center; justify-content: center; color: #333; font-size: 20px; }
-
-  /* ── Cost note ── */
+  .thumb.empty { display: flex; align-items: center; justify-content: center; color: #444; font-size: 20px; }
   .cost-note {
-    font-size: 10px; color: #555; margin-top: 8px;
-    letter-spacing: 0.08em; text-transform: uppercase; text-align: center;
+    font-size: 10px; color: #666; margin-top: 8px; letter-spacing: 1px;
+    text-transform: uppercase; text-align: center;
   }
-
-  /* ── Project list ── */
   .project-list {
-    display: flex; flex-direction: column; gap: 8px;
+    display: flex; flex-direction: column; gap: 6px;
     max-height: 240px; overflow-y: auto; padding-right: 4px;
   }
-  .project-list::-webkit-scrollbar { width: 4px; }
+  .project-list::-webkit-scrollbar { width: 5px; }
   .project-list::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
   .project-item {
     display: flex; align-items: center; gap: 10px;
-    background: #0e0e0e;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px; padding: 10px; transition: border-color 0.15s;
+    background: #0c0c0c; border: 1px solid #1f1f1f; border-radius: 6px;
+    padding: 8px; transition: border-color 0.15s;
   }
-  .project-item:hover { border-color: rgba(255,255,255,0.12); }
-  .project-item.active { border-color: rgba(229,57,53,0.5); }
+  .project-item:hover { border-color: #444; }
+  .project-item.active { border-color: #8b0000; }
   .project-thumb {
-    width: 38px; height: 68px; object-fit: cover; border-radius: 6px;
+    width: 38px; height: 68px; object-fit: cover; border-radius: 4px;
     background: #050505; flex-shrink: 0;
   }
   .project-meta { flex: 1; min-width: 0; }
   .project-name {
-    font-size: 12px; font-weight: 600; color: #ddd;
+    font-size: 13px; font-weight: 600; color: #ddd;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .project-date { font-size: 10px; color: #555; letter-spacing: 0.06em; margin-top: 2px; }
+  .project-date { font-size: 10px; color: #666; letter-spacing: 1px; margin-top: 2px; }
   .project-load-btn, .project-del-btn {
-    padding: 6px 10px; border-radius: 6px; font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
-    cursor: pointer; flex-shrink: 0; width: auto; box-shadow: none;
+    padding: 6px 10px; border-radius: 4px; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
+    cursor: pointer; flex-shrink: 0; width: auto;
   }
-  .project-load-btn { background: #e53935; color: #fff; border: none; }
+  .project-load-btn {
+    background: linear-gradient(135deg, #8b0000, #3b0000); color: #fff; border: none;
+  }
   .project-del-btn {
-    background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #666;
+    background: transparent; border: 1px solid #2a2a2a; color: #888;
   }
-  .project-del-btn:hover { border-color: #e57373; color: #e57373; }
-
-  /* ── Folder row ── */
+  .project-del-btn:hover { border-color: #ff4040; color: #ff4040; }
   .folder-row { display: flex; gap: 8px; align-items: center; }
   .folder-display {
-    flex: 1; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.08);
-    color: #aaa; padding: 10px 13px; border-radius: 8px;
+    flex: 1; background: #080808; border: 1px solid #252525;
+    color: #bbb; padding: 10px 12px; border-radius: 6px;
     font-size: 12px; font-family: 'Inter', monospace;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .folder-display.set { border-color: rgba(229,57,53,0.5); color: #ef5350; }
-
+  .folder-display.set { border-color: #8b0000; color: #ff6060; }
   .big-btn { padding: 16px; font-size: 13px; }
   audio { width: 100%; margin-top: 8px; filter: invert(90%) hue-rotate(180deg); }
-
-  /* ── Details/summary ── */
   details summary {
-    cursor: pointer; padding: 7px 0; color: #666; font-size: 10px;
-    letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600;
-    transition: color 0.15s;
+    cursor: pointer; padding: 6px 0; color: #888; font-size: 11px;
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
   }
   details[open] summary { color: #aaa; }
   details > *:not(summary) { margin-top: 10px; }
-
-  /* ── Canvas animation ── */
   @keyframes canvasPulse {
-    0%, 100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 20px 60px rgba(0,0,0,0.7); }
-    50% { box-shadow: 0 0 0 1px rgba(229,57,53,0.3), 0 20px 80px rgba(229,57,53,0.3); }
+    0%, 100% { box-shadow: 0 20px 60px rgba(139,0,0,0.15); }
+    50% { box-shadow: 0 20px 80px rgba(139,0,0,0.55); }
   }
   canvas.generating { animation: canvasPulse 1.2s ease-in-out infinite; }
   .retry-bar { display:none; gap:8px; margin-top:10px; flex-wrap:wrap; }
   .retry-bar.show { display:flex; }
 
-  /* ── Progress bar ── */
-  .progress-track {
-    height: 3px; background: #1a1a1a; border-radius: 2px; overflow: hidden;
-    margin-top: 10px;
-  }
-  .progress-bar {
-    height: 100%; background: linear-gradient(90deg, #e53935, #ff6b6b);
-    width: 0%; transition: width 0.3s;
-  }
-
   /* ── Subtitle presets ── */
-  .subs-presets { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:16px; }
+  .subs-presets { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:14px; }
   .subs-preset-btn {
-    background:#141414; border:1px solid rgba(255,255,255,0.08); color:#888;
-    padding:9px 4px; border-radius:8px; cursor:pointer; font-size:9px;
-    text-transform:uppercase; letter-spacing:0.1em; font-weight:700;
+    background:#0e0e0e; border:1px solid #2a2a2a; color:#aaa;
+    padding:8px 4px; border-radius:6px; cursor:pointer; font-size:9px;
+    text-transform:uppercase; letter-spacing:1px; font-weight:700;
     font-family:'Inter',sans-serif; text-align:center; line-height:1.4;
-    transition:all 0.15s; width:100%; box-shadow:none;
+    transition:all 0.15s; width:100%;
   }
-  .subs-preset-btn:hover { border-color:rgba(229,57,53,0.4); color:#fff; transform:none; box-shadow:none; }
-  .subs-preset-btn.active { background:#e53935; border-color:#e53935; color:#fff; box-shadow:none; }
-
-  .subs-section-label {
-    font-size:9px; text-transform:uppercase; letter-spacing:0.18em;
-    color: #c9a84c; font-weight:700; margin:14px 0 8px; display:block;
-    opacity: 0.7;
-  }
+  .subs-preset-btn:hover { border-color:#8b0000; color:#fff; }
+  .subs-preset-btn.active { background:#8b0000; border-color:#8b0000; color:#fff; }
+  .subs-section-label { font-size:9px; text-transform:uppercase; letter-spacing:2px; color:#555; font-weight:700; margin:12px 0 8px; display:block; }
   .subs-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .subs-toggle-row {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.05);
-  }
-  .subs-toggle-label { font-size:11px; color:#bbb; }
-
-  /* ── Toggle switch ── */
+  .subs-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #1a1a1a; }
+  .subs-toggle-label { font-size:11px; color:#ccc; }
+  /* Toggle switch */
   .toggle-switch { position:relative; width:38px; height:20px; flex-shrink:0; }
   .toggle-switch input { opacity:0; width:0; height:0; }
-  .toggle-track {
-    position:absolute; inset:0; background:#1a1a1a;
-    border-radius:20px; border:1px solid rgba(255,255,255,0.1);
-    cursor:pointer; transition:background 0.2s;
-  }
-  .toggle-switch input:checked + .toggle-track { background:#e53935; border-color:#e53935; }
-  .toggle-track::after {
-    content:''; position:absolute; top:2px; left:2px;
-    width:14px; height:14px; background:#fff;
-    border-radius:50%; transition:transform 0.2s;
-  }
+  .toggle-track { position:absolute; inset:0; background:#1a1a1a; border-radius:20px; border:1px solid #333; cursor:pointer; transition:background 0.2s; }
+  .toggle-switch input:checked + .toggle-track { background:#8b0000; border-color:#8b0000; }
+  .toggle-track::after { content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; background:#fff; border-radius:50%; transition:transform 0.2s; }
   .toggle-switch input:checked + .toggle-track::after { transform:translateX(18px); }
+
 
   /* ── 7-Day Calendar ── */
   .calendar-panel { margin-top: 24px; }
   .cal-day-row {
     display: grid; grid-template-columns: 52px 1fr auto auto;
     gap: 8px; align-items: center; padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid #181818;
   }
   .cal-day-row:last-child { border-bottom: none; }
-  .cal-day-label {
-    font-size: 10px; font-weight: 800; color: #555;
-    letter-spacing: 0.08em; text-transform: uppercase;
-  }
-  .cal-day-label.today { color: #c9a84c; }
+  .cal-day-label { font-size: 11px; font-weight: 800; color: #666; letter-spacing: 1px; text-transform: uppercase; }
+  .cal-day-label.today { color: #8b0000; }
   .cal-topic-input {
-    background: #161616; border: 1px solid rgba(255,255,255,0.07);
-    color: #e0e0e0; padding: 8px 11px; border-radius: 8px;
-    font-size: 12px; font-family: 'Inter', system-ui, sans-serif; width: 100%;
-    transition: border-color 0.15s;
+    background: #080808; border: 1px solid #1e1e1e; color: #e5e5e5;
+    padding: 8px 10px; border-radius: 6px; font-size: 12px; font-family: inherit; width: 100%;
   }
-  .cal-topic-input:focus { outline: none; border-color: rgba(229,57,53,0.5); box-shadow: 0 0 0 2px rgba(229,57,53,0.08); }
+  .cal-topic-input:focus { outline: none; border-color: #8b0000; }
   .cal-status {
-    font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase; padding: 3px 9px; border-radius: 12px;
-    white-space: nowrap; flex-shrink: 0; font-family: 'Inter', monospace;
+    font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0;
   }
-  .cal-status.empty   { background: #161616; color: #3a3a3a; }
-  .cal-status.planned { background: rgba(144,96,200,0.15); color: #9b77cc; }
-  .cal-status.done    { background: rgba(64,180,96,0.12); color: #4caf66; }
-  .cal-status.posted  { background: rgba(200,64,64,0.12); color: #ef5350; }
+  .cal-status.empty   { background: #1a1a1a; color: #444; }
+  .cal-status.planned { background: #1a1525; color: #9060cc; }
+  .cal-status.done    { background: #0f1f15; color: #40cc70; }
+  .cal-status.posted  { background: #1a0505; color: #cc4040; }
   .cal-actions { display: flex; gap: 5px; flex-shrink: 0; }
   .cal-btn {
-    background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #777;
-    padding: 5px 9px; border-radius: 6px; font-size: 9px; cursor: pointer;
-    letter-spacing: 0.04em; font-family: 'Inter', system-ui, sans-serif;
-    white-space: nowrap; transition: all 0.12s; width: auto; box-shadow:none;
+    background: transparent; border: 1px solid #2a2a2a; color: #888;
+    padding: 5px 8px; border-radius: 5px; font-size: 9px; cursor: pointer;
+    letter-spacing: 0.5px; font-family: inherit; white-space: nowrap;
+    transition: all 0.12s; width: auto;
   }
-  .cal-btn:hover:not(:disabled) { border-color: rgba(229,57,53,0.5); color: #fff; transform: none; box-shadow:none; }
-  .cal-btn:disabled { opacity: 0.25; cursor: not-allowed; }
-  .cal-btn.primary { background: #e53935; border-color: #e53935; color: #fff; }
-  .cal-progress { height: 3px; background: #161616; border-radius: 2px; margin-top: 14px; overflow: hidden; }
-  .cal-progress-bar { height: 100%; background: linear-gradient(90deg, #e53935, #ff6b6b); width: 0; transition: width 0.4s; }
-
+  .cal-btn:hover:not(:disabled) { border-color: #8b0000; color: #fff; }
+  .cal-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .cal-btn.primary { background: #8b0000; border-color: #8b0000; color: #fff; }
+  .cal-progress { height: 3px; background: #111; border-radius: 2px; margin-top: 12px; overflow: hidden; }
+  .cal-progress-bar { height: 100%; background: linear-gradient(90deg, #8b0000, #ff3b3b); width: 0; transition: width 0.4s; }
   @media (max-width: 600px) {
     .cal-day-row { grid-template-columns: 40px 1fr; }
     .cal-actions { flex-wrap: wrap; }
   }
 
-  .cal-ampm-label {
-    font-size:8px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase;
-    padding:2px 7px; border-radius:4px; flex-shrink:0;
-  }
-  .cal-ampm-label.am { background:rgba(200,50,50,0.2); color:#ef5350; }
-  .cal-ampm-label.pm { background:rgba(50,100,200,0.15); color:#5090cc; }
+
+  .cal-ampm-label { font-size:8px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:2px 6px; border-radius:4px; flex-shrink:0; }
+  .cal-ampm-label.am { background:#2a0000; color:#cc4040; }
+  .cal-ampm-label.pm { background:#001020; color:#4080cc; }
   .cal-day-row.debate { grid-template-columns: 52px auto 1fr auto auto; }
 
   .hidden { display: none !important; }
+  .progress-track {
+    height: 4px; background: #1a1a1a; border-radius: 2px; overflow: hidden;
+    margin-top: 10px;
+  }
+  .progress-bar {
+    height: 100%; background: linear-gradient(90deg, #8b0000, #ff3b3b);
+    width: 0%; transition: width 0.3s;
+  }
 
-  /* ── Cost Estimator ── */
+  /* ── Cost Estimator + Spending Tracker ── */
   .cost-estimator {
-    margin-top: 14px; padding: 14px 16px;
-    background: #0d0d0d;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #0d0d0d, #181818);
+    border: 1px solid #252525;
+    border-radius: 8px;
   }
   .cost-est-head {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px; font-weight: 700; font-size: 10px;
-    letter-spacing: 0.14em; text-transform: uppercase; color: #666;
+    margin-bottom: 10px;
+    font-weight: 700; font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: #888;
   }
   .cost-total {
-    font-size: 20px; font-weight: 900; letter-spacing: 0.03em;
-    color: #4ade80; transition: color 0.2s;
-    font-family: 'Inter', monospace;
+    font-size: 20px; font-weight: 900;
+    letter-spacing: 0.5px; color: #4ade80;
+    transition: color 0.2s;
   }
   .cost-total.medium { color: #facc15; }
-  .cost-total.high   { color: #ef5350; }
-  .cost-breakdown { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  .cost-line {
-    display: flex; flex-direction: column; padding: 8px 10px;
-    background: #0a0a0a; border-radius: 8px; border-left: 3px solid #2a2a2a;
+  .cost-total.high { color: #ff3b3b; }
+  .cost-breakdown {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
   }
-  .cost-line .svc { color: #444; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; }
-  .cost-line .val { color: #ccc; font-size: 13px; font-weight: 700; margin-top: 3px; font-family: 'Inter', monospace; }
-  .cost-line.claude { border-left-color: #c9a84c; }
-  .cost-line.fal    { border-left-color: #0aaec0; }
+  .cost-line {
+    display: flex; flex-direction: column;
+    padding: 7px 9px;
+    background: #080808;
+    border-radius: 5px;
+    border-left: 3px solid #333;
+  }
+  .cost-line .svc { color: #555; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; }
+  .cost-line .val { color: #ccc; font-size: 13px; font-weight: 700; margin-top: 3px; }
+  .cost-line.claude { border-left-color: #d97706; }
+  .cost-line.fal { border-left-color: #06b6d4; }
   .cost-line.eleven { border-left-color: #8b5cf6; }
   .spending-stats {
-    margin-top: 12px; padding-top: 12px;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed #2a2a2a;
     display: flex; justify-content: space-around;
   }
   .spending-stats .stat { text-align: center; }
-  .spending-stats .stat .lbl { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #3a3a3a; }
-  .spending-stats .stat .val { font-size: 12px; color: #888; font-weight: 700; margin-top: 2px; font-family: 'Inter', monospace; }
+  .spending-stats .stat .lbl { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: #444; }
+  .spending-stats .stat .val { font-size: 12px; color: #aaa; font-weight: 700; margin-top: 2px; }
   #spendAllStat { cursor: help; transition: color 0.15s; }
-  #spendAllStat:hover .val { color: #ef5350; }
+  #spendAllStat:hover .val { color: #ff3b3b; }
 
-  /* ── Pre-flight Modal ── */
+  /* Pre-flight Modal */
   .preflight-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.88);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 1000;
     display: none; align-items: center; justify-content: center;
     padding: 20px;
   }
   .preflight-overlay.show { display: flex; }
   .preflight-box {
-    background: #111; border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px; padding: 32px;
+    background: #0e0e0e; border: 1px solid #2a2a2a;
+    border-radius: 12px; padding: 28px;
     max-width: 460px; width: 100%;
-    box-shadow: 0 0 80px rgba(229,57,53,0.2);
+    box-shadow: 0 0 60px rgba(139,0,0,0.35);
     animation: pfPop 0.18s ease-out;
   }
-  @keyframes pfPop { from { opacity: 0; transform: translateY(12px) scale(0.97); } to { opacity: 1; transform: none; } }
+  @keyframes pfPop { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
   .preflight-box h3 {
-    font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase;
-    font-weight: 800; margin-bottom: 5px;
-    background: linear-gradient(135deg, #ff4444, #cc2222);
+    font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
+    font-weight: 800; margin-bottom: 4px;
+    background: linear-gradient(135deg, #ff3b3b, #8b0000);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
-  .preflight-box .sub { color: #555; font-size: 11px; margin-bottom: 20px; letter-spacing: 0.06em; }
+  .preflight-box .sub { color: #666; font-size: 11px; margin-bottom: 18px; letter-spacing: 1px; }
   .preflight-row {
     display: flex; justify-content: space-between;
-    padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 9px 0; border-bottom: 1px solid #1a1a1a;
     font-size: 13px;
   }
   .preflight-row:last-of-type { border-bottom: none; }
-  .preflight-row .lbl { color: #777; }
-  .preflight-row .val { color: #e0e0e0; font-weight: 600; max-width: 60%; text-align: right; word-break: break-word; }
+  .preflight-row .lbl { color: #888; }
+  .preflight-row .val { color: #e5e5e5; font-weight: 600; max-width: 60%; text-align: right; word-break: break-word; }
   .preflight-total {
-    margin-top: 16px; padding: 14px 18px;
-    background: #0a0a0a; border-radius: 12px;
+    margin-top: 14px; padding: 14px 16px;
+    background: #080808; border-radius: 8px;
     display: flex; justify-content: space-between; align-items: center;
-    border: 1px solid rgba(255,255,255,0.06);
   }
-  .preflight-total .lbl { color: #999; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; font-size: 11px; }
-  .preflight-total .val { font-size: 22px; font-weight: 900; color: #ef5350; font-family: 'Inter', monospace; }
-  .pf-cb { margin-top: 16px; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #666; cursor: pointer; user-select: none; }
+  .preflight-total .lbl { color: #aaa; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; font-size: 11px; }
+  .preflight-total .val { font-size: 22px; font-weight: 900; color: #ff3b3b; }
+  .pf-cb { margin-top: 14px; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #777; cursor: pointer; user-select: none; }
   .pf-cb input { cursor: pointer; }
-  .preflight-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+  .preflight-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
   .preflight-buttons button {
-    padding: 13px; font-weight: 700; font-size: 12px;
-    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
-    transition: 0.15s all; font-family: 'Inter', system-ui, sans-serif;
+    padding: 12px; border-radius: 7px; font-weight: 700; font-size: 12px;
+    letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
+    transition: 0.15s all; border: none; font-family: inherit;
   }
-  .preflight-buttons .cancel {
-    background: #161616; color: #aaa;
-    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-shadow:none;
-  }
-  .preflight-buttons .cancel:hover { background: #1f1f1f; color: #fff; box-shadow:none; }
-  .preflight-buttons .confirm {
-    background: linear-gradient(135deg, #c62828, #ef5350); color: #fff; border-radius: 50px;
-    border: none;
-  }
-  .preflight-buttons .confirm:hover { box-shadow: 0 0 24px rgba(239,83,80,0.5); }
+  .preflight-buttons .cancel { background: #1a1a1a; color: #aaa; border: 1px solid #2a2a2a; }
+  .preflight-buttons .cancel:hover { background: #222; color: #fff; }
+  .preflight-buttons .confirm { background: linear-gradient(135deg, #8b0000, #ff3b3b); color: #fff; }
+  .preflight-buttons .confirm:hover { transform: translateY(-1px); box-shadow: 0 0 20px rgba(255,59,59,0.45); }
 
   @media (max-width: 600px) {
     .cost-breakdown { grid-template-columns: 1fr; }
-    .preflight-box { padding: 22px; }
+    .preflight-box { padding: 20px; }
   }
 
   /* ── Episode Poster Generator ── */
   .poster-panel-grid { display: grid; grid-template-columns: 240px 1fr; gap: 18px; align-items: start; }
   @media (max-width: 720px) { .poster-panel-grid { grid-template-columns: 1fr; } }
   .poster-canvas-wrap {
-    background: #0d0d0d; border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px; overflow: hidden; aspect-ratio: 9 / 16; position: relative;
-    box-shadow: 0 0 24px rgba(0,0,0,0.6);
+    background: #000; border: 1px solid #1f1f1f; border-radius: 8px;
+    overflow: hidden; aspect-ratio: 9 / 16; position: relative;
+    box-shadow: 0 0 24px rgba(139,0,0,0.18);
   }
-  .poster-canvas-wrap canvas { width: 100%; height: 100%; display: block; }
+  .poster-canvas-wrap canvas {
+    width: 100%; height: 100%; display: block;
+  }
   .poster-canvas-wrap.empty::after {
     content: 'Generate script first'; position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    color: #333; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #444; font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
   }
   .poster-controls { display: flex; flex-direction: column; gap: 12px; }
   .poster-style-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
   .poster-style-btn {
-    padding: 9px 4px; border-radius: 8px;
-    background: #141414; border: 1px solid rgba(255,255,255,0.08); color: #777;
-    font-family: 'Inter', system-ui, sans-serif; font-size: 10px; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    cursor: pointer; transition: 0.15s all; box-shadow: none; width: 100%;
+    padding: 8px 4px; border-radius: 6px;
+    background: #0a0a0a; border: 1px solid #2a2a2a; color: #888;
+    font-family: inherit; font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer; transition: 0.15s all;
   }
-  .poster-style-btn:hover { color: #e0e0e0; border-color: rgba(255,255,255,0.2); transform: none; box-shadow: none; }
+  .poster-style-btn:hover { color: #fff; border-color: #404040; }
   .poster-style-btn.active {
-    background: rgba(229,57,53,0.15);
-    border-color: rgba(229,57,53,0.6); color: #ef9a9a;
-    box-shadow: 0 0 12px rgba(229,57,53,0.2);
+    background: linear-gradient(135deg, #2a0000, #500000);
+    border-color: #8b0000; color: #ff8c8c;
+    box-shadow: 0 0 12px rgba(139,0,0,0.4);
   }
   .poster-position-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
   .poster-pos-btn {
-    padding: 7px; border-radius: 7px;
-    background: #141414; border: 1px solid rgba(255,255,255,0.08); color: #777;
-    font-family: 'Inter', system-ui, sans-serif; font-size: 10px; font-weight: 700;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    cursor: pointer; transition: 0.15s all; box-shadow: none; width: 100%;
+    padding: 7px; border-radius: 5px;
+    background: #0a0a0a; border: 1px solid #2a2a2a; color: #888;
+    font-family: inherit; font-size: 10px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; transition: 0.15s all;
   }
-  .poster-pos-btn.active { background: #1e1e1e; color: #e0e0e0; border-color: rgba(255,255,255,0.25); }
+  .poster-pos-btn.active { background: #1a1a1a; color: #fff; border-color: #555; }
   .poster-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .poster-actions button {
-    padding: 12px; cursor: pointer;
-    font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 11px; border-radius: 7px; cursor: pointer;
+    font-family: inherit; font-size: 11px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
     border: none; transition: 0.15s all;
   }
   .poster-actions .download-btn {
-    background: #e53935; color: #fff; border-radius: 50px;
-    box-shadow: 0 2px 12px rgba(229,57,53,0.3);
+    background: linear-gradient(135deg, #8b0000, #ff3b3b); color: #fff;
   }
-  .poster-actions .download-btn:hover { box-shadow: 0 4px 20px rgba(229,57,53,0.5); }
+  .poster-actions .download-btn:hover {
+    transform: translateY(-1px); box-shadow: 0 0 16px rgba(255,59,59,0.4);
+  }
   .poster-actions .regen-btn {
-    background: #1a1a1a; color: #aaa;
-    border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: none;
+    background: #1a1a1a; color: #aaa; border: 1px solid #2a2a2a;
   }
-  .poster-actions .regen-btn:hover { color: #e0e0e0; border-color: rgba(255,255,255,0.25); }
-  .poster-actions .regen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .poster-status { font-size: 10px; color: #444; letter-spacing: 0.06em; min-height: 14px; }
+  .poster-actions .regen-btn:hover { color: #fff; border-color: #555; }
+  .poster-actions .regen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .poster-status { font-size: 10px; color: #555; letter-spacing: 1px; min-height: 14px; }
 
-  /* ── ElevenLabs quota toast ── */
-  #voiceQuotaToast {
-    display: none; position: sticky; top: 0; z-index: 9999;
-    margin: 0 0 12px 0; padding: 12px 18px;
-    background: #1a1200; border: 1px solid rgba(201,168,76,0.3);
-    border-radius: 12px; color: #c9a84c; font-size: 13px; line-height: 1.5;
-    align-items: center; gap: 10px;
+  /* ── MODE TABS (added) ────────────────────────────── */
+  :root { --tab-accent: #e53935; }
+  .mode-tab-bar {
+    display: flex;
+    border-bottom: 1px solid #1e1e1e;
+    background: #0a0a0a;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    margin-bottom: 16px;
   }
-  #voiceQuotaToast.show { display: flex; }
-  #voiceQuotaToast .toast-msg { flex: 1; }
-  #voiceQuotaToast a { color: #e8c96a; text-decoration: underline; }
-  #voiceQuotaToast button.toast-close {
-    background: none; border: 1px solid rgba(201,168,76,0.3);
-    color: #c9a84c; border-radius: 6px; cursor: pointer;
-    padding: 2px 9px; font-size: 12px; flex-shrink: 0; box-shadow: none; width: auto;
+  .mode-btn {
+    flex: 1;
+    padding: 11px 4px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #555;
+    font-family: inherit;
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.5;
   }
-  #voiceQuotaToast button.toast-close:hover { background: rgba(201,168,76,0.1); box-shadow: none; transform: none; }
+  .mode-btn:hover { color: #aaa; background: #111; }
+  .mode-btn.active {
+    border-bottom: 3px solid var(--tab-accent);
+    color: var(--tab-accent);
+    background: #111;
+  }
+  .mode-panel { /* shown/hidden by setContentMode */ }
+  .panel-accent-bar {
+    border-left: 3px solid var(--tab-accent);
+    padding-left: 10px;
+  }
+  .quotes-gen-btn, .poster-gen-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--tab-accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.15s all;
+  }
+  .quotes-gen-btn:hover, .poster-gen-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+  .poster-gen-btn-outline {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: var(--tab-accent);
+    border: 2px solid var(--tab-accent);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: 0.15s all;
+  }
+  .poster-gen-btn-outline:hover { background: rgba(255,255,255,0.05); }
+
 </style>
+</head>
 <body>
 <div class="container">
-<div id="voiceQuotaToast" role="alert" aria-live="polite">
-  <span class="toast-msg">⚠️ <strong>ElevenLabs quota exceeded</strong> — skipping voice. Videos will have no audio. Top up credits at <a href="https://elevenlabs.io" target="_blank" rel="noopener">elevenlabs.io</a></span>
-  <button class="toast-close" onclick="document.getElementById('voiceQuotaToast').classList.remove('show');window.voiceSkipped=false;" title="Dismiss">✕</button>
-</div>
-
   <header>
     <img src="data:image/png;base64,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" alt="Brutal Stories Logo" class="logo">
     <div class="brand-text">
@@ -775,45 +644,9 @@
           <div class="api-label">FAL.ai</div>
           <input type="password" id="falKey" placeholder="fal-… (FLUX images)" autocomplete="off">
         </div>
-        <!-- Voice Provider Pill Toggle -->
-        <div style="margin-bottom:12px;">
-          <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px;">Voice Provider</div>
-          <div id="voiceProviderToggle" style="display:flex;gap:4px;">
-            <button onclick="setVoiceProvider('elevenlabs')" id="vpBtn_elevenlabs" class="vp-btn active">🎤 ElevenLabs</button>
-            <button onclick="setVoiceProvider('openai')" id="vpBtn_openai" class="vp-btn">🤖 OpenAI TTS</button>
-            <button onclick="setVoiceProvider('upload')" id="vpBtn_upload" class="vp-btn">📁 Upload Audio</button>
-          </div>
-          <input type="hidden" id="voiceProvider" value="elevenlabs">
-        </div>
-        <!-- ElevenLabs Key — always visible -->
         <div class="api-row">
           <div class="api-label">ElevenLabs</div>
           <input type="password" id="elevenKey" placeholder="xi-… (TTS)" autocomplete="off">
-        </div>
-        <!-- OpenAI Key — always visible -->
-        <div class="api-row">
-          <div class="api-label">OpenAI Key</div>
-          <input type="password" id="openaiKey" placeholder="sk-… (TTS)" autocomplete="off">
-        </div>
-        <!-- OpenAI Voice config — shown only when OpenAI active -->
-        <div id="openaiVoiceConfig" style="display:none;">
-          <div class="api-row" style="margin-top:8px;">
-            <div class="api-label">OpenAI Voice</div>
-            <select id="openaiVoice" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:11px 13px;border-radius:6px;font-family:inherit;font-size:14px;">
-              <option value="alloy">Alloy (neutral)</option>
-              <option value="echo">Echo (male)</option>
-              <option value="fable">Fable (British)</option>
-              <option value="onyx" selected>Onyx (deep male)</option>
-              <option value="nova">Nova (female)</option>
-              <option value="shimmer">Shimmer (soft female)</option>
-            </select>
-          </div>
-        </div>
-        <!-- Upload audio fields (shown when provider = upload) -->
-        <div id="uploadAudioFields" style="display:none;">
-          <div style="background:#0a0a0a;border:1px solid #252525;border-radius:6px;padding:12px;margin-bottom:10px;">
-            <div style="font-size:11px;color:#aaa;line-height:1.6;">🎙️ Upload audio for each scene below after generating your script. Accepted formats: MP3, WAV, M4A, OGG.</div>
-          </div>
         </div>
         <div style="border-top:1px solid #1e1e1e;margin-top:12px;padding-top:12px;">
           <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px;">☁️ Auto-Schedule Setup</div>
@@ -853,62 +686,17 @@
         <div class="cost-note">Stored in your browser · script + images + voice + settings</div>
       </div>
 
-      <div class="panel">
-        <h2><span><span class="num">2</span>Topic &amp; Config</span></h2>
-        <input type="hidden" id="appMode" value="listicle">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
-          <button class="cal-btn primary" id="modeListicle" onclick="setContentMode('listicle')">📋 Listicle<br><span style="font-size:8px;opacity:0.7">Stories + images</span></button>
-          <button class="cal-btn" id="modeQuotes" onclick="setContentMode('quotes')">💬 Quotes<br><span style="font-size:8px;opacity:0.7">Text-only, no images</span></button>
-          <button class="cal-btn" id="modePoster" onclick="setContentMode('poster')">🎭 Episode Poster<br><span style="font-size:8px;opacity:0.7">1 quote · 4 lines</span></button>
-        </div>
-        <div id="quoteBgRow" style="display:none;margin-bottom:14px;">
-          <label style="display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:6px;">Animated Background</label>
-          <select id="quoteBg" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
-            <option value="ai" selected>🎨 AI Generated (vibrant)</option>
-            <option value="rain">🌧 Rain</option>
-            <option value="particles">✨ Particles</option>
-            <option value="smoke">🌫 Smoke</option>
-            <option value="matrix">💊 Matrix</option>
-            <option value="bokeh">🔮 Bokeh</option>
-          </select>
-        </div>
-        <div id="quoteFontSizeRow" style="display:none;margin-bottom:14px;">
-          <label style="display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:6px;">Quote Font Size</label>
-          <input type="number" id="quoteFontSize" min="20" max="200" value="72" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
-        </div>
-        <!-- ── Episode Poster UI ── -->
-        <div id="posterModeSection" style="display:none;margin-bottom:14px;">
-          <div class="field">
-            <label>Poster Topic</label>
-            <input type="text" id="posterTopic" placeholder="e.g. betrayal, manipulation, envy">
-          </div>
-          <div class="row-2" style="margin-bottom:10px;">
-            <div class="field" style="margin:0">
-              <label>Background</label>
-              <select id="posterBgStyle" onchange="drawStaticPreview()" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
-                <option value="void">⬛ Void Black</option>
-                <option value="crimson" selected>🔴 Crimson Abyss</option>
-                <option value="matrix">💊 Matrix Green</option>
-                <option value="smoke">🌫 Smoke Grey</option>
-                <option value="navy">🔵 Deep Navy</option>
-              </select>
-            </div>
-            <div class="field" style="margin:0">
-              <label>Quote Style</label>
-              <select id="posterQuoteStyle" onchange="drawStaticPreview()" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
-                <option value="upper" selected>UPPERCASE</option>
-                <option value="sentence">Sentence case</option>
-                <option value="lower">lowercase</option>
-              </select>
-            </div>
-          </div>
-          <div class="row-2">
-            <button onclick="generatePoster()" id="generatePosterBtn">⚡ Generate Poster</button>
-            <button onclick="exportPosterPNG()" class="secondary">💾 Export PNG</button>
-          </div>
-          <div id="posterGenStatus" style="display:none;margin-top:8px;padding:8px 12px;border-radius:6px;font-size:11px;text-align:center;letter-spacing:1px;"></div>
-        </div>
+      <!-- ══ MODE TAB BAR ══ -->
+      <div class="mode-tab-bar">
+        <button class="mode-btn active" id="modeListicle" onclick="setContentMode('listicle')">📋 Listicle<br><span style="opacity:0.7">Stories + images</span></button>
+        <button class="mode-btn" id="modeQuotes" onclick="setContentMode('quotes')">💬 Quotes<br><span style="opacity:0.7">Text-only</span></button>
+        <button class="mode-btn" id="modePoster" onclick="setContentMode('poster')">🎬 Episode Poster<br><span style="opacity:0.7">Static export</span></button>
+      </div>
 
+      <!-- ══ LISTICLE PANEL ══ -->
+      <div id="listiclePanel" class="mode-panel">
+        <div class="panel">
+          <h2><span class="panel-accent-bar"><span class="num">2</span>Topic &amp; Config</span></h2>
         <div class="field">
           <label>Topic / Theme</label>
           <input type="text" id="topic" placeholder="e.g. 5 stages of every relationship" value="The Dark Psychology Behind Why Filipinos Can't Say No">
@@ -922,7 +710,7 @@
               <option value="9">9</option>
             </select>
           </div>
-          <div id="elevenVoiceConfigFields" class="field">
+          <div class="field">
             <label>Voice</label>
             <select id="voice">
               <option value="yBtWe2ymKT0oXUmsi6st" selected>My Voice (Sulong)</option>
@@ -934,7 +722,7 @@
               <option value="EXAVITQu4vr4xnSDxMaL">Bella (soft)</option>
             </select>
           </div>
-          <div id="elevenModelConfigField" class="field">
+          <div class="field">
             <label>ElevenLabs Model</label>
             <select id="elevenModel">
               <option value="eleven_v3" selected>v3 — Best quality (latest)</option>
@@ -970,32 +758,6 @@
             <input type="checkbox" id="cartoonMode" checked>
             <div class="toggle-track"></div>
           </label>
-        </div>
-        <div id="cartoonStyleRow" style="margin-bottom:14px;">
-          <label style="display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:6px;">🎨 Cartoon Style</label>
-          <select id="cartoonStyle" style="width:100%;background:#0d0d0d;color:#ccc;border:1px solid #2a2a2a;border-radius:6px;padding:7px 10px;font-size:11px;">
-            <option value="expressive">Expressive Cartoon (default)</option>
-            <option value="flat">Flat Design (minimalist, bold colors)</option>
-            <option value="anime80s">80s Anime (vintage Japanese)</option>
-            <option value="chibi">Chibi (cute, big head, tiny body)</option>
-            <option value="comic">Comic Book (superhero, halftone)</option>
-            <option value="watercolor">Watercolor (soft painted)</option>
-            <option value="pixar">3D Pixar-Style (rendered 3D)</option>
-            <option value="sketch">Sketch / Doodle (pencil drawn)</option>
-            <option value="retro">Retro 1950s Cartoon (Tom & Jerry era)</option>
-          </select>
-        </div>
-        <!-- Visual Mode Toggle -->
-        <input type="hidden" id="visualMode" value="image">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;" id="visualModeRow">
-          <div>
-            <div style="font-size:11px;color:#ccc;font-weight:600;">🎬 Visual Mode</div>
-            <div style="font-size:10px;color:#555;margin-top:2px;">Static illustration or AI-generated video clip</div>
-          </div>
-          <div style="display:flex;gap:4px;background:#111;border:1px solid #252525;border-radius:20px;padding:3px;">
-            <button id="modeImgBtn" onclick="setVisualMode('image')" style="padding:5px 12px;border-radius:16px;border:none;font-size:11px;font-weight:700;cursor:pointer;background:#e5e5e5;color:#111;transition:all .15s;">🖼 AI Image</button>
-            <button id="modeVidBtn" onclick="setVisualMode('video')" style="padding:5px 12px;border-radius:16px;border:none;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:#666;transition:all .15s;">🎬 AI Video</button>
-          </div>
         </div>
         <button id="generateAllBtn" class="big-btn">⚡ Generate Everything</button>
 
@@ -1035,6 +797,178 @@
           </div>
         </div>
       </div>
+
+      </div><!-- /listicle inner panel -->
+      </div><!-- /listiclePanel -->
+
+      <!-- ══ QUOTES PANEL ══ -->
+      <div id="quotesPanel" class="mode-panel" style="display:none">
+        <div class="panel">
+          <h2><span class="panel-accent-bar"><span class="num">2</span>Quotes Config</span></h2>
+          <div class="field">
+            <label>Topic for AI Quote Generation</label>
+            <input type="text" id="quotesTopic" placeholder="e.g. dark psychology of manipulation"
+              oninput="document.getElementById('topic').value=this.value"
+              style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+            <div class="cost-note" style="text-align:left;text-transform:none;letter-spacing:normal;font-size:10px;margin-top:4px;">This syncs to the Listicle topic field used by the generator.</div>
+          </div>
+          <div class="field">
+            <label>Scenes / Quote Count</label>
+            <select id="quotesSceneCount" onchange="document.getElementById('sceneCount').value=this.value"
+              style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+              <option value="5">5 quotes</option>
+              <option value="7" selected>7 quotes</option>
+              <option value="9">9 quotes</option>
+            </select>
+          </div>
+          <div id="quoteBgRow" style="margin-bottom:14px;">
+            <label style="display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:6px;">Animated Background</label>
+            <select id="quoteBg" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+              <option value="ai" selected>🎨 AI Generated (vibrant)</option>
+              <option value="rain">🌧 Rain</option>
+              <option value="particles">✨ Particles</option>
+              <option value="smoke">🌫 Smoke</option>
+              <option value="matrix">💊 Matrix</option>
+              <option value="bokeh">🔮 Bokeh</option>
+            </select>
+          </div>
+          <div id="quoteFontSizeRow" style="margin-bottom:14px;">
+            <label style="display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:6px;">Quote Font Size</label>
+            <input type="number" id="quoteFontSize" min="20" max="200" value="72"
+              style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field">
+            <label>Quote Font (syncs subtitle font)</label>
+            <select id="quotesFont" onchange="document.getElementById('subsFont').value=this.value"
+              style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+              <option value="'Inter', sans-serif" selected>Inter (bold sans)</option>
+              <option value="'Anton', sans-serif">Anton (condensed)</option>
+              <option value="'Montserrat', sans-serif">Montserrat 900</option>
+              <option value="'Archivo Black', sans-serif">Archivo Black</option>
+              <option value="'Special Elite', monospace">Special Elite — Worn Keys</option>
+              <option value="'VT323', monospace">VT323 — Pixel Terminal</option>
+              <option value="'Permanent Marker', cursive">Permanent Marker</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Quote Text Case (syncs subtitle case)</label>
+            <select id="quotesCase" onchange="document.getElementById('subsCase').value=this.value"
+              style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+              <option value="upper">ALL CAPS</option>
+              <option value="lower">all lowercase</option>
+              <option value="original" selected>Original Case</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>ElevenLabs Voice (syncs main voice)</label>
+            <select id="quotesVoice" onchange="document.getElementById('voice').value=this.value"
+              style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+              <option value="yBtWe2ymKT0oXUmsi6st" selected>My Voice (Sulong)</option>
+              <option value="pNInz6obpgDQGcFmaJgB">Adam (deep)</option>
+              <option value="ErXwobaYiN019PkySvjV">Antoni (warm)</option>
+              <option value="VR6AewLTigWG4xSOukaG">Arnold (strong)</option>
+              <option value="21m00Tcm4TlvDq8ikWAM">Rachel (calm)</option>
+              <option value="AZnzlk1XvdvUeBnXmlld">Domi (bold)</option>
+              <option value="EXAVITQu4vr4xnSDxMaL">Bella (soft)</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;">
+            <div>
+              <div style="font-size:11px;color:#ccc;font-weight:600;">✂️ Silence Remover</div>
+              <div style="font-size:10px;color:#555;margin-top:2px;">Syncs to shared silence setting in panel 4</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="quotesSilenceEnabled" checked
+                onchange="document.getElementById('silenceRemoveEnabled').checked=this.checked">
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+          <button class="quotes-gen-btn" onclick="runGenerateAll()">⚡ Generate Quotes</button>
+        </div>
+      </div><!-- /quotesPanel -->
+
+      <!-- ══ EPISODE POSTER PANEL ══ -->
+      <div id="posterPanel" class="mode-panel" style="display:none">
+        <div class="panel">
+          <h2>
+            <span class="panel-accent-bar"><span class="num" style="background:#d97706">🎬</span>Episode Poster</span>
+            <div class="poster-status" id="posterStatus">Generate script first</div>
+          </h2>
+          <div class="cost-note" style="text-align:left;text-transform:none;letter-spacing:normal;font-size:10px;margin-bottom:12px;">🔇 No audio — static image export only. Uses the current script &amp; topic.</div>
+          <div class="field">
+            <label>Poster Topic / Custom Text</label>
+            <input type="text" id="posterTopic" placeholder="Overrides auto-topic (optional)"
+              style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="poster-panel-grid">
+            <div class="poster-canvas-wrap empty" id="posterCanvasWrap">
+              <canvas id="posterCanvas" width="540" height="960"></canvas>
+            </div>
+            <div class="poster-controls">
+              <div class="field" style="margin:0;">
+                <label>Poster Style</label>
+                <div class="poster-style-row">
+                  <button type="button" class="poster-style-btn active" data-style="cinematic">🎞️ Cinematic</button>
+                  <button type="button" class="poster-style-btn" data-style="minimal">⬜ Minimal</button>
+                  <button type="button" class="poster-style-btn" data-style="vintage">📽️ Vintage</button>
+                </div>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label>Background Source</label>
+                <select id="posterBgStyle"
+                  style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+                  <option value="scene">Use current scene image</option>
+                  <option value="ai">Generate dedicated AI image</option>
+                  <option value="solid">Solid dark background</option>
+                </select>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label>Scene / Quote Source</label>
+                <select id="posterSource"
+                  style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+                  <option value="0">Scene 1</option>
+                  <option value="1">Scene 2</option>
+                  <option value="2">Scene 3</option>
+                  <option value="best">Best (auto)</option>
+                </select>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label>Quote Text Source</label>
+                <select id="posterTextSource" style="margin-bottom:6px;width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+                  <option value="title">Main title</option>
+                  <option value="narration" selected>Scene narration (first sentence)</option>
+                  <option value="custom">Custom text below</option>
+                </select>
+              </div>
+              <textarea id="posterCustomText" style="min-height:64px;font-size:12px;line-height:1.4;width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;" placeholder="Type your own quote, or pick a scene above…"></textarea>
+              <div class="field" style="margin-top:10px;">
+                <label>Quote Style</label>
+                <select id="posterQuoteStyle"
+                  style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+                  <option value="upper">UPPERCASE</option>
+                  <option value="sentence" selected>Sentence case</option>
+                  <option value="lower">lowercase</option>
+                </select>
+              </div>
+              <div class="poster-position-row" style="margin-top:10px;margin-bottom:6px;">
+                <button type="button" class="poster-pos-btn" data-pos="top">↑ Top</button>
+                <button type="button" class="poster-pos-btn active" data-pos="bottom">↓ Bottom</button>
+                <button type="button" class="poster-pos-btn" data-pos="center">◉ Center</button>
+              </div>
+              <div style="margin-top:8px;">
+                <label class="check-row"><input type="checkbox" id="posterUppercase" checked> UPPERCASE text</label>
+                <label class="check-row"><input type="checkbox" id="posterQuoteMarks"> "Quote marks"</label>
+              </div>
+              <label class="check-row" style="margin-top:8px;">
+                <input type="checkbox" id="posterShowBrand" checked>
+                Show branding
+              </label>
+              <button type="button" class="poster-gen-btn" id="posterRegenBtn" title="Generate a dedicated AI poster image">⚡ Generate AI Poster</button>
+              <button type="button" class="poster-gen-btn-outline" id="posterDownloadBtn">💾 Export PNG</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /posterPanel -->
 
       <div class="panel">
         <h2><span><span class="num">3</span>Script</span>
@@ -1118,8 +1052,6 @@
             <select id="bgVariant">
               <optgroup label="Dark">
                 <option value="concrete" selected>Gray Concrete (default)</option>
-                <option value="darkConcrete">Dark Concrete (Mind Psych style)</option>
-                <option value="grunge">Grunge / Worn</option>
                 <option value="blood">Blood Red (dark)</option>
                 <option value="bloodLight">Blood Red (lighter)</option>
                 <option value="bloodWine">Wine / Burgundy</option>
@@ -1132,7 +1064,6 @@
                 <option value="paperWarm">Paper Warm Yellow</option>
                 <option value="paperCool">Paper Cool Blue + Hexagons</option>
                 <option value="paperPink">Paper Pink</option>
-                <option value="oldpaper">Old Paper (vintage)</option>
               </optgroup>
             </select>
           </div>
@@ -1140,50 +1071,6 @@
             <label>Background brightness (<span id="bgBrightnessVal">0</span>) · lighten / darken any texture</label>
             <input type="range" id="bgBrightness" min="-150" max="200" value="0">
           </div>
-
-          <!-- ═══════════════ B-ROLL VIDEO OVERLAY ═══════════════ -->
-          <div class="field" style="border:1px solid #2a1a1a;border-radius:8px;padding:12px;background:#0d0808;margin-bottom:2px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-              <div>
-                <div style="font-size:11px;font-weight:700;color:#e57373;text-transform:uppercase;letter-spacing:2px;">🎬 B-roll Video</div>
-                <div style="font-size:10px;color:#555;margin-top:2px;">Plays under all content as a semi-transparent layer</div>
-              </div>
-            </div>
-
-            <!-- File picker row -->
-            <label for="brollFile" id="brollFileLabel" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#161616;border:1px dashed #333;border-radius:6px;padding:10px 12px;color:#777;font-size:12px;font-weight:500;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#e53935'" onmouseout="this.style.borderColor='#333'">
-              <span style="font-size:18px;">📁</span>
-              <span id="brollFileName">Upload MP4 / MOV clip…</span>
-            </label>
-            <input type="file" id="brollFile" accept="video/mp4,video/quicktime,video/*" style="display:none;">
-
-            <!-- Tiny thumbnail preview -->
-            <div id="brollPreviewWrap" style="display:none;margin-top:8px;position:relative;">
-              <video id="brollThumb" style="width:100%;border-radius:5px;max-height:80px;object-fit:cover;background:#000;" muted playsinline loop></video>
-              <div style="position:absolute;top:4px;right:4px;">
-                <button id="brollRemoveBtn" style="background:rgba(229,57,53,0.9);color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;font-weight:700;">✕ Remove</button>
-              </div>
-            </div>
-
-            <!-- Opacity -->
-            <div style="margin-top:10px;">
-              <label style="display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:4px;">Opacity · <span id="brollOpacityVal">40</span>%</label>
-              <input type="range" id="brollOpacity" min="0" max="100" value="40" style="width:100%;">
-            </div>
-
-            <!-- Position -->
-            <div style="margin-top:10px;">
-              <label style="display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:4px;">Position</label>
-              <select id="brollPosition" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:8px 10px;border-radius:6px;font-family:inherit;font-size:12px;">
-                <option value="full">Full Screen</option>
-                <option value="top">Top Half</option>
-                <option value="bottom">Bottom Half</option>
-                <option value="center">Center Crop (fill)</option>
-              </select>
-            </div>
-          </div>
-          <!-- ════════════════════════════════════════════════════ -->
-
           <div class="field">
             <label>Illustration mode</label>
             <select id="illMode">
@@ -1417,64 +1304,6 @@
   </div>
 
 
-  <!-- ══ EPISODE POSTER GENERATOR ══ -->
-  <div class="panel">
-    <h2>
-      <span><span class="num" style="background:#8b0000">🎬</span>Episode Poster</span>
-      <div class="poster-status" id="posterStatus">Generate script first</div>
-    </h2>
-    <div class="poster-panel-grid">
-      <div class="poster-canvas-wrap empty" id="posterCanvasWrap">
-        <canvas id="posterCanvas" width="540" height="960"></canvas>
-      </div>
-      <div class="poster-controls">
-        <div class="field" style="margin:0;">
-          <label>Style</label>
-          <div class="poster-style-row">
-            <button type="button" class="poster-style-btn active" data-style="cinematic">🎞️ Cinematic</button>
-            <button type="button" class="poster-style-btn" data-style="minimal">⬜ Minimal</button>
-            <button type="button" class="poster-style-btn" data-style="vintage">📽️ Vintage</button>
-          </div>
-        </div>
-        <div class="field" style="margin:0;">
-          <label>Background source</label>
-          <select id="posterSource">
-            <option value="scene-1">Scene 1 (default)</option>
-          </select>
-        </div>
-        <div class="field" style="margin:0;">
-          <label>Poster text</label>
-          <select id="posterTextSource" style="margin-bottom:6px;">
-            <option value="title">Main title (default)</option>
-            <option value="custom">✎ Custom (edit below)</option>
-          </select>
-          <textarea id="posterCustomText" style="min-height:64px;font-size:12px;line-height:1.4;" placeholder="Type your own quote, or pick a scene above…"></textarea>
-        </div>
-        <div class="field" style="margin:0;">
-          <label>Position &amp; format</label>
-          <div class="poster-position-row" style="margin-bottom:6px;">
-            <button type="button" class="poster-pos-btn" data-pos="top">↑ Top</button>
-            <button type="button" class="poster-pos-btn active" data-pos="bottom">↓ Bottom</button>
-            <button type="button" class="poster-pos-btn" data-pos="center">◉ Center</button>
-          </div>
-          <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#aaa;">
-            <label class="check-row"><input type="checkbox" id="posterUppercase" checked> UPPERCASE</label>
-            <label class="check-row"><input type="checkbox" id="posterQuoteMarks"> "Quote marks"</label>
-          </div>
-        </div>
-        <div class="field" style="margin:0;">
-          <label class="check-row" style="font-size:11px;color:#aaa;">
-            <input type="checkbox" id="posterShowBrand" checked>
-            Show "DARK PSYCHO" mark
-          </label>
-        </div>
-        <div class="poster-actions">
-          <button type="button" class="regen-btn" id="posterRegenBtn" title="Generate a dedicated AI poster image (extra ~$0.005)">⚡ AI Poster</button>
-          <button type="button" class="download-btn" id="posterDownloadBtn">💾 Download PNG</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
 
   <!-- ══ 7-DAY CONTENT CALENDAR ══ -->
@@ -1636,7 +1465,6 @@ const sceneInfoEl = $('sceneInfo');
 let script = null;          // { mainTitle, scenes: [{title, narration, imagePrompt}] }
 let images = [];            // HTMLImageElement[] per scene (may be null)
 let imageBlobs = [];        // Blob[] per scene (raw FAL image, for project save)
-window.hasAiVideo = [];     // bool[] per scene — true when AI video is loaded
 let processedImages = [];   // Canvas[] with bg-removed pixels (lazy-rebuilt)
 let processedThreshold = -1;
 let audios = [];            // AudioBuffer[] per scene (may be null)
@@ -1664,10 +1492,7 @@ const BG_PALETTES = {
   paperLight: { stops: ['#f8f7f3', '#f0eee8', '#e6e2d8'], grainAmount: 8, splotchAlpha: 0.025, vignette: 0.12, hexOverlay: true,  darkSplotch: true },
   paperWarm:  { stops: ['#fdf6e3', '#f5ecc8', '#e9dca0'], grainAmount: 8, splotchAlpha: 0.025, vignette: 0.12, darkSplotch: true },
   paperCool:  { stops: ['#eef4f8', '#e0e9ef', '#cfd8de'], grainAmount: 8, splotchAlpha: 0.025, vignette: 0.12, hexOverlay: true,  darkSplotch: true },
-  paperPink:  { stops: ['#fce8ee', '#f5d4dc', '#e9bcc6'], grainAmount: 8, splotchAlpha: 0.025, vignette: 0.12, darkSplotch: true },
-  darkConcrete: { customDraw: 'darkConcrete' },
-  grunge:       { customDraw: 'grunge' },
-  oldpaper:     { customDraw: 'oldpaper' }
+  paperPink:  { stops: ['#fce8ee', '#f5d4dc', '#e9bcc6'], grainAmount: 8, splotchAlpha: 0.025, vignette: 0.12, darkSplotch: true }
 };
 
 function shiftHex(hex, offset) {
@@ -1678,208 +1503,10 @@ function shiftHex(hex, offset) {
   return `rgb(${r},${g},${b})`;
 }
 
-function seededRand(seed) {
-  let s = seed >>> 0;
-  return function() {
-    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
-    return s / 0x100000000;
-  };
-}
-
-function drawDarkConcrete(c, W, H, brightness) {
-  // Dark concrete inspired by Mind Psychology style: #2a2a2a base, gritty, uneven tone
-  const rand = seededRand(42);
-  const base = Math.max(0, Math.min(255, 42 + brightness));
-  // Fill base
-  const grad = c.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0,   `rgb(${base+14},${base+14},${base+14})`);
-  grad.addColorStop(0.45,`rgb(${base+6},${base+6},${base+6})`);
-  grad.addColorStop(1,   `rgb(${Math.max(0,base-6)},${Math.max(0,base-6)},${Math.max(0,base-6)})`);
-  c.fillStyle = grad;
-  c.fillRect(0, 0, W, H);
-  // Pixel grain (seeded)
-  const imgData = c.getImageData(0, 0, W, H);
-  const d = imgData.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const n = (rand() - 0.5) * 34;
-    d[i]   = Math.max(0, Math.min(255, d[i]   + n));
-    d[i+1] = Math.max(0, Math.min(255, d[i+1] + n));
-    d[i+2] = Math.max(0, Math.min(255, d[i+2] + n * 0.85)); // slight brown tint
-  }
-  c.putImageData(imgData, 0, 0);
-  // Large tonal patches (uneven concrete tone)
-  for (let i = 0; i < 55; i++) {
-    const x = rand() * W;
-    const y = rand() * H;
-    const r = 60 + rand() * 160;
-    const lightOrDark = rand() > 0.5 ? 1 : 0;
-    const a = 0.02 + rand() * 0.055;
-    const rg = c.createRadialGradient(x, y, 0, x, y, r);
-    const col = lightOrDark
-      ? `rgba(160,150,140,${a})`   // warm gray highlight patch
-      : `rgba(10,8,6,${a})`;       // dark shadow patch
-    rg.addColorStop(0, col);
-    rg.addColorStop(1, 'rgba(0,0,0,0)');
-    c.fillStyle = rg;
-    c.fillRect(x - r, y - r, r * 2, r * 2);
-  }
-  // Fine horizontal streaks (cast concrete look)
-  c.save();
-  for (let i = 0; i < 28; i++) {
-    const y = rand() * H;
-    const h = 0.5 + rand() * 3;
-    const a = 0.015 + rand() * 0.04;
-    c.fillStyle = `rgba(${rand()>0.5?180:8},${rand()>0.5?165:6},${rand()>0.5?150:4},${a})`;
-    c.fillRect(0, y, W, h);
-  }
-  c.restore();
-  // Vignette
-  const vig = c.createRadialGradient(W/2, H/2, H*0.28, W/2, H/2, H*0.8);
-  vig.addColorStop(0, 'rgba(0,0,0,0)');
-  vig.addColorStop(1, 'rgba(0,0,0,0.55)');
-  c.fillStyle = vig;
-  c.fillRect(0, 0, W, H);
-}
-
-function drawGrunge(c, W, H, brightness) {
-  // Grunge/worn: very dark base, scratches, worn spots, dust particles
-  const rand = seededRand(137);
-  const base = Math.max(0, Math.min(255, 26 + brightness));
-  c.fillStyle = `rgb(${base},${base-2},${base-4})`;
-  c.fillRect(0, 0, W, H);
-  // Pixel grain (seeded, coarser)
-  const imgData = c.getImageData(0, 0, W, H);
-  const d = imgData.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const n = (rand() - 0.5) * 28;
-    d[i]   = Math.max(0, Math.min(255, d[i]   + n));
-    d[i+1] = Math.max(0, Math.min(255, d[i+1] + n));
-    d[i+2] = Math.max(0, Math.min(255, d[i+2] + n));
-  }
-  c.putImageData(imgData, 0, 0);
-  // Worn spots (low-opacity white/gray ellipses — aged scuffs)
-  for (let i = 0; i < 38; i++) {
-    const x = rand() * W;
-    const y = rand() * H;
-    const rx = 20 + rand() * 90;
-    const ry = 10 + rand() * 50;
-    const a = 0.015 + rand() * 0.04;
-    c.save();
-    c.translate(x, y);
-    c.rotate((rand() - 0.5) * Math.PI);
-    const eg = c.createRadialGradient(0, 0, 0, 0, 0, Math.max(rx, ry));
-    eg.addColorStop(0, `rgba(200,195,185,${a})`);
-    eg.addColorStop(1, 'rgba(0,0,0,0)');
-    c.fillStyle = eg;
-    c.scale(rx / Math.max(rx, ry), ry / Math.max(rx, ry));
-    c.beginPath();
-    c.arc(0, 0, Math.max(rx, ry), 0, Math.PI * 2);
-    c.fill();
-    c.restore();
-  }
-  // Scratches — thin diagonal lines
-  c.save();
-  for (let i = 0; i < 45; i++) {
-    const x1 = rand() * W;
-    const y1 = rand() * H;
-    const len = 30 + rand() * 200;
-    const angle = (rand() - 0.5) * 0.6 + (rand() > 0.5 ? Math.PI/4 : -Math.PI/4);
-    const x2 = x1 + Math.cos(angle) * len;
-    const y2 = y1 + Math.sin(angle) * len;
-    const a = 0.06 + rand() * 0.12;
-    c.strokeStyle = `rgba(210,205,195,${a})`;
-    c.lineWidth = 0.4 + rand() * 0.8;
-    c.beginPath();
-    c.moveTo(x1, y1);
-    c.lineTo(x2, y2);
-    c.stroke();
-  }
-  c.restore();
-  // Dust particles (tiny dots)
-  for (let i = 0; i < 120; i++) {
-    const x = rand() * W;
-    const y = rand() * H;
-    const r = 0.5 + rand() * 1.5;
-    const a = 0.04 + rand() * 0.12;
-    c.fillStyle = `rgba(190,185,175,${a})`;
-    c.beginPath();
-    c.arc(x, y, r, 0, Math.PI * 2);
-    c.fill();
-  }
-  // Edge burn / heavy vignette
-  const vig = c.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.85);
-  vig.addColorStop(0, 'rgba(0,0,0,0)');
-  vig.addColorStop(1, 'rgba(0,0,0,0.7)');
-  c.fillStyle = vig;
-  c.fillRect(0, 0, W, H);
-}
-
-function drawOldPaper(c, W, H, brightness) {
-  // Old paper: warm beige base, subtle noise, aged spots, vignette
-  const rand = seededRand(256);
-  const bOff = brightness;
-  const r0 = Math.max(0, Math.min(255, 232 + bOff));
-  const g0 = Math.max(0, Math.min(255, 220 + bOff));
-  const b0 = Math.max(0, Math.min(255, 200 + bOff));
-  // Warm gradient base
-  const grad = c.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0,   `rgb(${r0},${g0},${b0})`);
-  grad.addColorStop(0.5, `rgb(${r0-8},${g0-8},${b0-10})`);
-  grad.addColorStop(1,   `rgb(${r0-14},${g0-14},${b0-16})`);
-  c.fillStyle = grad;
-  c.fillRect(0, 0, W, H);
-  // Fine paper grain (seeded)
-  const imgData = c.getImageData(0, 0, W, H);
-  const d = imgData.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const n = (rand() - 0.5) * 12;
-    d[i]   = Math.max(0, Math.min(255, d[i]   + n));
-    d[i+1] = Math.max(0, Math.min(255, d[i+1] + n * 0.9));
-    d[i+2] = Math.max(0, Math.min(255, d[i+2] + n * 0.7));
-  }
-  c.putImageData(imgData, 0, 0);
-  // Aged spots / foxing (brown dots/blotches)
-  for (let i = 0; i < 60; i++) {
-    const x = rand() * W;
-    const y = rand() * H;
-    const r = 3 + rand() * 30;
-    const a = 0.03 + rand() * 0.09;
-    const rg = c.createRadialGradient(x, y, 0, x, y, r);
-    rg.addColorStop(0, `rgba(110,75,30,${a})`);
-    rg.addColorStop(1, 'rgba(0,0,0,0)');
-    c.fillStyle = rg;
-    c.fillRect(x - r, y - r, r * 2, r * 2);
-  }
-  // Subtle horizontal fiber lines
-  for (let i = 0; i < 20; i++) {
-    const y = rand() * H;
-    const a = 0.01 + rand() * 0.025;
-    c.fillStyle = `rgba(130,100,60,${a})`;
-    c.fillRect(0, y, W, 0.5 + rand() * 1.5);
-  }
-  // Vignette (darker edges = aged paper)
-  const vig = c.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.72);
-  vig.addColorStop(0, 'rgba(0,0,0,0)');
-  vig.addColorStop(1, 'rgba(80,50,20,0.28)');
-  c.fillStyle = vig;
-  c.fillRect(0, 0, W, H);
-}
-
 function buildConcrete(variant) {
   const key = variant || (document.getElementById('bgVariant')?.value) || 'concrete';
   const palette = BG_PALETTES[key] || BG_PALETTES.concrete;
   const brightness = parseInt(document.getElementById('bgBrightness')?.value || '0');
-  // Custom texture variants (seeded PRNG, unique draw routines)
-  if (palette.customDraw) {
-    const off = document.createElement('canvas');
-    off.width = W; off.height = H;
-    const c = off.getContext('2d');
-    if (palette.customDraw === 'darkConcrete') drawDarkConcrete(c, W, H, brightness);
-    else if (palette.customDraw === 'grunge')   drawGrunge(c, W, H, brightness);
-    else if (palette.customDraw === 'oldpaper') drawOldPaper(c, W, H, brightness);
-    concreteBg = off;
-    return;
-  }
   const stops = palette.stops.map(s => shiftHex(s, brightness));
   const off = document.createElement('canvas');
   off.width = W; off.height = H;
@@ -1967,43 +1594,11 @@ function setProgress(pct) {
   progressBar.style.width = Math.max(0, Math.min(100, pct)) + '%';
 }
 
-// ----- Voice provider UI toggle
-function setVoiceProvider(provider) {
-  applyVoiceProviderUI(provider);
-}
-function applyVoiceProviderUI(provider) {
-  const isOpenAI = provider === 'openai';
-  const isUpload = provider === 'upload';
-  // Update hidden input so all existing code reading voiceProvider.value still works
-  const vpInput = $('voiceProvider');
-  if (vpInput) vpInput.value = provider;
-  // Update pill toggle button active states
-  ['elevenlabs', 'openai', 'upload'].forEach(p => {
-    const btn = $('vpBtn_' + p);
-    if (btn) btn.classList.toggle('active', p === provider);
-  });
-  // Show/hide voice CONFIG sections only (key fields are always visible)
-  const oaVoiceConfig = $('openaiVoiceConfig');
-  const upFields = $('uploadAudioFields');
-  const elVoiceConfig = $('elevenVoiceConfigFields');
-  const elModelConfig = $('elevenModelConfigField');
-  if (oaVoiceConfig) oaVoiceConfig.style.display = isOpenAI ? '' : 'none';
-  if (upFields) upFields.style.display = isUpload ? '' : 'none';
-  if (elVoiceConfig) elVoiceConfig.style.display = (isOpenAI || isUpload) ? 'none' : '';
-  if (elModelConfig) elModelConfig.style.display = (isOpenAI || isUpload) ? 'none' : '';
-  localStorage.setItem('voice_provider', provider);
-  // Rebuild thumb grid to show/hide per-scene upload buttons
-  rebuildThumbGrid();
-}
-
 // ----- Save keys
 $('saveKeys').onclick = () => {
   localStorage.setItem('anthropic_api_key', anthropicKeyEl.value.trim());
   localStorage.setItem('fal_api_key', falKeyEl.value.trim());
   localStorage.setItem('elevenlabs_api_key', elevenKeyEl.value.trim());
-  localStorage.setItem('openai_api_key', $('openaiKey')?.value.trim() || '');
-  localStorage.setItem('voice_provider', $('voiceProvider')?.value || 'elevenlabs');
-  localStorage.setItem('openai_voice', $('openaiVoice')?.value || 'onyx');
   localStorage.setItem('cloudinary_cloud', document.getElementById('cloudinaryCloud')?.value.trim() || '');
   localStorage.setItem('make_webhook', document.getElementById('makeWebhook')?.value.trim() || '');
   localStorage.setItem('cloudinary_preset', document.getElementById('cloudinaryPreset')?.value.trim() || '');
@@ -2016,9 +1611,6 @@ function loadKeys() {
   anthropicKeyEl.value = localStorage.getItem('anthropic_api_key') || '';
   falKeyEl.value = localStorage.getItem('fal_api_key') || '';
   elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
-  const _oKey = localStorage.getItem('openai_api_key'); if (_oKey && $('openaiKey')) $('openaiKey').value = _oKey;
-  const _vp = localStorage.getItem('voice_provider'); if (_vp) { applyVoiceProviderUI(_vp); } else { applyVoiceProviderUI('elevenlabs'); }
-  const _ov = localStorage.getItem('openai_voice'); if (_ov && $('openaiVoice')) $('openaiVoice').value = _ov;
   const mwEl = document.getElementById('makeWebhook'); if (mwEl && !mwEl.value) mwEl.value = localStorage.getItem('make_webhook') || 'https://hook.us2.make.com/vz7tdtaf6l8h1jx3q1ivt4s9qglrutle';
   const ccEl = document.getElementById('cloudinaryCloud'); if (ccEl) ccEl.value = localStorage.getItem('cloudinary_cloud') || '';
   const cpEl = document.getElementById('cloudinaryPreset'); if (cpEl) cpEl.value = localStorage.getItem('cloudinary_preset') || '';
@@ -2119,26 +1711,10 @@ function getStylePrefix() {
   return mode === 'clean' ? STYLE_PREFIX_CLEAN : mode === 'colored' ? STYLE_PREFIX_COLORED : STYLE_PREFIX_BAKED;
 }
 
-const CARTOON_STYLE_PROMPTS = {
-  expressive: 'Expressive HUMAN cartoon character (man, woman, or child only), human face with exaggerated facial emotion, bold ink outlines, dynamic pose, vibrant personality, colorful expressive illustration. ',
-  flat: 'Flat design illustration of a human character (man, woman, or child only), minimalist style, bold solid colors, no outlines, geometric shapes, modern app icon aesthetic, clean vector look. ',
-  anime80s: '80s anime style human character (man, woman, or child only), vintage Japanese animation, large expressive eyes, dramatic shading, cel-shaded colors, retro pastel palette, emotional expression. ',
-  chibi: 'Chibi cartoon human character (man, woman, or child only), super-deformed proportions, oversized head, tiny body, cute round face, big sparkling eyes, adorable cheerful expression. ',
-  comic: 'American comic book style human character (man, woman, or child only), bold ink lines, halftone dot shading, superhero aesthetic, dramatic action pose, high contrast colors, dynamic panel composition. ',
-  watercolor: 'Watercolor illustration of a human character (man, woman, or child only), soft painted textures, loose expressive brushstrokes, pastel colors, bleeding edges, artistic hand-painted feel. ',
-  pixar: '3D rendered Pixar-style human character (man, woman, or child only), smooth subsurface scattering skin, expressive oversized eyes, cinematic lighting, vibrant saturated colors, warm friendly design. ',
-  sketch: 'Pencil sketch illustration of a human character (man, woman, or child only), rough hand-drawn lines, crosshatching shading, graphite texture, sketchbook style, loose expressive linework. ',
-  retro: '1950s retro cartoon human character (man, woman, or child only), vintage limited animation style, bold black outlines, restricted muted color palette, classic old cartoon proportions, nostalgic charm. ',
-};
-const CARTOON_STYLE_SUFFIX = 'ONLY human people. NO monsters, NO vampires, NO demons, NO zombies, NO skeletons, NO aliens, NO animals, NO creatures, NO fantasy beings, NO supernatural entities. ';
-
 async function generateImageForScene(scenePrompt, apiKey, isCartoon = false) {
-  let cartoonStyleAddition = '';
-  if (isCartoon) {
-    const styleKey = document.getElementById('cartoonStyle')?.value || 'expressive';
-    const stylePrompt = CARTOON_STYLE_PROMPTS[styleKey] || CARTOON_STYLE_PROMPTS.expressive;
-    cartoonStyleAddition = stylePrompt + CARTOON_STYLE_SUFFIX;
-  }
+  const cartoonStyleAddition = isCartoon
+    ? 'Expressive HUMAN cartoon character (man, woman, or child only), human face with exaggerated facial emotion, bold ink outlines, dynamic pose, vibrant personality. ONLY human people. NO monsters, NO vampires, NO demons, NO zombies, NO skeletons, NO aliens, NO animals, NO creatures, NO fantasy beings, NO supernatural entities. '
+    : '';
   const body = {
     prompt: getStylePrefix() + cartoonStyleAddition + scenePrompt,
     image_size: { width: 768, height: 1344 },
@@ -2178,79 +1754,6 @@ async function generateImageForScene(scenePrompt, apiKey, isCartoon = false) {
   const objUrl = URL.createObjectURL(blob);
   const img = await loadImage(objUrl);
   return { img, blob };
-}
-
-
-// ── Visual Mode ──────────────────────────────────────────────────────────────
-function setVisualMode(mode) {
-  document.getElementById('visualMode').value = mode;
-  const imgBtn = document.getElementById('modeImgBtn');
-  const vidBtn = document.getElementById('modeVidBtn');
-  if (mode === 'image') {
-    imgBtn.style.background = '#e5e5e5'; imgBtn.style.color = '#111';
-    vidBtn.style.background = 'transparent'; vidBtn.style.color = '#666';
-  } else {
-    vidBtn.style.background = '#e5e5e5'; vidBtn.style.color = '#111';
-    imgBtn.style.background = 'transparent'; imgBtn.style.color = '#666';
-    setStatus('⚠️ AI Video takes 1–3 min per scene and uses more FAL.ai credits.', 'info');
-    setTimeout(() => setStatus(''), 5000);
-  }
-}
-
-// ── FAL.ai video generation (Minimax Hailuo) ─────────────────────────────────
-async function generateVideoForScene(prompt) {
-  const falKey = document.getElementById('falKey').value.trim();
-  const submitRes = await fetch('https://queue.fal.run/fal-ai/minimax-video', {
-    method: 'POST',
-    headers: { 'Authorization': `Key ${falKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt: prompt, prompt_optimizer: true })
-  });
-  if (!submitRes.ok) {
-    const err = await submitRes.text();
-    throw new Error('FAL video submit failed: ' + err);
-  }
-  const { request_id } = await submitRes.json();
-  const statusUrl = `https://queue.fal.run/fal-ai/minimax-video/requests/${request_id}`;
-  for (let i = 0; i < 72; i++) {
-    await new Promise(r => setTimeout(r, 2500));
-    const poll = await fetch(statusUrl, { headers: { 'Authorization': `Key ${falKey}` } });
-    const data = await poll.json();
-    if (data.status === 'COMPLETED' || data.video?.url || data.output?.video?.url) {
-      return data.video?.url || data.output?.video?.url;
-    }
-    if (data.status === 'FAILED') throw new Error('Video generation failed');
-  }
-  throw new Error('Video generation timed out');
-}
-
-// ── Load video blob into a hidden <video> element ────────────────────────────
-async function loadSceneVideo(sceneIdx, url) {
-  const resp = await fetch(url);
-  const blob = await resp.blob();
-  const vid = document.createElement('video');
-  vid.src = URL.createObjectURL(blob);
-  vid.muted = true;
-  vid.loop = true;
-  vid.playsInline = true;
-  vid.style.display = 'none';
-  document.body.appendChild(vid);
-  await new Promise(r => { vid.onloadeddata = r; vid.load(); });
-  window.sceneVideos = window.sceneVideos || {};
-  window.sceneVideos[sceneIdx] = vid;
-  return vid;
-}
-
-// ── Cleanup scene videos ──────────────────────────────────────────────────────
-function cleanupSceneVideos() {
-  if (window.sceneVideos) {
-    Object.values(window.sceneVideos).forEach(vid => {
-      try { vid.pause(); } catch(e) {}
-      try { URL.revokeObjectURL(vid.src); } catch(e) {}
-      try { vid.remove(); } catch(e) {}
-    });
-  }
-  window.sceneVideos = {};
-  window.hasAiVideo = [];
 }
 
 function loadImage(src) {
@@ -2297,16 +1800,7 @@ function buildWordTimings(alignment) {
   return result.length ? result : null;
 }
 
-// Show non-blocking warning when ElevenLabs quota is exhausted
-function showVoiceQuotaWarning(status) {
-  if (window.voiceSkipped) return; // only show once
-  window.voiceSkipped = true;
-  const toast = document.getElementById('voiceQuotaToast');
-  if (toast) toast.classList.add('show');
-  console.warn('ElevenLabs quota/auth error (' + status + ') — voice generation skipped');
-}
-
-async function generateSpeechElevenLabs(text, voiceId, apiKey, audioCtx) {
+async function generateSpeech(text, voiceId, apiKey, audioCtx) {
   const body = {
     text: text,
     model_id: (document.getElementById('elevenModel')?.value || 'eleven_turbo_v2_5'),
@@ -2330,11 +1824,6 @@ async function generateSpeechElevenLabs(text, voiceId, apiKey, audioCtx) {
   if (!response.ok) {
     let detail = '';
     try { detail = (await response.json()).detail?.message || (await response.text()); } catch (e) {}
-    // Gracefully handle quota exceeded (401) and rate limit (429): skip voice, continue with images
-    if (response.status === 401 || response.status === 429) {
-      showVoiceQuotaWarning(response.status);
-      return null;
-    }
     throw new Error(`ElevenLabs ${response.status}: ${detail || response.statusText}`);
   }
   const data = await response.json();
@@ -2347,45 +1836,6 @@ async function generateSpeechElevenLabs(text, voiceId, apiKey, audioCtx) {
   const audioBuf = await audioCtx.decodeAudioData(arrayBuf.slice(0));
   const wt = buildWordTimings(data.alignment || data.normalized_alignment);
   return { audioBuffer: audioBuf, mp3Buffer: arrayBuf, wordTimings: wt };
-}
-
-async function generateSpeechOpenAI(text, apiKey, audioCtx) {
-  const voiceVal = document.getElementById('openaiVoice')?.value || 'onyx';
-  const response = await fetch('https://api.openai.com/v1/audio/speech', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'tts-1',
-      input: text,
-      voice: voiceVal,
-      response_format: 'mp3'
-    })
-  });
-  if (!response.ok) {
-    let detail = '';
-    try { const j = await response.json(); detail = j.error?.message || ''; } catch (e) {}
-    if (response.status === 401 || response.status === 429) {
-      showVoiceQuotaWarning(response.status);
-      return null;
-    }
-    throw new Error(`OpenAI TTS ${response.status}: ${detail || response.statusText}`);
-  }
-  const arrayBuf = await response.arrayBuffer();
-  const audioBuf = await audioCtx.decodeAudioData(arrayBuf.slice(0));
-  // OpenAI TTS has no word-level timestamps — subtitle sync uses char-weighted fallback (wordTimings = null)
-  return { audioBuffer: audioBuf, mp3Buffer: arrayBuf, wordTimings: null };
-}
-
-async function generateSpeech(text, voiceId, apiKey, audioCtx) {
-  const provider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
-  if (provider === 'openai') {
-    const oKey = document.getElementById('openaiKey')?.value.trim() || '';
-    return generateSpeechOpenAI(text, oKey, audioCtx);
-  }
-  return generateSpeechElevenLabs(text, voiceId, apiKey, audioCtx);
 }
 
 // =========================================================
@@ -2847,36 +2297,9 @@ function drawHighlightSubtitle(words, spokenCount, alpha) {
   ctx.restore();
 }
 
-// ── B-roll video overlay ──────────────────────────────────────────────────────
-function drawBroll() {
-  const bvid = document.getElementById('brollVideo');
-  if (!window.brollLoaded || !bvid || bvid.readyState < 2) return;
-  const opacity = (parseInt(document.getElementById('brollOpacity')?.value) || 40) / 100;
-  const pos = document.getElementById('brollPosition')?.value || 'full';
-  ctx.save();
-  ctx.globalAlpha = opacity;
-  if (pos === 'full') {
-    ctx.drawImage(bvid, 0, 0, W, H);
-  } else if (pos === 'top') {
-    ctx.drawImage(bvid, 0, 0, W, H / 2);
-  } else if (pos === 'bottom') {
-    ctx.drawImage(bvid, 0, H / 2, W, H / 2);
-  } else if (pos === 'center') {
-    const vAspect = bvid.videoWidth / (bvid.videoHeight || 1);
-    const cAspect = W / H;
-    let sx = 0, sy = 0, sw = bvid.videoWidth, sh = bvid.videoHeight;
-    if (vAspect > cAspect) { sw = sh * cAspect; sx = (bvid.videoWidth - sw) / 2; }
-    else { sh = sw / cAspect; sy = (bvid.videoHeight - sh) / 2; }
-    ctx.drawImage(bvid, sx, sy, sw, sh, 0, 0, W, H);
-  }
-  ctx.restore();
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
 function drawScene(sceneIdx, tInScene, sceneDuration) {
   if (contentMode === 'quotes') { drawQuoteScene(sceneIdx, tInScene, sceneDuration); return; }
   drawConcrete();
-  drawBroll();
   if (!script || !script.scenes[sceneIdx]) return;
   const scene = script.scenes[sceneIdx];
   const img = images[sceneIdx];
@@ -2904,23 +2327,7 @@ function drawScene(sceneIdx, tInScene, sceneDuration) {
     const t = progress < 0.5 ? progress * 2 : (1 - progress) * 2;
     zoom = 1 + zoomIntensity * t;
   }
-  // ── AI Video layer ──────────────────────────────────────────────────────────
-  const _hasVid = window.hasAiVideo?.[sceneIdx] && window.sceneVideos?.[sceneIdx];
-  if (_hasVid) {
-    const vid = window.sceneVideos[sceneIdx];
-    if (vid.readyState >= 2) {
-      ctx.save();
-      ctx.globalAlpha = fade;
-      const vw = vid.videoWidth || 720, vh = vid.videoHeight || 1280;
-      const scale = Math.max(720/vw, 1280/vh);
-      const dw = vw*scale, dh = vh*scale;
-      const dx = (720-dw)/2, dy = (1280-dh)/2;
-      ctx.drawImage(vid, dx, dy, dw, dh);
-      ctx.restore();
-    }
-  } else {
-    drawIllustration(img, zoom, fade);
-  }
+  drawIllustration(img, zoom, fade);
   drawMainTitle(script.mainTitle, fade);
   const capPos = (titlePosEl.value === 'bottom') ? 'top' : 'bottom';
   drawSceneCaption(scene.title, fade, capPos);
@@ -2958,14 +2365,6 @@ function drawScene(sceneIdx, tInScene, sceneDuration) {
 }
 
 function drawStaticPreview() {
-  if (contentMode === 'poster') {
-    if (window.posterQuotes && window.posterQuotes.length === 4) {
-      drawEpisodePoster(window.posterQuotes);
-    } else {
-      drawPosterPlaceholder();
-    }
-    return;
-  }
   if (contentMode === 'quotes' && script) { drawQuoteScene(previewScene, 0.5, 4); return; }
   if (!script) {
     drawConcrete();
@@ -3008,7 +2407,6 @@ function rebuildSceneNav() {
 function rebuildThumbGrid() {
   thumbGridEl.innerHTML = '';
   if (!script) return;
-  const isUploadProvider = (document.getElementById('voiceProvider')?.value || 'elevenlabs') === 'upload';
   script.scenes.forEach((s, i) => {
     const t = document.createElement('div');
     t.className = 'thumb';
@@ -3030,49 +2428,6 @@ function rebuildThumbGrid() {
       t.classList.add('empty');
       t.textContent = '—';
     }
-    // Per-scene audio upload button (shown when provider = upload)
-    if (isUploadProvider) {
-      const uploadBtn = document.createElement('div');
-      uploadBtn.title = 'Upload audio for this scene';
-      uploadBtn.style.cssText = 'position:absolute;bottom:4px;left:4px;background:rgba(30,30,30,0.92);color:#bbb;font-size:9px;padding:3px 5px;border-radius:6px;cursor:pointer;font-weight:700;letter-spacing:0.3px;z-index:5;border:1px solid #333;';
-      if (audios[i]) {
-        uploadBtn.textContent = '✅';
-        uploadBtn.title = `Scene ${i+1} audio loaded (${audios[i].duration.toFixed(1)}s) — click to replace`;
-        uploadBtn.style.background = 'rgba(0,60,20,0.9)';
-        uploadBtn.style.borderColor = '#1a4a1a';
-        uploadBtn.style.color = '#80ff99';
-      } else {
-        uploadBtn.textContent = '🎙️';
-      }
-      uploadBtn.onclick = (e) => {
-        e.stopPropagation();
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = '.mp3,.wav,.m4a,.ogg,audio/*';
-        fileInput.onchange = async () => {
-          const file = fileInput.files[0];
-          if (!file) return;
-          try {
-            const arrayBuf = await file.arrayBuffer();
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const audioBuf = await audioCtx.decodeAudioData(arrayBuf);
-            audios[i] = audioBuf;
-            audioMp3s[i] = arrayBuf;
-            wordTimings[i] = null;
-            rebuildThumbGrid();
-            // Update assets status
-            const uploaded = audios.filter(a => a !== null).length;
-            assetsStatusEl.textContent = `${uploaded}/${script.scenes.length} scenes have uploaded audio`;
-            setStatus(`✅ Scene ${i+1} audio uploaded (${audioBuf.duration.toFixed(1)}s)`, 'success');
-            setTimeout(() => setStatus(''), 2000);
-          } catch (err) {
-            setStatus(`Error decoding audio for scene ${i+1}: ${err.message}`, 'error');
-          }
-        };
-        fileInput.click();
-      };
-      t.appendChild(uploadBtn);
-    }
     t.onclick = () => {
       previewScene = i;
       rebuildSceneNav();
@@ -3089,12 +2444,8 @@ async function runGenerateAll() {
   const anthropicKey = anthropicKeyEl.value.trim();
   const falKey = falKeyEl.value.trim();
   const elevenKey = elevenKeyEl.value.trim();
-  const _provider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
-  const _oKey = document.getElementById('openaiKey')?.value.trim() || '';
-  const _voiceKeyOk = _provider === 'upload' ? true : (_provider === 'openai' ? !!_oKey : !!elevenKey);
-  if (!anthropicKey || !falKey || !_voiceKeyOk) {
-    const _missing = _provider === 'openai' ? 'OpenAI' : 'ElevenLabs';
-    setStatus(`Need all 3 API keys (Anthropic, FAL.ai, ${_missing})`, 'error');
+  if (!anthropicKey || !falKey || !elevenKey) {
+    setStatus('Need all 3 API keys (Anthropic, FAL.ai, ElevenLabs)', 'error');
     return;
   }
   const topic = topicEl.value.trim();
@@ -3110,7 +2461,6 @@ async function runGenerateAll() {
     script = contentMode === 'quotes'
       ? await generateQuotesScript(topic, sceneCount, anthropicKey)
       : await generateScript(topic, sceneCount, anthropicKey);
-    cleanupSceneVideos();
     images = new Array(script.scenes.length).fill(null);
     imageBlobs = new Array(script.scenes.length).fill(null);
     processedImages = []; processedThreshold = -1;
@@ -3152,76 +2502,42 @@ async function runGenerateAll() {
         assetsStatusEl.textContent = '✓ Quotes mode — animated background';
       }
       setProgress(60);
-    } else {
-      const visualMode = document.getElementById('visualMode')?.value || 'image';
-      if (visualMode === 'video') cleanupSceneVideos();
-      for (let i = 0; i < script.scenes.length; i++) {
-        const vmode = document.getElementById('visualMode')?.value || 'image';
-        const isCartoon = document.getElementById('cartoonMode')?.checked || false;
-        const imagePrompt = script.scenes[i].imagePrompt;
-        if (vmode === 'video') {
-          setStatus(`🎬 Generating AI video for scene ${i+1}/${script.scenes.length}… (1–3 min)`, 'info');
-          setProgress(10 + ((i / script.scenes.length) * 50));
-          const vidUrl = await generateVideoForScene(imagePrompt);
-          await loadSceneVideo(i, vidUrl);
-          images[i] = null;
-          window.hasAiVideo[i] = true;
-        } else {
-          setStatus(`Generating illustration ${i + 1}/${script.scenes.length}…`, 'info');
-          const result = await generateImageForScene(imagePrompt, falKey, isCartoon);
-          images[i] = result.img;
-          imageBlobs[i] = result.blob;
-          window.hasAiVideo[i] = false;
-        }
-        rebuildThumbGrid();
-        if (i === 0) drawStaticPreview();
-        setProgress(10 + ((i + 1) / script.scenes.length) * 50);
-      }
+    } else
+    for (let i = 0; i < script.scenes.length; i++) {
+      setStatus(`Generating illustration ${i + 1}/${script.scenes.length}…`, 'info');
+      const isCartoon = document.getElementById('cartoonMode')?.checked || false;
+      const result = await generateImageForScene(script.scenes[i].imagePrompt, falKey, isCartoon);
+      images[i] = result.img;
+      imageBlobs[i] = result.blob;
+      rebuildThumbGrid();
+      if (i === 0) drawStaticPreview();
+      setProgress(10 + ((i + 1) / script.scenes.length) * 50);
     }
     assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations ready`;
 
     // Step 3: Voices (sequential — avoids ElevenLabs concurrent request limit)
-    const _genProvider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
-    if (_genProvider === 'upload') {
-      // Upload mode: no voice generation — user uploads per-scene audio via thumb grid
-      setProgress(95);
-      const _uploadedCount = audios.filter(a => a !== null).length;
-      assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations · 🎙️ upload audio per scene below (${_uploadedCount}/${script.scenes.length} uploaded)`;
-    } else {
-      setStatus('Generating voiceovers…', 'info');
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const voiceId = voiceEl.value;
-      for (let i = 0; i < script.scenes.length; i++) {
-        setStatus(`Generating voice ${i + 1}/${script.scenes.length}…`, 'info');
-        setProgress(60 + ((i / script.scenes.length) * 35));
-        const r = await generateSpeech(script.scenes[i].narration, voiceId, elevenKey, audioCtx);
-        if (r === null) {
-          // Voice skipped (quota/auth) — keep audio slot null so generation continues
-          audios[i] = null; audioMp3s[i] = null; wordTimings[i] = null;
-        } else {
-          let audioBuffer = r.audioBuffer;
-          let wt = r.wordTimings || null;
-          // Apply silence removal if enabled — works for all providers (ElevenLabs + OpenAI TTS)
-          const _currProvider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
-          if (document.getElementById('silenceRemoveEnabled')?.checked) {
-            const thresh = parseInt(document.getElementById('silenceThresh')?.value || 2);
-            const minSil = parseInt(document.getElementById('silenceMin')?.value || 15) / 100;
-            const durBefore = audioBuffer.duration.toFixed(2);
-            const { buffer: trimmed, timeMap } = removeSilenceFromBuffer(audioBuffer, thresh, minSil);
-            audioBuffer = trimmed;
-            console.log(`[SilenceRemover] scene ${i+1} | provider=${_currProvider} | ${durBefore}s → ${audioBuffer.duration.toFixed(2)}s | thresh=${thresh}% minSil=${minSil}s`);
-            if (wt && timeMap) wt = remapWordTimings(wt, timeMap);
-          }
-          audios[i] = audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = wt;
-        }
+    setStatus('Generating voiceovers…', 'info');
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const voiceId = voiceEl.value;
+    for (let i = 0; i < script.scenes.length; i++) {
+      setStatus(`Generating voice ${i + 1}/${script.scenes.length}…`, 'info');
+      setProgress(60 + ((i / script.scenes.length) * 35));
+      const r = await generateSpeech(script.scenes[i].narration, voiceId, elevenKey, audioCtx);
+      let audioBuffer = r.audioBuffer;
+      let wt = r.wordTimings || null;
+      // Apply silence removal if enabled
+      if (document.getElementById('silenceRemoveEnabled')?.checked) {
+        const thresh = parseInt(document.getElementById('silenceThresh')?.value || 2);
+        const minSil = parseInt(document.getElementById('silenceMin')?.value || 15) / 100;
+        const { buffer: trimmed, timeMap } = removeSilenceFromBuffer(audioBuffer, thresh, minSil);
+        audioBuffer = trimmed;
+        if (wt && timeMap) wt = remapWordTimings(wt, timeMap);
       }
-      setProgress(95);
-      const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
-      const _voiceSkipped = window.voiceSkipped || audios.every(a => a === null);
-      assetsStatusEl.textContent = _voiceSkipped
-        ? `✓ ${script.scenes.length} illustrations · ⚠️ voice skipped (quota exceeded)`
-        : `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
+      audios[i] = audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = wt;
     }
+    setProgress(95);
+    const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
+    assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
     refreshAudioDownloadBtn();
 
     setProgress(100);
@@ -3422,16 +2738,8 @@ async function regenerateOneImage(idx) {
 
 async function regenerateVoice() {
   if (!script) { setStatus('Generate a script first', 'error'); return; }
-  const _regenProvider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
-  if (_regenProvider === 'upload') {
-    setStatus('Upload mode: use the 🎙️ buttons on each scene thumbnail to upload audio', 'info');
-    rebuildThumbGrid();
-    return;
-  }
-  const key = _regenProvider === 'openai'
-    ? (document.getElementById('openaiKey')?.value.trim() || '')
-    : elevenKeyEl.value.trim();
-  if (!key) { setStatus(_regenProvider === 'openai' ? 'Need OpenAI key' : 'Need ElevenLabs key', 'error'); return; }
+  const key = elevenKeyEl.value.trim();
+  if (!key) { setStatus('Need ElevenLabs key', 'error'); return; }
   disableControls(true);
   try {
     setStatus('Regenerating voiceovers…', 'info');
@@ -3440,31 +2748,12 @@ async function regenerateVoice() {
     for (let i = 0; i < script.scenes.length; i++) {
       setStatus(`Re-generating voice ${i + 1}/${script.scenes.length}…`, 'info');
       const r = await generateSpeech(script.scenes[i].narration, voiceId, key, audioCtx);
-      if (r === null) {
-        audios[i] = null; audioMp3s[i] = null; wordTimings[i] = null;
-      } else {
-        let audioBuffer = r.audioBuffer;
-        let wt = r.wordTimings || null;
-        // Apply silence removal if enabled — works for all providers (ElevenLabs + OpenAI TTS)
-        if (document.getElementById('silenceRemoveEnabled')?.checked) {
-          const thresh = parseInt(document.getElementById('silenceThresh')?.value || 2);
-          const minSil = parseInt(document.getElementById('silenceMin')?.value || 15) / 100;
-          const durBefore = audioBuffer.duration.toFixed(2);
-          const { buffer: trimmed, timeMap } = removeSilenceFromBuffer(audioBuffer, thresh, minSil);
-          audioBuffer = trimmed;
-          console.log(`[SilenceRemover] regen scene ${i+1} | provider=${_regenProvider} | ${durBefore}s → ${audioBuffer.duration.toFixed(2)}s | thresh=${thresh}% minSil=${minSil}s`);
-          if (wt && timeMap) wt = remapWordTimings(wt, timeMap);
-        }
-        audios[i] = audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = wt;
-      }
+      audios[i] = r.audioBuffer; audioMp3s[i] = r.mp3Buffer; wordTimings[i] = r.wordTimings || null;
     }
     const totalAudio = audios.reduce((s, a) => s + (a ? a.duration : 0), 0);
-    const _regen_voiceSkipped = window.voiceSkipped || audios.every(a => a === null);
-    assetsStatusEl.textContent = _regen_voiceSkipped
-      ? `✓ ${script.scenes.length} illustrations · ⚠️ voice skipped (quota exceeded)`
-      : `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
+    assetsStatusEl.textContent = `✓ ${script.scenes.length} illustrations + ${totalAudio.toFixed(1)}s voiceover`;
     refreshAudioDownloadBtn();
-    setStatus(_regen_voiceSkipped ? '⚠️ Voice skipped — ElevenLabs quota exceeded' : 'Voiceovers regenerated', _regen_voiceSkipped ? 'info' : 'success');
+    setStatus('Voiceovers regenerated', 'success');
   } catch (err) {
     setStatus('Error: ' + err.message, 'error');
   } finally {
@@ -3581,43 +2870,18 @@ function computeTimings() {
 
 function playAudioSequence(audioCtx, recordDest) {
   const { timings } = computeTimings();
-
-  // FIX (mobile double-audio): On iOS/Android during recording, using a
-  // MediaStream-backed <audio> element as a monitor can bleed into the
-  // MediaRecorder output — iOS may capture the active audio session
-  // (including the monitor stream) as a second audio source alongside the
-  // explicit Web Audio track we added to the canvas stream. The result is
-  // double/overlapping audio in the exported MP4 on TikTok/CapCut.
-  //
-  // Solution: when recording on mobile, skip the MediaStream monitor entirely
-  // and connect audio sources directly to audioCtx.destination for playback.
-  // This bypasses the MediaStream path that iOS can accidentally re-capture.
-  //
-  // On desktop, and during preview-only (recordDest is null), we keep the
-  // original MediaStream → <audio> element approach so that iOS respects
-  // ringer/media volume instead of the silent switch.
-  // iPadOS 13+ reports 'Macintosh' in userAgent — detect via maxTouchPoints fallback
-  const _isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isMobileRecording = !!recordDest && (_isIOSDevice || /Android/i.test(navigator.userAgent));
-
-  let monitorDest = null;
-  let monitorEl = null;
-
-  if (!isMobileRecording) {
-    // Desktop / preview: Monitor via MediaStreamDestination -> HTMLAudioElement
-    // so iOS treats playback as media (respects ringer/media volume, NOT the silent switch)
-    monitorDest = audioCtx.createMediaStreamDestination();
-    monitorEl = document.createElement('audio');
-    monitorEl.srcObject = monitorDest.stream;
-    monitorEl.playsInline = true;
-    monitorEl.autoplay = true;
-    monitorEl.style.display = 'none';
-    document.body.appendChild(monitorEl);
-    const playPromise = monitorEl.play();
-    if (playPromise && typeof playPromise.catch === 'function') {
-      playPromise.catch(err => console.warn('monitor element play() rejected', err));
-    }
+  // Monitor via MediaStreamDestination -> HTMLAudioElement so iOS treats
+  // playback as media (respects ringer/media volume, NOT the silent switch)
+  const monitorDest = audioCtx.createMediaStreamDestination();
+  const monitorEl = document.createElement('audio');
+  monitorEl.srcObject = monitorDest.stream;
+  monitorEl.playsInline = true;
+  monitorEl.autoplay = true;
+  monitorEl.style.display = 'none';
+  document.body.appendChild(monitorEl);
+  const playPromise = monitorEl.play();
+  if (playPromise && typeof playPromise.catch === 'function') {
+    playPromise.catch(err => console.warn('monitor element play() rejected', err));
   }
 
   const sources = [];
@@ -3626,17 +2890,7 @@ function playAudioSequence(audioCtx, recordDest) {
     const src = audioCtx.createBufferSource();
     src.buffer = audios[i];
     if (recordDest) src.connect(recordDest);
-    if (isMobileRecording) {
-      // iOS/Android recording: intentionally do NOT connect to audioCtx.destination.
-      // Previous attempts routed audio to both recordDest AND speakers, which caused
-      // iOS to re-capture the live speaker output through its audio session and feed
-      // it back into the MediaRecorder stream — creating doubled/overlapping audio in
-      // the exported video on TikTok and CapCut. By routing ONLY to recordDest here,
-      // the user hears nothing during recording on iOS (acceptable trade-off), but the
-      // recorded file contains exactly one clean audio track with no feedback loop.
-    } else {
-      src.connect(monitorDest);
-    }
+    src.connect(monitorDest);
     src.start(audioCtx.currentTime + timings[i].start);
     sources.push(src);
   }
@@ -3700,12 +2954,6 @@ async function runPlayback(record) {
     if (forceExt) ext = forceExt;
     else ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
     canvasStream = canvas.captureStream(30);
-    // FIX (mobile double-audio): Remove any audio tracks captureStream() may
-    // have included. Canvas elements have no audio, but some mobile browsers
-    // return a stream with unexpected audio tracks. Adding our Web Audio track
-    // on top of those would give the MediaRecorder two audio sources → double
-    // audio in the exported video on TikTok/CapCut.
-    canvasStream.getAudioTracks().forEach(t => canvasStream.removeTrack(t));
     audioDest = audioCtx.createMediaStreamDestination();
     // Force mono downmix BEFORE reaching the recorder. This guarantees L === R
     // in the MP4, which prevents "audio overlap" symptoms when external editors
@@ -3720,19 +2968,7 @@ async function runPlayback(record) {
     audioRecordTarget = monoMixer;
     const audioTrack = audioDest.stream.getAudioTracks()[0];
     if (audioTrack) canvasStream.addTrack(audioTrack);
-    // Fix C: guarantee exactly 1 audio track enters MediaRecorder — iOS can
-    // silently add extra tracks; two audio tracks cause doubled audio on TikTok.
-    const _vTracks = canvasStream.getVideoTracks();
-    const _aTracks = canvasStream.getAudioTracks();
-    if (_aTracks.length > 1) {
-      console.warn(
-        `[DARK PSYCHO] MediaRecorder stream has ${_aTracks.length} audio tracks — ` +
-        'expected exactly 1. Only the first track will be used. ' +
-        'Extra tracks would cause doubled audio on TikTok/CapCut.'
-      );
-    }
-    const _safeStream = new MediaStream([..._vTracks, ...(_aTracks.length > 0 ? [_aTracks[0]] : [])]);
-    recorder = new MediaRecorder(_safeStream, { mimeType, videoBitsPerSecond: 6_000_000 });
+    recorder = new MediaRecorder(canvasStream, { mimeType, videoBitsPerSecond: 6_000_000 });
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
   }
 
@@ -3752,11 +2988,6 @@ async function runPlayback(record) {
   // (CapCut, TikTok) would interpret as "audio overlap" after their downmix.
   const { sources, monitorEl } = playAudioSequence(audioCtx, audioRecordTarget);
   if (record) recorder.start(100);
-  // Start B-roll video so it's live during recording/preview
-  if (window.brollLoaded) {
-    const bv = document.getElementById('brollVideo');
-    if (bv) { bv.currentTime = 0; bv.play().catch(() => {}); }
-  }
   const start = performance.now();
 
   await new Promise(resolve => {
@@ -3773,13 +3004,6 @@ async function runPlayback(record) {
         if (elapsed >= timings[i].start) idx = i;
       }
       const tInScene = elapsed - timings[idx].start;
-      // Play/pause scene videos in sync with current scene
-      if (window.sceneVideos) {
-        Object.entries(window.sceneVideos).forEach(([si, vid]) => {
-          if (parseInt(si) === idx) { if (vid.paused) vid.play().catch(()=>{}); }
-          else { if (!vid.paused) vid.pause(); }
-        });
-      }
       drawScene(idx, tInScene, timings[idx].duration);
       previewScene = idx;
       // Update scene dots live
@@ -3806,16 +3030,6 @@ async function runPlayback(record) {
     setStatus('');
   }
 
-  // Pause B-roll after playback ends
-  if (window.brollLoaded) {
-    const bv = document.getElementById('brollVideo');
-    if (bv) { try { bv.pause(); } catch (e) {} }
-  }
-
-  // Pause all scene videos when playback ends
-  if (window.sceneVideos) {
-    Object.values(window.sceneVideos).forEach(vid => { try { vid.pause(); } catch(e) {} });
-  }
   // Cleanup audio sources + monitor element
   sources.forEach(s => { try { s.stop(); } catch (e) {} });
   if (monitorEl) {
@@ -3857,87 +3071,6 @@ $('regenVoiceBtn').onclick = regenerateVoice;
 $('previewBtn').onclick = () => runPlayback(false);
 $('recordBtn').onclick = () => runPlayback(true);
 $('stopBtn').onclick = () => { if (playAbort) playAbort.cancel = true; };
-
-// =========================================================
-//  B-ROLL VIDEO OVERLAY
-// =========================================================
-window.brollLoaded = false;
-let brollObjectURL = null;
-
-document.getElementById('brollFile')?.addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  // Revoke previous object URL to free memory
-  if (brollObjectURL) { URL.revokeObjectURL(brollObjectURL); brollObjectURL = null; }
-  window.brollLoaded = false;
-
-  brollObjectURL = URL.createObjectURL(file);
-
-  // Remove any existing hidden video element
-  const existing = document.getElementById('brollVideo');
-  if (existing) existing.remove();
-
-  const bvid = document.createElement('video');
-  bvid.id = 'brollVideo';
-  bvid.src = brollObjectURL;
-  bvid.loop = true;
-  bvid.muted = true;
-  bvid.playsInline = true;
-  bvid.style.display = 'none';
-  bvid.crossOrigin = 'anonymous';
-  document.body.appendChild(bvid);
-
-  // Update thumbnail preview
-  const thumb = document.getElementById('brollThumb');
-  if (thumb) { thumb.src = brollObjectURL; }
-
-  bvid.addEventListener('loadeddata', () => {
-    window.brollLoaded = true;
-    // Refresh static preview
-    drawStaticPreview();
-  }, { once: true });
-
-  // Update label text
-  const label = document.getElementById('brollFileName');
-  if (label) label.textContent = file.name;
-
-  // Show preview wrap
-  const wrap = document.getElementById('brollPreviewWrap');
-  if (wrap) wrap.style.display = 'block';
-
-  // Ensure opacity label wired
-  const opSlider = document.getElementById('brollOpacity');
-  if (opSlider) opSlider.dispatchEvent(new Event('input'));
-});
-
-// Opacity slider live-update label
-document.getElementById('brollOpacity')?.addEventListener('input', function() {
-  const v = document.getElementById('brollOpacityVal');
-  if (v) v.textContent = this.value;
-  drawStaticPreview();
-});
-
-// Position dropdown live refresh
-document.getElementById('brollPosition')?.addEventListener('change', drawStaticPreview);
-
-// Remove button
-document.getElementById('brollRemoveBtn')?.addEventListener('click', function() {
-  window.brollLoaded = false;
-  const bvid = document.getElementById('brollVideo');
-  if (bvid) { try { bvid.pause(); } catch(e){} bvid.remove(); }
-  if (brollObjectURL) { URL.revokeObjectURL(brollObjectURL); brollObjectURL = null; }
-  const fileInput = document.getElementById('brollFile');
-  if (fileInput) fileInput.value = '';
-  const label = document.getElementById('brollFileName');
-  if (label) label.textContent = 'Upload MP4 / MOV clip…';
-  const wrap = document.getElementById('brollPreviewWrap');
-  if (wrap) wrap.style.display = 'none';
-  const thumb = document.getElementById('brollThumb');
-  if (thumb) thumb.src = '';
-  drawStaticPreview();
-});
-
 // =========================================================
 //  DOWNLOAD FOLDER (File System Access API + IndexedDB)
 // =========================================================
@@ -5010,16 +4143,6 @@ async function calGenerateAll() {
 
 // Wire up buttons
 document.addEventListener('DOMContentLoaded', () => {
-  // Show/hide cartoonStyleRow based on cartoonMode toggle
-  const cartoonModeEl = document.getElementById('cartoonMode');
-  const cartoonStyleRowEl = document.getElementById('cartoonStyleRow');
-  function syncCartoonStyleRow() {
-    if (cartoonStyleRowEl) {
-      cartoonStyleRowEl.style.display = cartoonModeEl?.checked ? 'block' : 'none';
-    }
-  }
-  syncCartoonStyleRow();
-  cartoonModeEl?.addEventListener('change', syncCartoonStyleRow);
   renderCalendar();
   const planBtn = document.getElementById('calPlanBtn');
   const genAllBtn = document.getElementById('calGenerateAllBtn');
@@ -5600,9 +4723,6 @@ function getAllKeys() {
     anthropic: document.getElementById('anthropicKey')?.value || localStorage.getItem('anthropic_api_key') || '',
     fal: document.getElementById('falKey')?.value || localStorage.getItem('fal_api_key') || '',
     eleven: document.getElementById('elevenKey')?.value || localStorage.getItem('elevenlabs_api_key') || '',
-    openai: document.getElementById('openaiKey')?.value || localStorage.getItem('openai_api_key') || '',
-    voiceProvider: document.getElementById('voiceProvider')?.value || localStorage.getItem('voice_provider') || 'elevenlabs',
-    openaiVoice: document.getElementById('openaiVoice')?.value || localStorage.getItem('openai_voice') || 'onyx',
     cloudName: document.getElementById('cloudinaryCloud')?.value || localStorage.getItem('cloudinary_cloud') || '',
     cloudPreset: document.getElementById('cloudinaryPreset')?.value || localStorage.getItem('cloudinary_preset') || '',
     ayrshare: document.getElementById('ayrshareKey')?.value || localStorage.getItem('ayrshare_key') || '',
@@ -5615,9 +4735,6 @@ function applyKeys(keys) {
   set('anthropicKey', keys.anthropic);
   set('falKey', keys.fal);
   set('elevenKey', keys.eleven);
-  set('openaiKey', keys.openai);
-  if (keys.voiceProvider) { applyVoiceProviderUI(keys.voiceProvider); }
-  if (keys.openaiVoice) set('openaiVoice', keys.openaiVoice);
   set('cloudinaryCloud', keys.cloudName);
   set('cloudinaryPreset', keys.cloudPreset);
   set('ayrshareKey', keys.ayrshare);
@@ -5626,9 +4743,6 @@ function applyKeys(keys) {
   if (keys.anthropic) localStorage.setItem('anthropic_api_key', keys.anthropic);
   if (keys.fal) localStorage.setItem('fal_api_key', keys.fal);
   if (keys.eleven) localStorage.setItem('elevenlabs_api_key', keys.eleven);
-  if (keys.openai) localStorage.setItem('openai_api_key', keys.openai);
-  if (keys.voiceProvider) localStorage.setItem('voice_provider', keys.voiceProvider);
-  if (keys.openaiVoice) localStorage.setItem('openai_voice', keys.openaiVoice);
   if (keys.cloudName) localStorage.setItem('cloudinary_cloud', keys.cloudName);
   if (keys.cloudPreset) localStorage.setItem('cloudinary_preset', keys.cloudPreset);
   if (keys.ayrshare) localStorage.setItem('ayrshare_key', keys.ayrshare);
@@ -5771,208 +4885,6 @@ function drawLogoWatermark(alpha) {
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  EPISODE POSTER MODE
-// ═══════════════════════════════════════════════════════════════════════════════
-
-function stripDashes(input) {
-  if (Array.isArray(input)) return input.map(s => stripDashes(s));
-  return input.replace(/[—–‒―­﹘﹣－-]{1,}/g, ' ').replace(/s{2,}/g, ' ').trim();
-}
-
-function drawPosterBg(bgStyle) {
-  if (bgStyle === 'void') {
-    ctx.fillStyle = '#050505';
-    ctx.fillRect(0, 0, W, H);
-  } else if (bgStyle === 'crimson') {
-    const grd = ctx.createRadialGradient(W/2, H*0.3, 0, W/2, H*0.3, W*0.9);
-    grd.addColorStop(0, '#1a0000');
-    grd.addColorStop(0.5, '#0c0000');
-    grd.addColorStop(1, '#050505');
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, H);
-    const vig = ctx.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.8);
-    vig.addColorStop(0, 'rgba(0,0,0,0)');
-    vig.addColorStop(1, 'rgba(0,0,0,0.6)');
-    ctx.fillStyle = vig;
-    ctx.fillRect(0, 0, W, H);
-  } else if (bgStyle === 'matrix') {
-    ctx.fillStyle = '#000a00';
-    ctx.fillRect(0, 0, W, H);
-    const vig = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.9);
-    vig.addColorStop(0, 'rgba(0,20,0,0.4)');
-    vig.addColorStop(1, 'rgba(0,0,0,0.8)');
-    ctx.fillStyle = vig;
-    ctx.fillRect(0, 0, W, H);
-  } else if (bgStyle === 'smoke') {
-    ctx.fillStyle = '#0a0a0c';
-    ctx.fillRect(0, 0, W, H);
-    const grd = ctx.createLinearGradient(0, 0, W, H);
-    grd.addColorStop(0, 'rgba(30,30,40,0.6)');
-    grd.addColorStop(1, 'rgba(5,5,8,0.9)');
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, H);
-  } else if (bgStyle === 'navy') {
-    const grd = ctx.createLinearGradient(0, 0, 0, H);
-    grd.addColorStop(0, '#00001a');
-    grd.addColorStop(0.5, '#000510');
-    grd.addColorStop(1, '#050505');
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, H);
-  } else {
-    ctx.fillStyle = '#050505';
-    ctx.fillRect(0, 0, W, H);
-  }
-}
-
-function drawPosterPlaceholder() {
-  const bgStyle = document.getElementById('posterBgStyle')?.value || 'crimson';
-  drawPosterBg(bgStyle);
-  ctx.save();
-  ctx.fillStyle = 'rgba(255,255,255,0.18)';
-  ctx.font = "600 22px 'Inter', sans-serif";
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('GENERATE A POSTER', W/2, H/2 - 14);
-  ctx.fillStyle = 'rgba(255,255,255,0.08)';
-  ctx.font = "400 14px 'Inter', sans-serif";
-  ctx.fillText('Enter a topic and click Generate', W/2, H/2 + 18);
-  ctx.restore();
-}
-function drawEpisodePoster(lines) {
-  const bgStyle = document.getElementById('posterBgStyle')?.value || 'crimson';
-  const quoteStyle = document.getElementById('posterQuoteStyle')?.value || 'upper';
-  const quoteFont = document.getElementById('titleFont')?.value || "'Montserrat', sans-serif";
-
-  drawPosterBg(bgStyle);
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.fillRect(0, 0, W, H);
-
-  const accentColors = { void:'rgba(255,255,255,0.25)', crimson:'rgba(180,20,20,0.7)', matrix:'rgba(0,180,0,0.5)', smoke:'rgba(200,200,220,0.3)', navy:'rgba(50,100,255,0.5)' };
-  const accentColor = accentColors[bgStyle] || 'rgba(255,255,255,0.25)';
-
-  // ── Header ────────────────────────────────────────────────────────────────
-  ctx.strokeStyle = accentColor;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(40, 80); ctx.lineTo(W - 40, 80); ctx.stroke();
-
-  ctx.save();
-  ctx.font = "900 22px 'Montserrat', sans-serif";
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
-  ctx.letterSpacing = '6px';
-  ctx.fillText('DARK PSYCHO', W / 2, 52);
-  ctx.restore();
-
-  // ── Format lines ─────────────────────────────────────────────────────────
-  function fmt(t) {
-    if (!t) return '';
-    if (quoteStyle === 'upper') return t.toUpperCase();
-    if (quoteStyle === 'lower') return t.toLowerCase();
-    return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
-  }
-  const formattedLines = (lines || []).slice(0, 4).map(fmt);
-
-  // ── Auto-shrink font until all lines fit within 660px width ──────────────
-  let fontSize = 88;
-  ctx.font = "800 " + fontSize + "px " + quoteFont;
-  let fits = false;
-  while (fontSize > 32 && !fits) {
-    ctx.font = "800 " + fontSize + "px " + quoteFont;
-    fits = formattedLines.every(l => ctx.measureText(l).width <= 660);
-    if (!fits) fontSize -= 4;
-  }
-
-  const totalBlockHeight = 4 * (fontSize * 1.35);
-  let startY = 120 + (1040 - totalBlockHeight) / 2 + fontSize;
-  startY = Math.max(160, startY);
-
-  // ── Draw 4 lines centered ─────────────────────────────────────────────────
-  ctx.save();
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  ctx.font = "800 " + fontSize + "px " + quoteFont;
-
-  formattedLines.forEach((line, i) => {
-    const lineY = startY + i * (fontSize * 1.35);
-
-    // Thin separator above each line (except first)
-    if (i > 0) {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(60, lineY - (fontSize * 1.35) * 0.15);
-      ctx.lineTo(W - 60, lineY - lineHeight * 0.15);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // Text stroke (outline for depth)
-    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-    ctx.lineWidth = Math.max(6, fontSize * 0.1);
-    ctx.lineJoin = 'round';
-    ctx.strokeText(line, W / 2, lineY);
-
-    // Text fill
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(line, W / 2, lineY);
-  });
-  ctx.restore();
-
-  // ── Footer ────────────────────────────────────────────────────────────────
-  ctx.strokeStyle = accentColor;
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(40, 1200); ctx.lineTo(W - 40, 1200); ctx.stroke();
-
-  drawLogoWatermark(0.6);
-}
-async function generatePoster() {
-  const topic = (document.getElementById('posterTopic')?.value || '').trim() || 'dark psychology';
-  const apiKey = document.getElementById('anthropicKey')?.value.trim();
-  if (!apiKey) {
-    const st = document.getElementById('posterGenStatus');
-    if (st) { st.style.display='block'; st.style.background='#251010'; st.style.color='#ff8080'; st.style.border='1px solid #401a1a'; st.textContent='Add your Anthropic API key first (Section 1)'; }
-    return;
-  }
-  const btn = document.getElementById('generatePosterBtn');
-  const st = document.getElementById('posterGenStatus');
-  if (btn) { btn.disabled=true; btn.textContent='⏳ Generating...'; }
-  if (st) { st.style.display='block'; st.style.background='#0f1525'; st.style.color='#8ba3ff'; st.style.border='1px solid #1a2340'; st.textContent='Calling Claude for a brutal quote...'; }
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:256, messages:[{ role:'user', content:'Write one brutal dark psychology quote about "' + topic + '". The quote must be exactly 4 lines when broken for dramatic effect like a poem or movie title card. Each line should be SHORT (2-6 words max), punchy, and fragment naturally. No numbering. No em dashes or en dashes. No attribution. Return ONLY a valid JSON array of exactly 4 strings: ["line1","line2","line3","line4"]' }] })
-    });
-    if (!res.ok) throw new Error('API error ' + res.status);
-    const data = await res.json();
-    let rawContent = data.content[0].text.trim();
-    rawContent = rawContent.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/,'').trim();
-    let lines = JSON.parse(rawContent);
-    if (!Array.isArray(lines) || lines.length !== 4) throw new Error('Expected 4-line array, got: ' + rawContent);
-    lines = lines.map(l => String(l).replace(/[—–]/g, ','));
-    window.posterQuotes = lines;
-    if (st) { st.style.background='#102510'; st.style.color='#80ff99'; st.style.border='1px solid #1a401a'; st.textContent='✓ Quote generated — canvas updated'; }
-    drawEpisodePoster(lines);
-  } catch(e) {
-    if (st) { st.style.display='block'; st.style.background='#251010'; st.style.color='#ff8080'; st.style.border='1px solid #401a1a'; st.textContent='Error: '+e.message; }
-  } finally {
-    if (btn) { btn.disabled=false; btn.textContent='⚡ Generate Poster'; }
-  }
-}
-
-function exportPosterPNG() {
-  const canvas = document.getElementById('canvas');
-  if (!canvas) return;
-  const link = document.createElement('a');
-  link.download = 'episode-poster.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-}
-
-
-// ═══════════════════════════════════════════════════════════════════════════════
 //  ANIMATED BACKGROUNDS FOR QUOTES MODE
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -6098,23 +5010,45 @@ let contentMode = 'listicle'; // 'listicle' | 'quotes'
 
 function setContentMode(mode) {
   contentMode = mode;
-  const appModeEl = document.getElementById('appMode');
-  if (appModeEl) appModeEl.value = mode;
+
+  // ── Tab accent colours ────────────────────────────────
+  const ACCENT = { listicle: '#e53935', quotes: '#7c3aed', poster: '#d97706' };
+  document.documentElement.style.setProperty('--tab-accent', ACCENT[mode] || '#e53935');
+
+  // ── Show / hide mode panels ───────────────────────────
+  ['listiclePanel', 'quotesPanel', 'posterPanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const activePanel = document.getElementById(
+    mode === 'listicle' ? 'listiclePanel' :
+    mode === 'quotes'   ? 'quotesPanel'   :
+                          'posterPanel'
+  );
+  if (activePanel) activePanel.style.display = 'block';
+
+  // ── Update tab button active states ──────────────────
+  ['modeListicle', 'modeQuotes', 'modePoster'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.className = 'mode-btn';
+  });
+  const activeBtn = document.getElementById(
+    mode === 'listicle' ? 'modeListicle' :
+    mode === 'quotes'   ? 'modeQuotes'   :
+                          'modePoster'
+  );
+  if (activeBtn) activeBtn.className = 'mode-btn active';
+
+  // ── Legacy compat: keep quoteBgRow / quoteFontSizeRow visible in quotes panel ──
   const bgRow = document.getElementById('quoteBgRow');
-  if (bgRow) bgRow.style.display = mode === 'quotes' ? 'block' : 'none';
+  if (bgRow) bgRow.style.display = 'block'; // always show inside quotesPanel
   const fontSizeRow = document.getElementById('quoteFontSizeRow');
-  if (fontSizeRow) fontSizeRow.style.display = mode === 'quotes' ? 'block' : 'none';
-  const posterSection = document.getElementById('posterModeSection');
-  if (posterSection) posterSection.style.display = mode === 'poster' ? 'block' : 'none';
-  // Auto-toggle subtitles: off for quotes/poster (text shown big), on for listicle
+  if (fontSizeRow) fontSizeRow.style.display = 'block';
+
+  // ── Auto-toggle subtitles ────────────────────────────
   const subsToggle = document.getElementById('subsEnabled');
-  if (subsToggle) subsToggle.checked = (mode === 'listicle');
-  const lb = document.getElementById('modeListicle');
-  const qb = document.getElementById('modeQuotes');
-  const pb = document.getElementById('modePoster');
-  if (lb) lb.className = 'cal-btn' + (mode === 'listicle' ? ' primary' : '');
-  if (qb) qb.className = 'cal-btn' + (mode === 'quotes' ? ' primary' : '');
-  if (pb) pb.className = 'cal-btn' + (mode === 'poster' ? ' primary' : '');
+  if (subsToggle) subsToggle.checked = mode !== 'quotes';
+
   drawStaticPreview();
 }
 
@@ -6179,20 +5113,7 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   const t = performance.now() / 1000;
   const img = images[sceneIdx];
 
-  // ── AI Video layer for quotes mode ─────────────────────────────────────────
-  const _qVid = window.hasAiVideo?.[sceneIdx] && window.sceneVideos?.[sceneIdx];
-  if (_qVid) {
-    const vid = window.sceneVideos[sceneIdx];
-    if (vid.readyState >= 2) {
-      const vw = vid.videoWidth || 720, vh = vid.videoHeight || 1280;
-      const scale = Math.max(720/vw, 1280/vh);
-      const dw = vw*scale, dh = vh*scale;
-      const dx = (720-dw)/2, dy = (1280-dh)/2;
-      ctx.drawImage(vid, dx, dy, dw, dh);
-    }
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    ctx.fillRect(0, 0, W, H);
-  } else if (quoteBgMode === 'ai' && img) {
+  if (quoteBgMode === 'ai' && img) {
     // Cover-fit AI image as background with slight ken burns
     ctx.save();
     const progress = Math.min(1, tInScene / Math.max(0.5, sceneDuration));
@@ -6207,7 +5128,6 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   } else {
     drawAnimatedBg(t);
   }
-  drawBroll();
   if (!script || !script.scenes[sceneIdx]) return;
   const scene = script.scenes[sceneIdx];
   const fade = Math.min(1, tInScene / 0.4);
@@ -6239,13 +5159,11 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   let fontSize = parseInt(document.getElementById('quoteFontSize')?.value) || 72;
   const maxW = W - 120;
   ctx.font = `800 ${fontSize}px ${quoteFont}`;
-  const subsCase = document.getElementById('subsCase')?.value || 'upper';
-  const processedQuote = subsCase === 'upper' ? quote.toUpperCase() : subsCase === 'lower' ? quote.toLowerCase() : quote;
-  let lines = wrapText(processedQuote, maxW);
+  let lines = wrapText(quote.toUpperCase(), maxW);
   while (lines.length > 5 && fontSize > 40) {
     fontSize -= 4;
     ctx.font = `800 ${fontSize}px ${quoteFont}`;
-    lines = wrapText(processedQuote, maxW);
+    lines = wrapText(quote.toUpperCase(), maxW);
   }
   const lineH = fontSize * 1.2;
   const blockH = lineH * lines.length;
@@ -6267,8 +5185,7 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   ctx.font = `600 28px 'Inter', sans-serif`;
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.letterSpacing = '3px';
-  const processedAttribution = subsCase === 'upper' ? attribution.toUpperCase() : subsCase === 'lower' ? attribution.toLowerCase() : attribution;
-  ctx.fillText('— ' + processedAttribution, W/2, startY + blockH + 30);
+  ctx.fillText('— ' + attribution.toUpperCase(), W/2, startY + blockH + 30);
 
   // Decorative bottom line
   ctx.strokeStyle = 'rgba(255,255,255,0.3)';
@@ -6281,8 +5198,18 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
 
   ctx.restore();
 
-  // Subtitles intentionally suppressed in Quotes mode — quote text is the visual centrepiece.
-  // (wordTimings are still built for voice-sync purposes; they just aren't drawn here.)
+  // Word-by-word subtitle of the quote
+  if (document.getElementById('subsEnabled')?.checked) {
+    const narrationDuration = audios[sceneIdx]?.duration ?? Math.max(0.5, sceneDuration - 0.2);
+    const offset = parseFloat(document.getElementById('subsOffset')?.value || '0');
+    const adjT = tInScene + offset;
+    const wordsPerChunk = parseInt(document.getElementById('subsWords')?.value || '2');
+    const wt = wordTimings[sceneIdx];
+    const currentChunk = wt
+      ? getChunkFromWordTimings(wt, adjT, wordsPerChunk)
+      : getCurrentChunk(chunkWords(quote, wordsPerChunk), adjT, narrationDuration);
+    if (currentChunk !== null) drawSubtitle(currentChunk, fade);
+  }
 }
 
 
