@@ -855,9 +855,11 @@
 
       <div class="panel">
         <h2><span><span class="num">2</span>Topic &amp; Config</span></h2>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <input type="hidden" id="appMode" value="listicle">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
           <button class="cal-btn primary" id="modeListicle" onclick="setContentMode('listicle')">📋 Listicle<br><span style="font-size:8px;opacity:0.7">Stories + images</span></button>
           <button class="cal-btn" id="modeQuotes" onclick="setContentMode('quotes')">💬 Quotes<br><span style="font-size:8px;opacity:0.7">Text-only, no images</span></button>
+          <button class="cal-btn" id="modePoster" onclick="setContentMode('poster')">🎭 Episode Poster<br><span style="font-size:8px;opacity:0.7">4-quote card</span></button>
         </div>
         <div id="quoteBgRow" style="display:none;margin-bottom:14px;">
           <label style="display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:6px;">Animated Background</label>
@@ -874,6 +876,39 @@
           <label style="display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:6px;">Quote Font Size</label>
           <input type="number" id="quoteFontSize" min="20" max="200" value="72" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
         </div>
+        <!-- ── Episode Poster UI ── -->
+        <div id="posterModeSection" style="display:none;margin-bottom:14px;">
+          <div class="field">
+            <label>Poster Topic</label>
+            <input type="text" id="posterTopic" placeholder="e.g. betrayal, manipulation, envy">
+          </div>
+          <div class="row-2" style="margin-bottom:10px;">
+            <div class="field" style="margin:0">
+              <label>Background</label>
+              <select id="posterBgStyle" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+                <option value="void">⬛ Void Black</option>
+                <option value="crimson" selected>🔴 Crimson Abyss</option>
+                <option value="matrix">💊 Matrix Green</option>
+                <option value="smoke">🌫 Smoke Grey</option>
+                <option value="navy">🔵 Deep Navy</option>
+              </select>
+            </div>
+            <div class="field" style="margin:0">
+              <label>Quote Style</label>
+              <select id="posterQuoteStyle" style="width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;font-size:13px;">
+                <option value="upper" selected>UPPERCASE</option>
+                <option value="sentence">Sentence case</option>
+                <option value="lower">lowercase</option>
+              </select>
+            </div>
+          </div>
+          <div class="row-2">
+            <button onclick="generatePoster()" id="generatePosterBtn">⚡ Generate Poster</button>
+            <button onclick="exportPosterPNG()" class="secondary">💾 Export PNG</button>
+          </div>
+          <div id="posterGenStatus" style="display:none;margin-top:8px;padding:8px 12px;border-radius:6px;font-size:11px;text-align:center;letter-spacing:1px;"></div>
+        </div>
+
         <div class="field">
           <label>Topic / Theme</label>
           <input type="text" id="topic" placeholder="e.g. 5 stages of every relationship" value="The Dark Psychology Behind Why Filipinos Can't Say No">
@@ -2923,10 +2958,17 @@ function drawScene(sceneIdx, tInScene, sceneDuration) {
 }
 
 function drawStaticPreview() {
+  if (contentMode === 'poster') {
+    if (window.posterQuotes && window.posterQuotes.length === 4) {
+      drawEpisodePoster(window.posterQuotes);
+    } else {
+      drawPosterPlaceholder();
+    }
+    return;
+  }
   if (contentMode === 'quotes' && script) { drawQuoteScene(previewScene, 0.5, 4); return; }
   if (!script) {
     drawConcrete();
-    drawBroll();
     ctx.save();
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     ctx.font = `700 28px 'Inter', sans-serif`;
@@ -5729,6 +5771,230 @@ function drawLogoWatermark(alpha) {
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  EPISODE POSTER MODE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function stripDashes(input) {
+  if (Array.isArray(input)) return input.map(s => stripDashes(s));
+  return input.replace(/[—–‒―­﹘﹣－-]{1,}/g, ' ').replace(/s{2,}/g, ' ').trim();
+}
+
+function drawPosterBg(bgStyle) {
+  if (bgStyle === 'void') {
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, W, H);
+  } else if (bgStyle === 'crimson') {
+    const grd = ctx.createRadialGradient(W/2, H*0.3, 0, W/2, H*0.3, W*0.9);
+    grd.addColorStop(0, '#1a0000');
+    grd.addColorStop(0.5, '#0c0000');
+    grd.addColorStop(1, '#050505');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    const vig = ctx.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.8);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.6)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, W, H);
+  } else if (bgStyle === 'matrix') {
+    ctx.fillStyle = '#000a00';
+    ctx.fillRect(0, 0, W, H);
+    const vig = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.9);
+    vig.addColorStop(0, 'rgba(0,20,0,0.4)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.8)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, W, H);
+  } else if (bgStyle === 'smoke') {
+    ctx.fillStyle = '#0a0a0c';
+    ctx.fillRect(0, 0, W, H);
+    const grd = ctx.createLinearGradient(0, 0, W, H);
+    grd.addColorStop(0, 'rgba(30,30,40,0.6)');
+    grd.addColorStop(1, 'rgba(5,5,8,0.9)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+  } else if (bgStyle === 'navy') {
+    const grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, '#00001a');
+    grd.addColorStop(0.5, '#000510');
+    grd.addColorStop(1, '#050505');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+  } else {
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
+function drawPosterPlaceholder() {
+  const bgStyle = document.getElementById('posterBgStyle')?.value || 'crimson';
+  drawPosterBg(bgStyle);
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.font = "600 22px 'Inter', sans-serif";
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('GENERATE A POSTER', W/2, H/2 - 14);
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.font = "400 14px 'Inter', sans-serif";
+  ctx.fillText('Enter a topic and click Generate', W/2, H/2 + 18);
+  ctx.restore();
+}
+function drawEpisodePoster(quotes) {
+  const bgStyle = document.getElementById('posterBgStyle')?.value || 'crimson';
+  const quoteStyle = document.getElementById('posterQuoteStyle')?.value || 'upper';
+  const quoteFont = document.getElementById('titleFont')?.value || "'Montserrat', sans-serif";
+
+  drawPosterBg(bgStyle);
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(0, 0, W, H);
+
+  const accentColors = { void:'rgba(255,255,255,0.25)', crimson:'rgba(180,20,20,0.7)', matrix:'rgba(0,180,0,0.5)', smoke:'rgba(200,200,220,0.3)', navy:'rgba(50,100,255,0.5)' };
+  const accentColor = accentColors[bgStyle] || 'rgba(255,255,255,0.25)';
+
+  const headerH = 80;
+  const headerGrd = ctx.createLinearGradient(0, 0, W, 0);
+  headerGrd.addColorStop(0, 'rgba(139,0,0,0.0)');
+  headerGrd.addColorStop(0.5, 'rgba(139,0,0,0.18)');
+  headerGrd.addColorStop(1, 'rgba(139,0,0,0.0)');
+  ctx.fillStyle = headerGrd;
+  ctx.fillRect(0, 0, W, headerH);
+
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(40, headerH - 2); ctx.lineTo(W - 40, headerH - 2); ctx.stroke();
+
+  ctx.save();
+  ctx.font = "900 28px 'Montserrat', sans-serif";
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.fillText('DARK PSYCHO', W/2, headerH / 2);
+  ctx.restore();
+
+  const padX = 44;
+  const maxTextW = W - padX * 2;
+  const contentTop = headerH + 28;
+  const footerH = 60;
+  const contentH = H - contentTop - footerH;
+  let quoteFontSize = 54;
+  const labelFontSize = 26;
+  const labelH = labelFontSize * 1.5;
+  const sepH = 28;
+
+  function fmtQ(t, s) {
+    if (!t) return '';
+    if (s === 'upper') return t.toUpperCase();
+    if (s === 'lower') return t.toLowerCase();
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  function measureTotalH(fontSize) {
+    ctx.font = "800 " + fontSize + "px " + quoteFont;
+    let total = 0;
+    for (let i = 0; i < 4; i++) {
+      const lines = wrapText(fmtQ(quotes[i], quoteStyle), maxTextW);
+      total += labelH + Math.min(lines.length, 3) * fontSize * 1.22 + 16;
+      if (i < 3) total += sepH;
+    }
+    return total;
+  }
+
+  while (quoteFontSize > 30 && measureTotalH(quoteFontSize) > contentH * 0.96) { quoteFontSize -= 2; }
+
+  const actualH = measureTotalH(quoteFontSize);
+  let y = contentTop + (contentH - actualH) / 2;
+  const lineHeight = quoteFontSize * 1.22;
+
+  for (let i = 0; i < 4; i++) {
+    const num = String(i + 1).padStart(2, '0');
+    ctx.save();
+    ctx.font = "700 " + labelFontSize + "px 'Inter', sans-serif";
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.fillText(num, padX, y);
+    ctx.restore();
+    y += labelH;
+
+    ctx.font = "800 " + quoteFontSize + "px " + quoteFont;
+    let lines = wrapText(fmtQ(quotes[i], quoteStyle), maxTextW);
+    if (lines.length > 3) lines = lines.slice(0, 3);
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.strokeStyle = 'rgba(0,0,0,0.75)';
+    ctx.lineWidth = Math.max(5, quoteFontSize * 0.09);
+    ctx.lineJoin = 'round';
+    ctx.fillStyle = '#ffffff';
+    lines.forEach((line, li) => {
+      ctx.strokeText(line, padX, y + li * lineHeight);
+      ctx.fillText(line, padX, y + li * lineHeight);
+    });
+    ctx.restore();
+    y += lines.length * lineHeight + 16;
+
+    if (i < 3) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padX, y + (sepH - 1) / 2);
+      ctx.lineTo(W - padX, y + (sepH - 1) / 2);
+      ctx.stroke();
+      ctx.restore();
+      y += sepH;
+    }
+  }
+
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40, H - footerH + 2); ctx.lineTo(W - 40, H - footerH + 2); ctx.stroke();
+  drawLogoWatermark(0.6);
+}
+async function generatePoster() {
+  const topic = (document.getElementById('posterTopic')?.value || '').trim() || 'dark psychology';
+  const apiKey = document.getElementById('anthropicKey')?.value.trim();
+  if (!apiKey) {
+    const st = document.getElementById('posterGenStatus');
+    if (st) { st.style.display='block'; st.style.background='#251010'; st.style.color='#ff8080'; st.style.border='1px solid #401a1a'; st.textContent='Add your Anthropic API key first (Section 1)'; }
+    return;
+  }
+  const btn = document.getElementById('generatePosterBtn');
+  const st = document.getElementById('posterGenStatus');
+  if (btn) { btn.disabled=true; btn.textContent='⏳ Generating...'; }
+  if (st) { st.style.display='block'; st.style.background='#0f1525'; st.style.color='#8ba3ff'; st.style.border='1px solid #1a2340'; st.textContent='Calling Claude for brutal quotes...'; }
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:512, messages:[{ role:'user', content:'Generate exactly 4 brutal, gut-punch dark psychology quotes about "'+topic+'". Each must be under 12 words. Punchy. No explanation. No numbering. No em dashes, en dashes, or hyphens. Return ONLY a valid JSON array with exactly 4 strings: ["quote1","quote2","quote3","quote4"]' }] })
+    });
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const data = await res.json();
+    let raw = data.content[0].text.trim().replace(/^```jsons*/i,'').replace(/^```s*/i,'').replace(/```$/,'').trim();
+    let quotes = JSON.parse(raw);
+    quotes = stripDashes(quotes);
+    window.posterQuotes = quotes;
+    if (st) { st.style.background='#102510'; st.style.color='#80ff99'; st.style.border='1px solid #1a401a'; st.textContent='✓ 4 quotes generated — canvas updated'; }
+    drawEpisodePoster(quotes);
+  } catch(e) {
+    if (st) { st.style.display='block'; st.style.background='#251010'; st.style.color='#ff8080'; st.style.border='1px solid #401a1a'; st.textContent='Error: '+e.message; }
+  } finally {
+    if (btn) { btn.disabled=false; btn.textContent='⚡ Generate Poster'; }
+  }
+}
+
+function exportPosterPNG() {
+  const canvas = document.getElementById('canvas');
+  if (!canvas) return;
+  const link = document.createElement('a');
+  link.download = 'episode-poster.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  ANIMATED BACKGROUNDS FOR QUOTES MODE
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -5854,17 +6120,23 @@ let contentMode = 'listicle'; // 'listicle' | 'quotes'
 
 function setContentMode(mode) {
   contentMode = mode;
+  const appModeEl = document.getElementById('appMode');
+  if (appModeEl) appModeEl.value = mode;
   const bgRow = document.getElementById('quoteBgRow');
   if (bgRow) bgRow.style.display = mode === 'quotes' ? 'block' : 'none';
   const fontSizeRow = document.getElementById('quoteFontSizeRow');
   if (fontSizeRow) fontSizeRow.style.display = mode === 'quotes' ? 'block' : 'none';
-  // Auto-toggle subtitles: off for quotes (text already shown big), on for listicle
+  const posterSection = document.getElementById('posterModeSection');
+  if (posterSection) posterSection.style.display = mode === 'poster' ? 'block' : 'none';
+  // Auto-toggle subtitles: off for quotes/poster (text shown big), on for listicle
   const subsToggle = document.getElementById('subsEnabled');
-  if (subsToggle) subsToggle.checked = mode !== 'quotes';
+  if (subsToggle) subsToggle.checked = (mode === 'listicle');
   const lb = document.getElementById('modeListicle');
   const qb = document.getElementById('modeQuotes');
+  const pb = document.getElementById('modePoster');
   if (lb) lb.className = 'cal-btn' + (mode === 'listicle' ? ' primary' : '');
   if (qb) qb.className = 'cal-btn' + (mode === 'quotes' ? ' primary' : '');
+  if (pb) pb.className = 'cal-btn' + (mode === 'poster' ? ' primary' : '');
   drawStaticPreview();
 }
 
