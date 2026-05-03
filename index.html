@@ -5720,18 +5720,8 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
 
   ctx.restore();
 
-  // Word-by-word subtitle of the quote
-  if (document.getElementById('subsEnabled')?.checked) {
-    const narrationDuration = audios[sceneIdx]?.duration ?? Math.max(0.5, sceneDuration - 0.2);
-    const offset = parseFloat(document.getElementById('subsOffset')?.value || '0');
-    const adjT = tInScene + offset;
-    const wordsPerChunk = parseInt(document.getElementById('subsWords')?.value || '2');
-    const wt = wordTimings[sceneIdx];
-    const currentChunk = wt
-      ? getChunkFromWordTimings(wt, adjT, wordsPerChunk)
-      : getCurrentChunk(chunkWords(quote, wordsPerChunk), adjT, narrationDuration);
-    if (currentChunk !== null) drawSubtitle(currentChunk, fade);
-  }
+  // Subtitles intentionally suppressed in Quotes mode — quote text is the visual centrepiece.
+  // (wordTimings are still built for voice-sync purposes; they just aren't drawn here.)
 }
 
 
