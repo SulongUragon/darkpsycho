@@ -861,6 +861,24 @@ details > *:not(summary) { margin-top: 10px; }
 
 .divider { height: 1px; background: var(--border); margin: var(--space-4) 0; }
 
+/* ── Voice provider pill toggle ───────────────────────────────── */
+.vp-btn {
+  flex: 1; padding: 9px 6px;
+  background: var(--bg-elev-2); border: 1px solid var(--border);
+  color: var(--text-mute);
+  font-family: inherit; font-size: 10px; font-weight: 700;
+  letter-spacing: .5px; cursor: pointer;
+  border-radius: var(--radius-sm); width: auto;
+  transition: all .15s var(--ease);
+  text-transform: none;
+}
+.vp-btn:hover:not(.active) { color: var(--text); border-color: var(--border-hover); }
+.vp-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-lo));
+  border-color: var(--accent); color: #fff;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -951,9 +969,38 @@ details > *:not(summary) { margin-top: 10px; }
           <div class="api-label">FAL.ai</div>
           <input type="password" id="falKey" placeholder="fal-… (FLUX images)" autocomplete="off">
         </div>
+        <!-- Voice Provider Pill Toggle -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px;">Voice Provider</div>
+          <div id="voiceProviderToggle" style="display:flex;gap:6px;">
+            <button type="button" onclick="setVoiceProvider('elevenlabs')" id="vpBtn_elevenlabs" class="vp-btn active">🎤 ElevenLabs</button>
+            <button type="button" onclick="setVoiceProvider('openai')" id="vpBtn_openai" class="vp-btn">🤖 OpenAI TTS</button>
+          </div>
+          <input type="hidden" id="voiceProvider" value="elevenlabs">
+          <div style="font-size:9px;color:var(--text-faint);margin-top:6px;letter-spacing:.5px;">If ElevenLabs runs out of credits, OpenAI is used as a fallback automatically.</div>
+        </div>
         <div class="api-row">
           <div class="api-label">ElevenLabs</div>
           <input type="password" id="elevenKey" placeholder="xi-… (TTS)" autocomplete="off">
+        </div>
+        <!-- OpenAI Key — always visible (used for TTS fallback / manual selection) -->
+        <div class="api-row">
+          <div class="api-label">OpenAI Key</div>
+          <input type="password" id="openaiKey" placeholder="sk-… (TTS)" autocomplete="off">
+        </div>
+        <!-- OpenAI Voice config — shown only when OpenAI is the active provider -->
+        <div id="openaiVoiceConfig" style="display:none;margin-bottom:10px;">
+          <div class="api-row" style="margin-bottom:0;">
+            <div class="api-label">OpenAI Voice</div>
+            <select id="openaiVoice">
+              <option value="alloy">Alloy (neutral)</option>
+              <option value="echo">Echo (male)</option>
+              <option value="fable">Fable (British)</option>
+              <option value="onyx" selected>Onyx (deep male)</option>
+              <option value="nova">Nova (female)</option>
+              <option value="shimmer">Shimmer (soft female)</option>
+            </select>
+          </div>
         </div>
         <div style="border-top:1px solid #1e1e1e;margin-top:12px;padding-top:12px;">
           <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px;">☁️ Auto-Schedule Setup</div>
@@ -2046,10 +2093,29 @@ function setProgress(pct) {
 }
 
 // ----- Save keys
+// ----- Voice provider UI toggle (ElevenLabs / OpenAI)
+function setVoiceProvider(provider) { applyVoiceProviderUI(provider); }
+function applyVoiceProviderUI(provider) {
+  if (provider !== 'elevenlabs' && provider !== 'openai') provider = 'elevenlabs';
+  const isOpenAI = provider === 'openai';
+  const vpInput = $('voiceProvider');
+  if (vpInput) vpInput.value = provider;
+  ['elevenlabs', 'openai'].forEach(p => {
+    const btn = $('vpBtn_' + p);
+    if (btn) btn.classList.toggle('active', p === provider);
+  });
+  const oaVoiceConfig = $('openaiVoiceConfig');
+  if (oaVoiceConfig) oaVoiceConfig.style.display = isOpenAI ? '' : 'none';
+  localStorage.setItem('voice_provider', provider);
+}
+
 $('saveKeys').onclick = () => {
   localStorage.setItem('anthropic_api_key', anthropicKeyEl.value.trim());
   localStorage.setItem('fal_api_key', falKeyEl.value.trim());
   localStorage.setItem('elevenlabs_api_key', elevenKeyEl.value.trim());
+  localStorage.setItem('openai_api_key', $('openaiKey')?.value.trim() || '');
+  localStorage.setItem('voice_provider', $('voiceProvider')?.value || 'elevenlabs');
+  localStorage.setItem('openai_voice', $('openaiVoice')?.value || 'onyx');
   localStorage.setItem('cloudinary_cloud', document.getElementById('cloudinaryCloud')?.value.trim() || '');
   localStorage.setItem('make_webhook', document.getElementById('makeWebhook')?.value.trim() || '');
   localStorage.setItem('cloudinary_preset', document.getElementById('cloudinaryPreset')?.value.trim() || '');
@@ -2062,6 +2128,9 @@ function loadKeys() {
   anthropicKeyEl.value = localStorage.getItem('anthropic_api_key') || '';
   falKeyEl.value = localStorage.getItem('fal_api_key') || '';
   elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
+  const _oKey = localStorage.getItem('openai_api_key'); if (_oKey && $('openaiKey')) $('openaiKey').value = _oKey;
+  const _ov = localStorage.getItem('openai_voice'); if (_ov && $('openaiVoice')) $('openaiVoice').value = _ov;
+  applyVoiceProviderUI(localStorage.getItem('voice_provider') || 'elevenlabs');
   const mwEl = document.getElementById('makeWebhook'); if (mwEl && !mwEl.value) mwEl.value = localStorage.getItem('make_webhook') || 'https://hook.us2.make.com/vz7tdtaf6l8h1jx3q1ivt4s9qglrutle';
   const ccEl = document.getElementById('cloudinaryCloud'); if (ccEl) ccEl.value = localStorage.getItem('cloudinary_cloud') || '';
   const cpEl = document.getElementById('cloudinaryPreset'); if (cpEl) cpEl.value = localStorage.getItem('cloudinary_preset') || '';
@@ -2251,7 +2320,8 @@ function buildWordTimings(alignment) {
   return result.length ? result : null;
 }
 
-async function generateSpeech(text, voiceId, apiKey, audioCtx) {
+// Throws { __quota: status } when 401/429 so caller can fallback to OpenAI.
+async function generateSpeechElevenLabs(text, voiceId, apiKey, audioCtx) {
   const body = {
     text: text,
     model_id: (document.getElementById('elevenModel')?.value || 'eleven_turbo_v2_5'),
@@ -2262,7 +2332,6 @@ async function generateSpeech(text, voiceId, apiKey, audioCtx) {
       use_speaker_boost: true
     }
   };
-  // Use /with-timestamps for exact word-level sync
   const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps`, {
     method: 'POST',
     headers: {
@@ -2275,10 +2344,14 @@ async function generateSpeech(text, voiceId, apiKey, audioCtx) {
   if (!response.ok) {
     let detail = '';
     try { detail = (await response.json()).detail?.message || (await response.text()); } catch (e) {}
+    if (response.status === 401 || response.status === 402 || response.status === 429) {
+      const err = new Error(`ElevenLabs ${response.status}: ${detail || response.statusText}`);
+      err.__quota = response.status;
+      throw err;
+    }
     throw new Error(`ElevenLabs ${response.status}: ${detail || response.statusText}`);
   }
   const data = await response.json();
-  // Decode base64 audio → ArrayBuffer
   const b64 = data.audio_base64;
   const binary = atob(b64);
   const bytes = new Uint8Array(binary.length);
@@ -2287,6 +2360,51 @@ async function generateSpeech(text, voiceId, apiKey, audioCtx) {
   const audioBuf = await audioCtx.decodeAudioData(arrayBuf.slice(0));
   const wt = buildWordTimings(data.alignment || data.normalized_alignment);
   return { audioBuffer: audioBuf, mp3Buffer: arrayBuf, wordTimings: wt };
+}
+
+async function generateSpeechOpenAI(text, apiKey, audioCtx) {
+  if (!apiKey) throw new Error('OpenAI key required');
+  const voiceVal = document.getElementById('openaiVoice')?.value || 'onyx';
+  const response = await fetch('https://api.openai.com/v1/audio/speech', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'tts-1', input: text, voice: voiceVal, response_format: 'mp3' })
+  });
+  if (!response.ok) {
+    let detail = '';
+    try { const j = await response.json(); detail = j.error?.message || ''; } catch (e) {}
+    throw new Error(`OpenAI TTS ${response.status}: ${detail || response.statusText}`);
+  }
+  const arrayBuf = await response.arrayBuffer();
+  const audioBuf = await audioCtx.decodeAudioData(arrayBuf.slice(0));
+  // OpenAI TTS has no word-level timestamps — subtitle sync uses char-weighted fallback (wordTimings = null)
+  return { audioBuffer: audioBuf, mp3Buffer: arrayBuf, wordTimings: null };
+}
+
+// Dispatcher: chooses provider, with automatic fallback ElevenLabs → OpenAI
+// when ElevenLabs returns 401/402/429 (out-of-credits / quota).
+let _voiceFallbackNotified = false;
+async function generateSpeech(text, voiceId, apiKey, audioCtx) {
+  const provider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
+  const oKey = document.getElementById('openaiKey')?.value.trim() || '';
+  if (provider === 'openai') {
+    return generateSpeechOpenAI(text, oKey, audioCtx);
+  }
+  // ElevenLabs path with OpenAI fallback when quota is hit
+  try {
+    return await generateSpeechElevenLabs(text, voiceId, apiKey, audioCtx);
+  } catch (err) {
+    if (err && err.__quota && oKey) {
+      if (!_voiceFallbackNotified) {
+        _voiceFallbackNotified = true;
+        try { window.toast && window.toast('ElevenLabs out of credits — falling back to OpenAI TTS', 'warn', 4500); } catch {}
+        // Auto-flip the UI so the user sees what happened
+        try { applyVoiceProviderUI('openai'); } catch {}
+      }
+      return await generateSpeechOpenAI(text, oKey, audioCtx);
+    }
+    throw err;
+  }
 }
 
 // =========================================================
@@ -2895,10 +3013,18 @@ async function runGenerateAll() {
   const anthropicKey = anthropicKeyEl.value.trim();
   const falKey = falKeyEl.value.trim();
   const elevenKey = elevenKeyEl.value.trim();
-  if (!anthropicKey || !falKey || !elevenKey) {
-    setStatus('Need all 3 API keys (Anthropic, FAL.ai, ElevenLabs)', 'error');
+  const openaiKey = document.getElementById('openaiKey')?.value.trim() || '';
+  const provider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
+  const voiceKeyOk = provider === 'openai' ? !!openaiKey : !!elevenKey;
+  if (!anthropicKey || !falKey || !voiceKeyOk) {
+    const missing = [];
+    if (!anthropicKey) missing.push('Anthropic');
+    if (!falKey) missing.push('FAL.ai');
+    if (!voiceKeyOk) missing.push(provider === 'openai' ? 'OpenAI' : 'ElevenLabs');
+    setStatus(`Need API keys: ${missing.join(', ')}`, 'error');
     return;
   }
+  _voiceFallbackNotified = false;
   const topic = topicEl.value.trim();
   if (!topic) { setStatus('Enter a topic', 'error'); return; }
   const sceneCount = parseInt(sceneCountEl.value);
@@ -3189,8 +3315,15 @@ async function regenerateOneImage(idx) {
 
 async function regenerateVoice() {
   if (!script) { setStatus('Generate a script first', 'error'); return; }
+  const provider = document.getElementById('voiceProvider')?.value || 'elevenlabs';
   const key = elevenKeyEl.value.trim();
-  if (!key) { setStatus('Need ElevenLabs key', 'error'); return; }
+  const oKey = document.getElementById('openaiKey')?.value.trim() || '';
+  const voiceKeyOk = provider === 'openai' ? !!oKey : !!key;
+  if (!voiceKeyOk) {
+    setStatus(provider === 'openai' ? 'Need OpenAI key' : 'Need ElevenLabs key (or switch to OpenAI)', 'error');
+    return;
+  }
+  _voiceFallbackNotified = false;
   disableControls(true);
   try {
     setStatus('Regenerating voiceovers…', 'info');
@@ -5174,6 +5307,9 @@ function getAllKeys() {
     anthropic: document.getElementById('anthropicKey')?.value || localStorage.getItem('anthropic_api_key') || '',
     fal: document.getElementById('falKey')?.value || localStorage.getItem('fal_api_key') || '',
     eleven: document.getElementById('elevenKey')?.value || localStorage.getItem('elevenlabs_api_key') || '',
+    openai: document.getElementById('openaiKey')?.value || localStorage.getItem('openai_api_key') || '',
+    voiceProvider: document.getElementById('voiceProvider')?.value || localStorage.getItem('voice_provider') || 'elevenlabs',
+    openaiVoice: document.getElementById('openaiVoice')?.value || localStorage.getItem('openai_voice') || 'onyx',
     cloudName: document.getElementById('cloudinaryCloud')?.value || localStorage.getItem('cloudinary_cloud') || '',
     cloudPreset: document.getElementById('cloudinaryPreset')?.value || localStorage.getItem('cloudinary_preset') || '',
     ayrshare: document.getElementById('ayrshareKey')?.value || localStorage.getItem('ayrshare_key') || '',
@@ -5186,14 +5322,21 @@ function applyKeys(keys) {
   set('anthropicKey', keys.anthropic);
   set('falKey', keys.fal);
   set('elevenKey', keys.eleven);
+  set('openaiKey', keys.openai);
+  set('openaiVoice', keys.openaiVoice);
   set('cloudinaryCloud', keys.cloudName);
   set('cloudinaryPreset', keys.cloudPreset);
   set('ayrshareKey', keys.ayrshare);
   set('makeWebhook', keys.makeWebhook);
-  // Save to localStorage
   if (keys.anthropic) localStorage.setItem('anthropic_api_key', keys.anthropic);
   if (keys.fal) localStorage.setItem('fal_api_key', keys.fal);
   if (keys.eleven) localStorage.setItem('elevenlabs_api_key', keys.eleven);
+  if (keys.openai) localStorage.setItem('openai_api_key', keys.openai);
+  if (keys.openaiVoice) localStorage.setItem('openai_voice', keys.openaiVoice);
+  if (keys.voiceProvider) {
+    localStorage.setItem('voice_provider', keys.voiceProvider);
+    try { applyVoiceProviderUI(keys.voiceProvider); } catch {}
+  }
   if (keys.cloudName) localStorage.setItem('cloudinary_cloud', keys.cloudName);
   if (keys.cloudPreset) localStorage.setItem('cloudinary_preset', keys.cloudPreset);
   if (keys.ayrshare) localStorage.setItem('ayrshare_key', keys.ayrshare);
