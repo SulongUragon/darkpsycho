@@ -953,6 +953,65 @@ details > *:not(summary) { margin-top: 10px; }
 .panel:nth-of-type(5) { animation-delay: 200ms; }
 .panel:nth-of-type(6) { animation-delay: 250ms; }
 
+/* ── Mode tab bar (Listicle / Quotes / Episode Poster) ────────── */
+.mode-tab-bar {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+  margin-bottom: var(--space-5);
+  padding: 4px;
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  position: relative;
+}
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-mute);
+  padding: 12px 8px;
+  border-radius: calc(var(--radius) - 4px);
+  font-family: inherit; font-size: 11px;
+  letter-spacing: 1.4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  width: 100%;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.5;
+  position: relative; z-index: 1;
+  transition: color .18s var(--ease), background-color .18s var(--ease), transform .12s var(--ease-out);
+  box-shadow: none;
+}
+.mode-btn span {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 1px;
+  font-weight: 400;
+  margin-top: 4px;
+  text-transform: none;
+  opacity: .55;
+}
+.mode-btn br { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .mode-btn:not(.active):hover { color: var(--text-soft); background: var(--bg-elev-2); }
+}
+.mode-btn:active { transform: scale(0.985); }
+.mode-btn.active {
+  color: var(--text);
+  background: var(--bg-elev-2);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.3),
+    inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
+}
+/* Active tab underline accent */
+.mode-btn.active::after {
+  content: '';
+  position: absolute;
+  left: 18%; right: 18%; bottom: 6px;
+  height: 2px; border-radius: 2px;
+  background: var(--tab-accent, var(--accent));
+  box-shadow: 0 0 8px var(--tab-accent, var(--accent-glow));
+}
+
 /* ── Voice provider pill toggle ───────────────────────────────── */
 .vp-btn {
   flex: 1; padding: 9px 6px;
@@ -1004,7 +1063,7 @@ details > *:not(summary) { margin-top: 10px; }
 
   <div class="layout">
     <div>
-      <div class="panel">
+      <div class="panel" data-modes="listicle quotes">
         <h2><span>Preview · 9:16</span><span style="color:#555;font-size:10px" id="sceneInfo"></span></h2>
         <div class="preview-wrapper">
           <canvas id="canvas" width="720" height="1280"></canvas>
@@ -1019,7 +1078,7 @@ details > *:not(summary) { margin-top: 10px; }
       </div>
       </div>
 
-      <div class="panel">
+      <div class="panel" data-modes="listicle quotes">
         <h2><span><span class="num">5</span>Export</span></h2>
         <div class="field">
           <label>Download folder</label>
@@ -1418,7 +1477,7 @@ details > *:not(summary) { margin-top: 10px; }
         </div>
       </div><!-- /posterPanel -->
 
-      <div class="panel">
+      <div class="panel" data-modes="listicle quotes poster">
         <h2><span><span class="num">3</span>Script</span>
           <div style="display:flex;gap:6px">
             <button id="customScriptBtn" class="small secondary">+ Custom</button>
@@ -1454,7 +1513,7 @@ details > *:not(summary) { margin-top: 10px; }
         </div>
       </div>
 
-      <div class="panel">
+      <div class="panel" data-modes="listicle quotes">
         <h2><span><span class="num">★</span>Post Bundle</span>
           <button id="copyAllBundleBtn" class="small secondary">Copy TikTok-ready</button>
         </h2>
@@ -1473,7 +1532,7 @@ details > *:not(summary) { margin-top: 10px; }
         <div class="cost-note">Auto-generated with the script. Edit anytime — saved with the project.</div>
       </div>
 
-      <div class="panel">
+      <div class="panel" data-modes="listicle">
         <h2><span><span class="num">4</span>Illustrations &amp; Voice</span>
           <div style="display:flex;gap:6px">
             <button id="regenImagesBtn" class="small secondary">Re-gen Images</button>
@@ -1755,7 +1814,7 @@ details > *:not(summary) { margin-top: 10px; }
 
 
   <!-- ══ 7-DAY CONTENT CALENDAR ══ -->
-  <div class="panel calendar-panel">
+  <div class="panel calendar-panel" data-modes="listicle quotes">
     <h2>
       <span><span class="num" style="background:#4a0070">📅</span>7-Day Content Calendar</span>
       <div style="display:flex;gap:6px">
@@ -1932,6 +1991,7 @@ details > *:not(summary) { margin-top: 10px; }
     { ic: '★',  lbl: 'Save Current Project',     hint: '⌘S',   run: () => clickIf($('saveProjectBtn')) },
     { ic: '📋', lbl: 'Switch to Listicle Mode',  hint: '',     run: () => window.setContentMode && window.setContentMode('listicle') },
     { ic: '💬', lbl: 'Switch to Quotes Mode',    hint: '',     run: () => window.setContentMode && window.setContentMode('quotes') },
+    { ic: '🎬', lbl: 'Switch to Episode Poster',  hint: '',     run: () => window.setContentMode && window.setContentMode('poster') },
     { ic: '📅', lbl: 'Plan 7-Day Calendar',      hint: '',     run: () => clickIf($('calPlanBtn')) },
     { ic: '⚡', lbl: 'Generate Whole Calendar',  hint: '',     run: () => clickIf($('calGenerateAllBtn')) },
     { ic: '🎬', lbl: 'Regenerate AI Poster',     hint: '',     run: () => clickIf($('posterRegenBtn')) },
@@ -5699,12 +5759,13 @@ let contentMode = 'listicle'; // 'listicle' | 'quotes'
 
 function setContentMode(mode) {
   contentMode = mode;
+  try { localStorage.setItem('content_mode', mode); } catch (e) {}
 
   // ── Tab accent colours ────────────────────────────────
   const ACCENT = { listicle: '#e53935', quotes: '#7c3aed', poster: '#d97706' };
   document.documentElement.style.setProperty('--tab-accent', ACCENT[mode] || '#e53935');
 
-  // ── Show / hide mode panels ───────────────────────────
+  // ── Show / hide mode-specific sub-panels ──────────────
   ['listiclePanel', 'quotesPanel', 'posterPanel'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
@@ -5724,13 +5785,30 @@ function setContentMode(mode) {
   const activeBtn = document.getElementById(
     mode === 'listicle' ? 'modeListicle' :
     mode === 'quotes'   ? 'modeQuotes'   :
-                          'modePoster'
+                          'posterPanel'.includes(mode) ? 'modePoster' : 'modePoster'
   );
   if (activeBtn) activeBtn.className = 'mode-btn active';
 
+  // ── Hide / show top-level panels by data-modes attribute ──
+  // Each panel declares which modes it appears in via `data-modes="listicle quotes"`.
+  // Panels without the attribute are always visible.
+  document.querySelectorAll('[data-modes]').forEach(el => {
+    const modes = (el.getAttribute('data-modes') || '').split(/\s+/).filter(Boolean);
+    el.style.display = modes.includes(mode) ? '' : 'none';
+  });
+
+  // If the left column ends up with all panels hidden (poster mode), collapse the
+  // grid to single-column so the right side breathes properly.
+  const layout = document.querySelector('.layout');
+  if (layout) {
+    const leftCol = layout.children[0];
+    const visibleInLeft = leftCol ? [...leftCol.children].some(c => c.style.display !== 'none') : true;
+    layout.style.gridTemplateColumns = visibleInLeft ? '' : 'minmax(0, 1fr)';
+  }
+
   // ── Legacy compat: keep quoteBgRow / quoteFontSizeRow visible in quotes panel ──
   const bgRow = document.getElementById('quoteBgRow');
-  if (bgRow) bgRow.style.display = 'block'; // always show inside quotesPanel
+  if (bgRow) bgRow.style.display = 'block';
   const fontSizeRow = document.getElementById('quoteFontSizeRow');
   if (fontSizeRow) fontSizeRow.style.display = 'block';
 
@@ -5916,6 +5994,11 @@ function init() {
   drawStaticPreview();
   if ($('saveProjectBtn')) $('saveProjectBtn').onclick = saveCurrentProject;
   refreshProjectList();
+  // Apply mode visibility on first load (also restores from localStorage if remembered)
+  try {
+    const savedMode = localStorage.getItem('content_mode') || 'listicle';
+    setContentMode(savedMode);
+  } catch (e) { setContentMode('listicle'); }
   if ($('presetSelect')) {
     $('presetSelect').addEventListener('change', () => applyPresetByValue($('presetSelect').value));
     $('presetSaveBtn').onclick = saveCurrentPreset;
