@@ -2806,16 +2806,22 @@ async function generateSpeech(text, voiceId, apiKey, audioCtx) {
     return generateSpeechOpenAI(text, oKey, audioCtx);
   }
   // ElevenLabs path with OpenAI fallback when quota is hit
+  if (!apiKey) {
+    throw new Error('ElevenLabs API key is missing. Add it in the API Keys tab.');
+  }
   try {
     return await generateSpeechElevenLabs(text, voiceId, apiKey, audioCtx);
   } catch (err) {
-    if (err && err.__quota && oKey) {
+    if (err && err.__quota) {
+      const reason = err.__quota === 401 ? 'Invalid ElevenLabs API key'
+                   : err.__quota === 402 ? 'ElevenLabs out of credits'
+                   : 'ElevenLabs rate limited';
       if (!_voiceFallbackNotified) {
         _voiceFallbackNotified = true;
-        try { window.toast && window.toast('ElevenLabs out of credits — falling back to OpenAI TTS', 'warn', 4500); } catch {}
-        // Auto-flip the UI so the user sees what happened
+        try { window.toast && window.toast(`⚠️ ${reason} — falling back to OpenAI TTS`, 'error', 8000); } catch {}
         try { applyVoiceProviderUI('openai'); } catch {}
       }
+      if (!oKey) throw new Error(`${reason}. Add an OpenAI key as fallback, or fix your ElevenLabs key.`);
       return await generateSpeechOpenAI(text, oKey, audioCtx);
     }
     throw err;
