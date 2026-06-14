@@ -6097,24 +6097,36 @@ function setContentMode(mode) {
 }
 
 async function generateQuotesScript(topic, sceneCount, apiKey) {
-  const prompt = `You are a viral dark-psychology quote creator for TikTok/Reels/Shorts.
+  const prompt = `You are a viral dark-psychology content creator for TikTok/Reels/Shorts.
 
 Topic: "${topic}"
 
-Generate ${sceneCount} powerful, punchy dark-psychology quotes on this topic. Each quote should be:
-- Original (not a famous existing quote)
-- 1-2 sentences max, hard-hitting truth
-- The kind that makes people stop scrolling
-- Raw, uncomfortable, honest
-- Reads naturally when spoken aloud
+Generate ${sceneCount} slides. Each slide is a 4-LINE psychological mirror quote that makes the reader think "that's exactly me" or "I've never heard anyone say this out loud but it's true."
+
+STYLE RULES for each slide:
+- EXACTLY 4 lines. Each line is SHORT (3-8 words max).
+- Written in second person ("You", "Your") — speak DIRECTLY to the reader.
+- Each line reveals a different layer of the same uncomfortable truth.
+- Line 1: Hook — a behavior or pattern they recognize in themselves.
+- Line 2: The real reason behind it (what they don't admit).
+- Line 3: The cost — what it's doing to them.
+- Line 4: The mirror — the hardest truth, the one that hits.
+- Raw, specific, emotionally precise. NOT generic advice. NOT preachy.
+- The reader should feel SEEN, not lectured.
+
+EXAMPLE of the tone and format:
+You help everyone.
+Not because you're kind.
+Because if you stop being useful,
+you're afraid no one will stay.
 
 Output STRICTLY valid JSON:
 {
   "mainTitle": "short viral hook title, MAX 6 WORDS",
   "scenes": [
     {
-      "quote": "The full quote text — 1-2 sentences, no quotation marks",
-      "narration": "Same as quote — this is what the voice will say",
+      "quote": "Line 1\\nLine 2\\nLine 3\\nLine 4",
+      "narration": "Line 1. Line 2. Line 3. Line 4.",
       "attribution": "Dark Psychology",
       "imagePrompt": "cinematic atmospheric background scene that emotionally matches this quote — describe a vivid, colorful, dramatic environment (city at night, stormy ocean, dark forest with light, etc.). NO people, NO text. Under 20 words."
     }
@@ -6126,10 +6138,11 @@ Output STRICTLY valid JSON:
 
 RULES:
 - EXACTLY ${sceneCount} scenes
-- No quotation marks inside the quote field
-- Each quote must be distinctly different angle on the topic
-- imagePrompt must be vivid and cinematic — match the emotional tone of the quote
-- NEVER use em dashes (—) or en dashes (–) anywhere in the output. Use commas, periods, or colons instead.
+- quote field: always 4 lines separated by \\n, no quotation marks
+- narration field: same lines joined with periods and spaces — for voice-over
+- Each slide must be a DIFFERENT psychological pattern on the topic
+- imagePrompt must be vivid and cinematic — match the emotional tone
+- NEVER use em dashes (—) or en dashes (–). Use commas, periods, or colons instead.
 - NO MARKDOWN. Raw JSON only.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -6199,37 +6212,47 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   ctx.textBaseline = 'top';
   ctx.fillText('“', 60, H*0.28);
 
-  // Main quote text
-  let fontSize = parseInt(document.getElementById('quoteFontSize')?.value) || 72;
-  const maxW = W - 120;
-  ctx.font = `800 ${fontSize}px ${quoteFont}`;
-  let lines = wrapText(quote.toUpperCase(), maxW);
-  while (lines.length > 5 && fontSize > 40) {
-    fontSize -= 4;
-    ctx.font = `800 ${fontSize}px ${quoteFont}`;
-    lines = wrapText(quote.toUpperCase(), maxW);
-  }
-  const lineH = fontSize * 1.2;
-  const blockH = lineH * lines.length;
-  const startY = H/2 - blockH/2;
+  // Split into up to 4 lines (handles \n in quote field)
+  const rawLines = quote.split(/\n/).map(l => l.trim()).filter(l => l).slice(0, 4);
+  const quoteCase = document.getElementById('quotesCase')?.value || 'upper';
+  const displayLines = rawLines.map(l => quoteCase === 'upper' ? l.toUpperCase() : quoteCase === 'lower' ? l.toLowerCase() : l);
 
-  // Shadow/stroke for depth
-  ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-  ctx.lineWidth = Math.max(6, fontSize * 0.1);
-  ctx.lineJoin = 'round';
-  ctx.fillStyle = '#ffffff';
+  // Font sizing — start big, shrink if any line overflows
+  let fontSize = parseInt(document.getElementById('quoteFontSize')?.value) || 68;
+  const maxW = W - 120;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  lines.forEach((line, i) => {
-    ctx.strokeText(line, W/2, startY + i * lineH);
-    ctx.fillText(line, W/2, startY + i * lineH);
+  const longestLine = displayLines.reduce((a, b) => a.length > b.length ? a : b, '');
+  while (fontSize > 36) {
+    ctx.font = `800 ${fontSize}px ${quoteFont}`;
+    if (ctx.measureText(longestLine).width <= maxW) break;
+    fontSize -= 3;
+  }
+  ctx.font = `800 ${fontSize}px ${quoteFont}`;
+
+  // Line heights: lines 1/3 slightly smaller (hook/cost), lines 2/4 normal (truth hits)
+  const lineH = fontSize * 1.35;
+  const blockH = lineH * displayLines.length;
+  const startY = H / 2 - blockH / 2 - 10;
+
+  // Draw each line: alternating opacity for rhythm (full / muted / full / full)
+  const lineOpacity = [1, 0.65, 1, 1];
+  ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+  ctx.lineJoin = 'round';
+  displayLines.forEach((line, i) => {
+    ctx.lineWidth = Math.max(8, fontSize * 0.12);
+    ctx.globalAlpha = fade * lineOpacity[i] ?? fade;
+    ctx.strokeText(line, W / 2, startY + i * lineH);
+    ctx.fillStyle = i === displayLines.length - 1 ? '#ffe066' : '#ffffff';
+    ctx.fillText(line, W / 2, startY + i * lineH);
   });
+  ctx.globalAlpha = fade;
 
   // Attribution
-  ctx.font = `600 28px 'Inter', sans-serif`;
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = `600 26px 'Inter', sans-serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
   ctx.letterSpacing = '3px';
-  ctx.fillText('— ' + attribution.toUpperCase(), W/2, startY + blockH + 30);
+  ctx.fillText('— ' + attribution.toUpperCase(), W / 2, startY + blockH + 28);
 
   // Decorative bottom line
   ctx.strokeStyle = 'rgba(255,255,255,0.3)';
