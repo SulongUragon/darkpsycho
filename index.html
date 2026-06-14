@@ -1836,7 +1836,9 @@ details > *:not(summary) { margin-top: 10px; }
                   <option value="custom">Custom text below</option>
                 </select>
               </div>
-              <textarea id="posterCustomText" style="min-height:64px;font-size:12px;line-height:1.4;width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;" placeholder="Type your own quote, or pick a scene above…"></textarea>
+              <textarea id="posterCustomText" style="min-height:64px;font-size:12px;line-height:1.4;width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;" placeholder="Type your own quote, or generate one below…"></textarea>
+              <button type="button" id="posterGenQuoteBtn" style="margin-top:7px;width:100%;padding:9px;border-radius:7px;border:1px dashed #7c3aed;background:rgba(124,58,237,.08);color:#a78bfa;font-size:12px;cursor:pointer;font-weight:600;letter-spacing:.5px;">✨ Generate Inspirational Quote</button>
+              <div id="posterQuoteStatus" style="font-size:10px;color:#555;margin-top:4px;min-height:14px;"></div>
               <div class="field" style="margin-top:10px;">
                 <label>Quote Style</label>
                 <select id="posterQuoteStyle"
@@ -7101,6 +7103,65 @@ document.fonts.ready.then(init);
     }, 'image/png');
   }
 
+  async function generatePosterQuote() {
+    const apiKey = document.getElementById('anthropicKey')?.value.trim() || '';
+    if (!apiKey) { alert('Wala pang Anthropic API key. I-add sa API Keys tab.'); return; }
+    const topic = $('posterTopic')?.value.trim()
+      || (typeof window.script !== 'undefined' && window.script?.mainTitle)
+      || 'life and resilience';
+    const btn = $('posterGenQuoteBtn');
+    const statusEl = $('posterQuoteStatus');
+    btn.disabled = true;
+    btn.textContent = '⏳ Generating…';
+    if (statusEl) statusEl.textContent = 'Calling Claude…';
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 200,
+          messages: [{
+            role: 'user',
+            content: `Write a 4-line inspirational quote for a social media episode poster about: "${topic}"
+
+Rules:
+- 4 lines, each line 4-8 words
+- Soft, reflective, poetic tone — about growth, loss, lessons, journey, purpose
+- Third person or universal ("Some lessons", "The ones who", "What we lose")
+- Each line flows naturally into the next
+- No hashtags, no quotation marks, no attribution
+- Output ONLY the 4 lines, nothing else
+
+Example style:
+Some lessons arrive disguised as loss.
+Only later do we understand their gift.
+The pain was never the enemy.
+It was the door we had to open.`
+          }]
+        })
+      });
+      const data = await res.json();
+      const quote = data.content?.[0]?.text?.trim() || '';
+      if (!quote) throw new Error('No quote returned');
+      const customEl = $('posterCustomText');
+      const srcEl = $('posterTextSource');
+      if (customEl) { customEl.value = quote; customEl.dispatchEvent(new Event('input')); }
+      if (srcEl) { srcEl.value = 'custom'; srcEl.dispatchEvent(new Event('change')); }
+      if (statusEl) statusEl.textContent = '✓ Quote generated';
+    } catch (err) {
+      if (statusEl) statusEl.textContent = '⚠️ ' + err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✨ Generate Inspirational Quote';
+    }
+  }
+
   function install() {
     if (!ensureCanvas()) return;
 
@@ -7166,6 +7227,7 @@ document.fonts.ready.then(init);
 
     // Buttons
     $('posterRegenBtn')?.addEventListener('click', generateAIPoster);
+    $('posterGenQuoteBtn')?.addEventListener('click', generatePosterQuote);
     $('posterDownloadBtn')?.addEventListener('click', downloadPoster);
 
     // Watch for new scene images via mutation polling — simplest reliable method
