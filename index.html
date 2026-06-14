@@ -1229,6 +1229,97 @@ details > *:not(summary) { margin-top: 10px; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── CHATBOT ── */
+#chatToggle {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #e53935);
+  border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(124,58,237,.5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; transition: transform .2s, box-shadow .2s;
+}
+#chatToggle:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(124,58,237,.7); }
+#chatToggle .chat-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: #e53935; color: #fff; font-size: 10px; font-weight: 700;
+  width: 18px; height: 18px; border-radius: 50%;
+  display: none; align-items: center; justify-content: center;
+}
+#chatPanel {
+  position: fixed; bottom: 92px; right: 24px; z-index: 9998;
+  width: 360px; max-height: 580px;
+  background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 16px;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,.8);
+  transform: scale(0.9) translateY(12px); opacity: 0;
+  pointer-events: none; transition: transform .22s ease, opacity .22s ease;
+}
+#chatPanel.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+.chat-header {
+  padding: 14px 16px; background: #161616; border-bottom: 1px solid #222;
+  display: flex; align-items: center; gap: 10px;
+}
+.chat-header .chat-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg,#7c3aed,#e53935);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.chat-header-info { flex: 1; }
+.chat-header-name { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: .5px; }
+.chat-header-status { font-size: 10px; color: #666; }
+.chat-close { background: none; border: none; color: #555; font-size: 18px; cursor: pointer; padding: 0 4px; }
+.chat-close:hover { color: #fff; }
+#chatMessages {
+  flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  scrollbar-width: thin; scrollbar-color: #333 transparent;
+}
+.chat-msg { display: flex; gap: 8px; max-width: 100%; }
+.chat-msg.user { flex-direction: row-reverse; }
+.chat-msg .bubble {
+  max-width: 260px; padding: 10px 13px; border-radius: 14px;
+  font-size: 13px; line-height: 1.5; color: #e8e8e8; word-break: break-word;
+}
+.chat-msg.bot .bubble { background: #1e1e1e; border-bottom-left-radius: 4px; }
+.chat-msg.user .bubble { background: #7c3aed; color: #fff; border-bottom-right-radius: 4px; }
+.chat-msg .bubble img { max-width: 220px; border-radius: 8px; margin-top: 6px; display: block; }
+.chat-msg .bubble .img-caption { font-size: 10px; color: #666; margin-top: 4px; }
+.chat-typing { display: flex; gap: 4px; align-items: center; padding: 10px 13px; }
+.chat-typing span {
+  width: 7px; height: 7px; border-radius: 50%; background: #555;
+  animation: chatBounce 1.2s infinite ease-in-out;
+}
+.chat-typing span:nth-child(2) { animation-delay: .2s; }
+.chat-typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes chatBounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+.chat-input-row {
+  padding: 12px; border-top: 1px solid #1e1e1e;
+  display: flex; gap: 8px; align-items: flex-end;
+}
+#chatInput {
+  flex: 1; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px;
+  color: #e8e8e8; font-size: 13px; padding: 9px 12px; resize: none;
+  min-height: 38px; max-height: 100px; font-family: inherit; outline: none;
+}
+#chatInput:focus { border-color: #7c3aed; }
+#chatSend {
+  width: 38px; height: 38px; border-radius: 10px; border: none;
+  background: linear-gradient(135deg,#7c3aed,#e53935); color: #fff;
+  font-size: 16px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .15s;
+}
+#chatSend:disabled { opacity: .4; cursor: not-allowed; }
+.chat-suggestion {
+  display: inline-block; padding: 5px 10px; background: #1a1a1a; border: 1px solid #2a2a2a;
+  border-radius: 20px; font-size: 11px; color: #aaa; cursor: pointer; margin: 2px;
+  transition: border-color .15s, color .15s;
+}
+.chat-suggestion:hover { border-color: #7c3aed; color: #fff; }
+.chat-img-pill {
+  font-size: 10px; color: #7c3aed; background: rgba(124,58,237,.12);
+  border-radius: 4px; padding: 2px 6px; display: inline-block; margin-bottom: 4px;
+}
 </style>
 </head>
 <body>
@@ -7091,6 +7182,238 @@ function switchKeyTab(tab) {
   document.querySelectorAll('.key-tab').forEach(b => b.classList.toggle('active', b.dataset.keytab === tab));
   document.querySelectorAll('.key-tab-pane').forEach(p => p.style.display = p.id === 'keytab-' + tab ? '' : 'none');
 }
+</script>
+
+<!-- ── CHATBOT HTML ── -->
+<button id="chatToggle" title="Ask anything / Generate image">
+  💬
+  <span class="chat-badge" id="chatBadge">1</span>
+</button>
+
+<div id="chatPanel">
+  <div class="chat-header">
+    <div class="chat-avatar">🧠</div>
+    <div class="chat-header-info">
+      <div class="chat-header-name">DARK PSYCHO AI</div>
+      <div class="chat-header-status" id="chatStatus">Ask anything · Generate images</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div id="chatMessages">
+    <div class="chat-msg bot">
+      <div class="bubble">
+        Kamusta. Tanungin mo ako tungkol sa dark psychology, o mag-type ng <strong>"generate image of..."</strong> para gumawa ako ng larawan para sayo.
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px;">
+          <span class="chat-suggestion" onclick="chatSuggest(this)">Why do people manipulate?</span>
+          <span class="chat-suggestion" onclick="chatSuggest(this)">Generate image of a lone wolf at night</span>
+          <span class="chat-suggestion" onclick="chatSuggest(this)">Signs of a narcissist</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="chat-input-row">
+    <textarea id="chatInput" placeholder="Ask or say generate image of…" rows="1"></textarea>
+    <button id="chatSend" onclick="chatSubmit()">➤</button>
+  </div>
+</div>
+
+<script>
+// ── CHATBOT LOGIC ──
+(function() {
+  const panel = document.getElementById('chatPanel');
+  const msgs  = document.getElementById('chatMessages');
+  const input = document.getElementById('chatInput');
+  const send  = document.getElementById('chatSend');
+  const badge = document.getElementById('chatBadge');
+  const status = document.getElementById('chatStatus');
+  let open = false;
+  let history = []; // [{role,content}]
+  let badgeCount = 1;
+
+  window.toggleChat = function() {
+    open = !open;
+    panel.classList.toggle('open', open);
+    if (open) { badge.style.display = 'none'; badgeCount = 0; input.focus(); }
+  };
+
+  document.getElementById('chatToggle').onclick = toggleChat;
+
+  // Auto-resize textarea
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatSubmit(); }
+  });
+
+  window.chatSuggest = function(el) { input.value = el.textContent; input.focus(); };
+
+  function getKeys() {
+    return {
+      anthropic: document.getElementById('anthropicKey')?.value.trim() || '',
+      fal: document.getElementById('falKey')?.value.trim() || ''
+    };
+  }
+
+  function isImageRequest(text) {
+    return /\b(generate|gawa|create|draw|make|show|larawan|image|picture|photo|ilustra|scene)\b.{0,60}(image|picture|photo|of|ng|scene|larawan|ilustra)/i.test(text)
+      || /^(generate|gawa|create|draw|make)\s+/i.test(text.trim());
+  }
+
+  function addMsg(role, html, extraClass='') {
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-msg ' + role + (extraClass ? ' ' + extraClass : '');
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = html;
+    wrap.appendChild(bubble);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+    return bubble;
+  }
+
+  function addTyping() {
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-msg bot typing-indicator';
+    wrap.innerHTML = '<div class="bubble chat-typing"><span></span><span></span><span></span></div>';
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+    return wrap;
+  }
+
+  window.chatSubmit = async function() {
+    const text = input.value.trim();
+    if (!text) return;
+    const keys = getKeys();
+    if (!keys.anthropic) { addMsg('bot', '⚠️ Wala pang Anthropic API key. I-add sa API Keys tab.'); return; }
+
+    input.value = '';
+    input.style.height = 'auto';
+    send.disabled = true;
+    status.textContent = 'Thinking…';
+
+    addMsg('user', escHtml(text));
+
+    if (isImageRequest(text)) {
+      await doImageGen(text, keys);
+    } else {
+      await doChat(text, keys);
+    }
+
+    send.disabled = false;
+    status.textContent = 'Ask anything · Generate images';
+    msgs.scrollTop = msgs.scrollHeight;
+  };
+
+  async function doChat(text, keys) {
+    history.push({ role: 'user', content: text });
+    const typing = addTyping();
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    let full = '';
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': keys.anthropic,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1024,
+          stream: true,
+          system: `You are a dark psychology expert and creative AI assistant for Dark Psycho — a viral content brand.
+You speak with authority, raw honesty, and psychological precision.
+Answer questions about dark psychology, manipulation, human behavior, narcissism, self-awareness, and shadow work.
+Keep answers concise (3-5 sentences max unless asked for more). No filler. No corporate tone.
+If asked to generate an image, tell the user to type "generate image of [description]" instead.
+Respond in the same language the user uses (Filipino/Tagalog or English).`,
+          messages: history.map(m => ({ role: m.role, content: m.content }))
+        })
+      });
+
+      typing.remove();
+      const wrap = document.createElement('div');
+      wrap.className = 'chat-msg bot';
+      wrap.appendChild(bubble);
+      msgs.appendChild(wrap);
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        for (const line of chunk.split('\n')) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') break;
+          try {
+            const j = JSON.parse(data);
+            const delta = j.delta?.text || '';
+            if (delta) { full += delta; bubble.innerHTML = mdToHtml(full); msgs.scrollTop = msgs.scrollHeight; }
+          } catch {}
+        }
+      }
+      history.push({ role: 'assistant', content: full });
+    } catch (err) {
+      typing.remove();
+      addMsg('bot', '⚠️ Error: ' + escHtml(err.message));
+    }
+  }
+
+  async function doImageGen(text, keys) {
+    if (!keys.fal) { addMsg('bot', '⚠️ Wala pang FAL.ai API key. I-add sa API Keys tab.'); return; }
+
+    // Extract the image description
+    const desc = text.replace(/^(generate|gawa|create|draw|make|show)\s+(image|picture|photo|larawan|ilustra)?\s*(of|ng)?\s*/i, '').trim() || text;
+    const prompt = `Cinematic dark atmospheric digital art, dramatic moody lighting, viral social media aesthetic, ultra detailed, 4K quality. ${desc}`;
+
+    const typing = addTyping();
+    status.textContent = 'Generating image…';
+
+    try {
+      const res = await fetch('https://fal.run/fal-ai/flux/schnell', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Key ${keys.fal}` },
+        body: JSON.stringify({
+          prompt,
+          image_size: { width: 768, height: 768 },
+          num_images: 1,
+          num_inference_steps: 4,
+          enable_safety_checker: false,
+          sync_mode: true
+        })
+      });
+      const data = await res.json();
+      const url = data.images?.[0]?.url;
+      typing.remove();
+      if (!url) throw new Error('Walang image na naibalik.');
+      const imgBlob = await (await fetch(url)).blob();
+      const objUrl = URL.createObjectURL(imgBlob);
+      addMsg('bot', `<div class="chat-img-pill">🖼 AI Generated</div><img src="${objUrl}" alt="generated"><div class="img-caption">${escHtml(desc)}</div>`);
+    } catch (err) {
+      typing.remove();
+      addMsg('bot', '⚠️ Image generation failed: ' + escHtml(err.message));
+    }
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function mdToHtml(text) {
+    return text
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .replace(/\n/g,'<br>');
+  }
+})();
 </script>
 </body>
 </html>
