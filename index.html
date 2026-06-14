@@ -1230,6 +1230,70 @@ details > *:not(summary) { margin-top: 10px; }
   }
 }
 
+/* ── 7-DAY CALENDAR ── */
+#calendarOverlay {
+  position: fixed; inset: 0; z-index: 9990; background: rgba(0,0,0,.75);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+#calendarOverlay.open { opacity: 1; pointer-events: all; }
+#calendarModal {
+  background: #111; border: 1px solid #2a2a2a; border-radius: 18px;
+  width: min(96vw, 680px); max-height: 88vh; overflow-y: auto;
+  padding: 24px; box-shadow: 0 24px 64px rgba(0,0,0,.9);
+  transform: translateY(16px); transition: transform .2s;
+}
+#calendarOverlay.open #calendarModal { transform: translateY(0); }
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.cal-header h2 { font-size: 18px; font-weight: 800; letter-spacing: 1px; color: #fff; margin: 0; }
+.cal-close { background: none; border: none; color: #555; font-size: 22px; cursor: pointer; }
+.cal-close:hover { color: #fff; }
+.cal-notif-bar {
+  background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.cal-notif-bar label { font-size: 12px; color: #aaa; flex: 1; min-width: 160px; }
+.cal-notif-bar input[type=time] {
+  background: #222; border: 1px solid #333; border-radius: 6px;
+  color: #fff; padding: 5px 10px; font-size: 13px;
+}
+.cal-notif-bar button {
+  padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+  background: linear-gradient(135deg,#7c3aed,#e53935); color: #fff;
+  font-size: 12px; font-weight: 700; letter-spacing: .5px;
+}
+.cal-grid { display: flex; flex-direction: column; gap: 10px; }
+.cal-day {
+  background: #161616; border: 1px solid #222; border-radius: 12px;
+  padding: 12px 14px; display: flex; align-items: flex-start; gap: 12px;
+}
+.cal-day.today { border-color: #7c3aed; }
+.cal-day-label { min-width: 52px; }
+.cal-day-label .day-name { font-size: 11px; font-weight: 700; color: #7c3aed; letter-spacing: 1px; }
+.cal-day-label .day-date { font-size: 10px; color: #555; margin-top: 2px; }
+.cal-day-body { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.cal-day-body input[type=text] {
+  width: 100%; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 7px;
+  color: #e8e8e8; font-size: 13px; padding: 7px 10px; outline: none; box-sizing: border-box;
+}
+.cal-day-body input[type=text]:focus { border-color: #7c3aed; }
+.cal-day-foot { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+.cal-mode-sel {
+  background: #222; border: 1px solid #2a2a2a; border-radius: 6px;
+  color: #aaa; font-size: 11px; padding: 4px 8px;
+}
+.cal-time-input {
+  background: #222; border: 1px solid #2a2a2a; border-radius: 6px;
+  color: #aaa; font-size: 11px; padding: 4px 8px;
+}
+.cal-load-btn {
+  padding: 4px 12px; border-radius: 6px; border: none; cursor: pointer;
+  background: #7c3aed; color: #fff; font-size: 11px; font-weight: 700;
+  margin-left: auto;
+}
+.cal-load-btn:hover { background: #6d28d9; }
+.cal-alarm-on { color: #4ade80; font-size: 10px; }
 /* ── CHATBOT ── */
 #chatToggle {
   position: fixed; bottom: 24px; right: 24px; z-index: 9999;
@@ -1343,6 +1407,7 @@ details > *:not(summary) { margin-top: 10px; }
         <span style="opacity:.8">Search</span>
         <span class="kbd">⌘K</span>
       </button>
+      <button class="icon-btn" id="calendarBtn" type="button" aria-label="7-Day Content Calendar" title="7-Day Content Calendar">📅</button>
       <button class="icon-btn" id="themeToggleBtn" type="button" aria-label="Toggle theme" title="Toggle light / dark">
         <span id="themeToggleIcon">◐</span>
       </button>
@@ -7184,6 +7249,27 @@ function switchKeyTab(tab) {
 }
 </script>
 
+<!-- ── 7-DAY CALENDAR MODAL ── -->
+<div id="calendarOverlay">
+  <div id="calendarModal">
+    <div class="cal-header">
+      <h2>📅 7-DAY CONTENT CALENDAR</h2>
+      <button class="cal-close" onclick="closeCalendar()">✕</button>
+    </div>
+    <div class="cal-notif-bar">
+      <label>🔔 Daily reminder time (applies to all days with no custom time)</label>
+      <input type="time" id="calGlobalTime" value="09:00">
+      <button onclick="calSaveGlobal()">Save & Enable</button>
+      <span class="cal-alarm-on" id="calGlobalStatus"></span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="calClearAll()" style="padding:8px 18px;border-radius:8px;border:1px solid #333;background:none;color:#666;cursor:pointer;font-size:12px;">Clear All</button>
+      <button onclick="calSaveAll()" style="padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#7c3aed,#e53935);color:#fff;cursor:pointer;font-size:13px;font-weight:700;">💾 Save Calendar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── CHATBOT HTML ── -->
 <button id="chatToggle" title="Ask anything / Generate image">
   💬
@@ -7218,6 +7304,177 @@ function switchKeyTab(tab) {
 </div>
 
 <script>
+// ── 7-DAY CALENDAR ──
+(function() {
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MODES = ['listicle','quotes','poster'];
+  const LS_KEY = 'dp_calendar_v1';
+  const LS_GLOBAL = 'dp_cal_global_time';
+  let calData = loadCal();
+  let alarmInterval = null;
+
+  function loadCal() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || buildEmpty(); } catch { return buildEmpty(); }
+  }
+  function buildEmpty() {
+    return Array.from({length:7}, (_,i) => ({ topic:'', mode:'listicle', time:'', done:false, offset:i }));
+  }
+  function saveCal() { localStorage.setItem(LS_KEY, JSON.stringify(calData)); }
+
+  function getDayDates() {
+    const today = new Date();
+    return Array.from({length:7}, (_,i) => {
+      const d = new Date(today); d.setDate(today.getDate() + i); return d;
+    });
+  }
+
+  window.openCalendar = function() {
+    buildGrid();
+    const gt = localStorage.getItem(LS_GLOBAL) || '09:00';
+    document.getElementById('calGlobalTime').value = gt;
+    updateGlobalStatus();
+    document.getElementById('calendarOverlay').classList.add('open');
+  };
+  window.closeCalendar = function() {
+    document.getElementById('calendarOverlay').classList.remove('open');
+  };
+  document.getElementById('calendarBtn').onclick = openCalendar;
+  document.getElementById('calendarOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeCalendar(); });
+
+  function buildGrid() {
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    const dates = getDayDates();
+    const todayIdx = 0;
+    calData.forEach((day, i) => {
+      const d = dates[i];
+      const dayName = DAYS[d.getDay()];
+      const dateStr = (d.getMonth()+1) + '/' + d.getDate();
+      const isToday = i === todayIdx;
+      const div = document.createElement('div');
+      div.className = 'cal-day' + (isToday ? ' today' : '');
+      div.innerHTML = `
+        <div class="cal-day-label">
+          <div class="day-name">${dayName.slice(0,3).toUpperCase()}${isToday ? ' ★' : ''}</div>
+          <div class="day-date">${dateStr}</div>
+        </div>
+        <div class="cal-day-body">
+          <input type="text" placeholder="Content topic for this day…" value="${escCal(day.topic)}" data-idx="${i}" class="cal-topic">
+          <div class="cal-day-foot">
+            <select class="cal-mode-sel" data-idx="${i}">
+              ${MODES.map(m => `<option value="${m}" ${day.mode===m?'selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
+            </select>
+            <input type="time" class="cal-time-input" data-idx="${i}" value="${day.time || ''}" title="Custom reminder time">
+            ${day.topic ? `<button class="cal-load-btn" data-idx="${i}">⚡ Create Now</button>` : ''}
+          </div>
+        </div>`;
+      grid.appendChild(div);
+    });
+
+    grid.querySelectorAll('.cal-topic').forEach(el => {
+      el.addEventListener('input', e => { calData[+e.target.dataset.idx].topic = e.target.value; });
+    });
+    grid.querySelectorAll('.cal-mode-sel').forEach(el => {
+      el.addEventListener('change', e => { calData[+e.target.dataset.idx].mode = e.target.value; });
+    });
+    grid.querySelectorAll('.cal-time-input').forEach(el => {
+      el.addEventListener('change', e => { calData[+e.target.dataset.idx].time = e.target.value; });
+    });
+    grid.querySelectorAll('.cal-load-btn').forEach(el => {
+      el.addEventListener('click', e => {
+        const idx = +e.target.dataset.idx;
+        loadDayIntoGenerator(idx);
+        closeCalendar();
+      });
+    });
+  }
+
+  function loadDayIntoGenerator(idx) {
+    const day = calData[idx];
+    if (!day.topic) return;
+    // Switch mode
+    if (typeof window.setContentMode === 'function') window.setContentMode(day.mode);
+    // Fill topic fields
+    const topicEl = document.getElementById('topic') || document.getElementById('quotesTopic');
+    if (topicEl) topicEl.value = day.topic;
+    const quoteTopicEl = document.getElementById('quotesTopic');
+    if (quoteTopicEl) quoteTopicEl.value = day.topic;
+    window.toast && window.toast(`Day ${idx+1} topic loaded: "${day.topic}"`, 'success', 3000);
+  }
+
+  window.calSaveAll = function() {
+    document.querySelectorAll('.cal-topic').forEach(el => { calData[+el.dataset.idx].topic = el.value; });
+    document.querySelectorAll('.cal-time-input').forEach(el => { calData[+el.dataset.idx].time = el.value; });
+    saveCal();
+    startAlarmWatcher();
+    buildGrid();
+    window.toast && window.toast('Calendar saved!', 'success', 2500);
+  };
+
+  window.calClearAll = function() {
+    if (!confirm('Clear all 7 days?')) return;
+    calData = buildEmpty(); saveCal(); buildGrid();
+  };
+
+  window.calSaveGlobal = async function() {
+    const t = document.getElementById('calGlobalTime').value;
+    if (!t) return;
+    localStorage.setItem(LS_GLOBAL, t);
+    // Request notification permission
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') { updateGlobalStatus('❌ Notifications blocked — allow sa browser settings'); return; }
+    }
+    startAlarmWatcher();
+    updateGlobalStatus('✓ Reminder set for ' + t);
+    window.toast && window.toast('Daily reminder set for ' + t, 'success', 3000);
+  };
+
+  function updateGlobalStatus(msg) {
+    const el = document.getElementById('calGlobalStatus');
+    if (!el) return;
+    if (msg) { el.textContent = msg; return; }
+    const t = localStorage.getItem(LS_GLOBAL);
+    el.textContent = t ? '✓ Active: ' + t : '';
+  }
+
+  function startAlarmWatcher() {
+    if (alarmInterval) clearInterval(alarmInterval);
+    alarmInterval = setInterval(checkAlarms, 30000); // check every 30s
+    checkAlarms();
+  }
+
+  function checkAlarms() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const now = new Date();
+    const hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    const globalTime = localStorage.getItem(LS_GLOBAL) || '';
+    const dates = getDayDates();
+    calData.forEach((day, i) => {
+      if (!day.topic) return;
+      const alarmTime = day.time || globalTime;
+      if (!alarmTime || alarmTime !== hhmm) return;
+      const alarmKey = 'dp_alarm_fired_' + dates[i].toDateString() + '_' + i;
+      if (sessionStorage.getItem(alarmKey)) return;
+      sessionStorage.setItem(alarmKey, '1');
+      const n = new Notification('📅 Dark Psycho — Content Reminder', {
+        body: `${DAYS[dates[i].getDay()]}: "${day.topic}" (${day.mode})`,
+        icon: './icon.png',
+        tag: 'dp-cal-' + i
+      });
+      n.onclick = () => { window.focus(); openCalendar(); };
+    });
+  }
+
+  function escCal(s) { return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+  // Auto-start watcher if permission already granted
+  if ('Notification' in window && Notification.permission === 'granted' && localStorage.getItem(LS_GLOBAL)) {
+    startAlarmWatcher();
+    updateGlobalStatus();
+  }
+})();
+
 // ── CHATBOT LOGIC ──
 (function() {
   const panel = document.getElementById('chatPanel');
