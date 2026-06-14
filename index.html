@@ -6255,48 +6255,46 @@ function setContentMode(mode) {
 }
 
 async function generateQuotesScript(topic, sceneCount, apiKey) {
-  const prompt = `You are a viral dark-psychology content creator for TikTok/Reels/Shorts.
+  const prompt = `You are a viral emotional short-form video scriptwriter for TikTok/Reels/Shorts.
 
 Topic: "${topic}"
 
-Generate ${sceneCount} slides. Each slide = 4 ultra-short lines that make the reader think "that's me."
+Write a 4-scene emotional script that follows this EXACT structure. Each scene has a specific role and timing:
 
-STRICT FORMAT RULES:
-- EXACTLY 4 lines per slide.
-- Each line: MAX 5 WORDS. Hard limit. Cut mercilessly.
-- Second person only: "You" / "Your" — never "Some people" or "We" or "They."
-- NO commas at end of lines. End with nothing or a period only.
-- NO soft words: no "perhaps," "sometimes," "maybe," "lessons," "journey," "value."
-- NO inspirational tone. Dark, precise, psychological.
-- Each line = a complete punch. Not a sentence fragment that continues.
+SCENE 1 — HOOK (0-3 sec)
+- Opens with a direct, specific address to the exact person watching
+- Names their situation clearly so they immediately feel seen
+- 1-2 short sentences. Ends with "listen." or a strong invitation.
+- Example: "If you lost your partner and feel completely alone today, listen."
 
-GOOD EXAMPLE:
-You overshare with strangers.
-Not because you trust them.
-Because no one close listens.
-That is the real problem.
+SCENE 2 — VALIDATION (3-15 sec)
+- Lists the emotions they are feeling WITHOUT judgment
+- Tells them their reaction is normal, not wrong
+- 2-3 sentences. Acknowledge the chaos inside them.
+- Example: "The sadness, anger, exhaustion, numbness — none of it means you're grieving wrong."
 
-BAD EXAMPLE (DO NOT DO THIS):
-Some lessons arrive,
-disguised as loss.
-Only later do we see,
-their true value.
+SCENE 3 — CONNECTION (15-25 sec)
+- Reminds them they are NOT alone
+- Points to the thousands/millions going through the same thing right now
+- 1-2 sentences. Creates a sense of shared humanity.
+- Example: "Thousands of people are carrying the same heartbreak right now."
 
-Line structure:
-- Line 1: a behavior (short, specific)
-- Line 2: the hidden reason
-- Line 3: the real cost
-- Line 4: the mirror truth (hardest hit)
+SCENE 4 — CLOSING (25-35 sec)
+- A gentle, actionable close
+- Does NOT tell them to "be strong" or "push through"
+- Gives them ONE small thing to do or feel
+- 2 sentences max. Ends with warmth.
+- Example: "You don't have to be strong every minute. Today, just take the next breath."
 
-Output STRICTLY valid JSON:
+Output STRICTLY valid JSON with EXACTLY 4 scenes:
 {
   "mainTitle": "short viral hook title, MAX 6 WORDS",
   "scenes": [
     {
-      "quote": "Line 1\\nLine 2\\nLine 3\\nLine 4",
-      "narration": "Line 1. Line 2. Line 3. Line 4.",
-      "attribution": "Dark Psychology",
-      "imagePrompt": "cinematic atmospheric background scene that emotionally matches this quote. Vivid, dramatic, colorful environment. NO people, NO text. Under 20 words."
+      "quote": "The full text for this scene. 1-3 sentences.",
+      "narration": "Same as quote — spoken aloud by voice-over.",
+      "attribution": "Hook",
+      "imagePrompt": "cinematic atmospheric background that matches the emotional tone of this scene. Vivid, dramatic. NO people, NO text. Under 20 words."
     }
   ],
   "caption": "viral TikTok caption, 1-2 sentences. NO hashtags.",
@@ -6305,11 +6303,11 @@ Output STRICTLY valid JSON:
 }
 
 RULES:
-- EXACTLY ${sceneCount} scenes
-- quote: 4 lines separated by \\n. No quotation marks.
-- narration: same lines joined with periods for voice-over.
-- Each slide = a DIFFERENT psychological pattern on the topic.
-- NEVER use em dashes or en dashes. Periods and colons only.
+- EXACTLY 4 scenes: attribution must be "Hook", "Validation", "Connection", "Closing" in order
+- quote and narration are identical — what the voice says
+- NO em dashes or en dashes. Use commas and periods only.
+- NO motivational cliches: no "journey," "hustle," "embrace," "warrior"
+- Write for a SPECIFIC emotional state, not generic positivity
 - NO MARKDOWN. Raw JSON only.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -6326,7 +6324,7 @@ RULES:
   // Normalize: use quote as title for each scene
   parsed.scenes = parsed.scenes.map(s => ({
     ...s,
-    title: s.attribution || 'Dark Psychology',
+    title: s.attribution || 'Hook',
     imagePrompt: '' // no images in quotes mode
   }));
   return parsed;
@@ -6379,47 +6377,57 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   ctx.textBaseline = 'top';
   ctx.fillText('“', 60, H*0.28);
 
-  // Split into up to 4 lines (handles \n in quote field)
-  const rawLines = quote.split(/\n/).map(l => l.trim()).filter(l => l).slice(0, 4);
+  // Wrap quote as full paragraph text
   const quoteCase = document.getElementById('quotesCase')?.value || 'upper';
-  const displayLines = rawLines.map(l => quoteCase === 'upper' ? l.toUpperCase() : quoteCase === 'lower' ? l.toLowerCase() : l);
+  const displayText = quoteCase === 'upper' ? quote.toUpperCase() : quoteCase === 'lower' ? quote.toLowerCase() : quote;
 
-  // Font sizing — start big, shrink if any line overflows
-  let fontSize = parseInt(document.getElementById('quoteFontSize')?.value) || 68;
-  const maxW = W - 120;
+  let fontSize = parseInt(document.getElementById('quoteFontSize')?.value) || 62;
+  const maxW = W - 130;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  const longestLine = displayLines.reduce((a, b) => a.length > b.length ? a : b, '');
-  while (fontSize > 36) {
-    ctx.font = `800 ${fontSize}px ${quoteFont}`;
-    if (ctx.measureText(longestLine).width <= maxW) break;
+
+  // Auto-shrink until text fits within 6 lines
+  let lines = wrapText(displayText, maxW);
+  while (lines.length > 6 && fontSize > 34) {
     fontSize -= 3;
+    ctx.font = `800 ${fontSize}px ${quoteFont}`;
+    lines = wrapText(displayText, maxW);
   }
   ctx.font = `800 ${fontSize}px ${quoteFont}`;
 
-  // Line heights: lines 1/3 slightly smaller (hook/cost), lines 2/4 normal (truth hits)
-  const lineH = fontSize * 1.35;
-  const blockH = lineH * displayLines.length;
-  const startY = H / 2 - blockH / 2 - 10;
+  const lineH = fontSize * 1.28;
+  const blockH = lineH * lines.length;
+  const startY = H / 2 - blockH / 2 - 16;
 
-  // Draw each line: alternating opacity for rhythm (full / muted / full / full)
-  const lineOpacity = [1, 0.65, 1, 1];
+  // Attribution label above quote (Hook / Validation / Connection / Closing)
+  const ATTR_COLORS = { hook:'#e53935', validation:'#7c3aed', connection:'#2196f3', closing:'#4caf50' };
+  const attrKey = attribution.toLowerCase();
+  const attrColor = ATTR_COLORS[attrKey] || '#ffffff';
+  ctx.font = `700 22px 'Inter', sans-serif`;
+  ctx.fillStyle = attrColor;
+  ctx.globalAlpha = fade * 0.9;
+  ctx.letterSpacing = '3px';
+  ctx.fillText('— ' + attribution.toUpperCase() + ' —', W / 2, startY - 38);
+  ctx.letterSpacing = '0px';
+
+  // Main quote text
+  ctx.font = `800 ${fontSize}px ${quoteFont}`;
   ctx.strokeStyle = 'rgba(0,0,0,0.9)';
   ctx.lineJoin = 'round';
-  displayLines.forEach((line, i) => {
+  ctx.fillStyle = '#ffffff';
+  lines.forEach((line, i) => {
     ctx.lineWidth = Math.max(8, fontSize * 0.12);
-    ctx.globalAlpha = fade * lineOpacity[i] ?? fade;
+    ctx.globalAlpha = fade;
     ctx.strokeText(line, W / 2, startY + i * lineH);
-    ctx.fillStyle = i === displayLines.length - 1 ? '#ffe066' : '#ffffff';
     ctx.fillText(line, W / 2, startY + i * lineH);
   });
   ctx.globalAlpha = fade;
 
-  // Attribution
-  ctx.font = `600 26px 'Inter', sans-serif`;
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
-  ctx.letterSpacing = '3px';
-  ctx.fillText('— ' + attribution.toUpperCase(), W / 2, startY + blockH + 28);
+  // Bottom line accent color bar
+  ctx.fillStyle = attrColor;
+  ctx.globalAlpha = fade * 0.6;
+  ctx.fillRect(W/2 - 30, startY + blockH + 18, 60, 3);
+  ctx.globalAlpha = fade;
 
   // Decorative bottom line
   ctx.strokeStyle = 'rgba(255,255,255,0.3)';
