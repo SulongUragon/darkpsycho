@@ -3890,6 +3890,7 @@ function playAudioSequence(audioCtx, recordDest) {
     playPromise.catch(err => console.warn('monitor element play() rejected', err));
   }
 
+  const audioOrigin = audioCtx.currentTime;
   const sources = [];
   for (let i = 0; i < audios.length; i++) {
     if (!audios[i]) continue;
@@ -3897,10 +3898,10 @@ function playAudioSequence(audioCtx, recordDest) {
     src.buffer = audios[i];
     if (recordDest) src.connect(recordDest);
     src.connect(monitorDest);
-    src.start(audioCtx.currentTime + timings[i].start);
+    src.start(audioOrigin + timings[i].start);
     sources.push(src);
   }
-  return { sources, monitorEl };
+  return { sources, monitorEl, audioOrigin };
 }
 
 async function runPlayback(record) {
@@ -3992,14 +3993,13 @@ async function runPlayback(record) {
   // Start audio — pass the mono mixer (when recording) so the recorded track
   // is forced to mono. This prevents L/R divergence that downstream editors
   // (CapCut, TikTok) would interpret as "audio overlap" after their downmix.
-  const { sources, monitorEl } = playAudioSequence(audioCtx, audioRecordTarget);
+  const { sources, monitorEl, audioOrigin } = playAudioSequence(audioCtx, audioRecordTarget);
   if (record) recorder.start(100);
-  const start = performance.now();
 
   await new Promise(resolve => {
     function loop() {
       if (playAbort.cancel) { resolve(); return; }
-      const elapsed = (performance.now() - start) / 1000;
+      const elapsed = audioCtx.currentTime - audioOrigin;
       if (elapsed >= total) { resolve(); return; }
       // Find current scene
       let idx = 0;
