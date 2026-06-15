@@ -2007,6 +2007,13 @@ details > *:not(summary) { margin-top: 10px; }
             </div>
           </div>
           <div class="field">
+            <label>Title vertical offset (<span id="titleOffsetVal">0px</span>)</label>
+            <div class="slider-row">
+              <input type="range" id="titleOffset" min="-300" max="300" value="0">
+              <span class="slider-val" id="titleOffsetDisplay">0px</span>
+            </div>
+          </div>
+          <div class="field">
             <label>Title bg opacity (<span id="titleBgOpacityVal">100%</span>) · 0 = fully transparent</label>
             <input type="range" id="titleBgOpacity" min="0" max="100" value="65">
           </div>
@@ -3201,7 +3208,8 @@ function drawMainTitle(text, alpha) {
   const lineHeight = fontSize * lineSpacingMult;
   const blockH = lineHeight * lines.length;
   const isBottom = titlePosEl.value === 'bottom';
-  const yStart = isBottom ? H - blockH - 70 : 80;
+  const titleOffset = parseInt(document.getElementById('titleOffset')?.value || '0');
+  const yStart = (isBottom ? H - blockH - 70 : 80) + titleOffset;
   const bandOpacity = parseInt(document.getElementById('titleBgOpacity')?.value || '100') / 100;
   ctx.save();
   // text background band — adjustable opacity (0 = fully transparent)
@@ -6038,6 +6046,15 @@ if (titleLetterSpacingEl) {
     const v = titleLetterSpacingEl.value + 'px';
     const d = document.getElementById('titleLetterSpacingVal'); if (d) d.textContent = v;
     const d2 = document.getElementById('titleLetterSpacingDisplay'); if (d2) d2.textContent = v;
+    drawStaticPreview();
+  });
+}
+const titleOffsetEl = document.getElementById('titleOffset');
+if (titleOffsetEl) {
+  titleOffsetEl.addEventListener('input', () => {
+    const v = titleOffsetEl.value + 'px';
+    const d = document.getElementById('titleOffsetVal'); if (d) d.textContent = v;
+    const d2 = document.getElementById('titleOffsetDisplay'); if (d2) d2.textContent = v;
     drawStaticPreview();
   });
 }
