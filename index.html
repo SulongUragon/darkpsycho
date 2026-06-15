@@ -2057,6 +2057,13 @@ details > *:not(summary) { margin-top: 10px; }
             </div>
           </div>
           <div class="field">
+            <label>Title Scale (<span id="titleScaleVal">1.00x</span>)</label>
+            <div class="slider-row">
+              <input type="range" id="titleScale" min="50" max="200" value="100">
+              <span class="slider-val" id="titleScaleDisplay">1.00x</span>
+            </div>
+          </div>
+          <div class="field">
             <label>Darken illustration (<span id="darkenVal">15%</span>)</label>
             <input type="range" id="darken" min="0" max="70" value="15">
           </div>
@@ -3169,7 +3176,8 @@ function drawMainTitle(text, alpha) {
   const fontFamily = titleFontEl.value;
   const color = titleColorEl.value;
   const weight = fontWeightFor(fontFamily, 900);
-  let fontSize = Math.round(parseInt(document.getElementById('titleFontSize')?.value || '56') * 1.07);
+  const titleScale = (parseInt(document.getElementById('titleScale')?.value) || 100) / 100;
+  let fontSize = Math.round(parseInt(document.getElementById('titleFontSize')?.value || '56') * 1.07 * titleScale);
   const maxWidth = W - 70;
   ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
   let lines = wrapText(text.toUpperCase(), maxWidth);
@@ -6020,6 +6028,15 @@ if (titleLetterSpacingEl) {
     const v = titleLetterSpacingEl.value + 'px';
     const d = document.getElementById('titleLetterSpacingVal'); if (d) d.textContent = v;
     const d2 = document.getElementById('titleLetterSpacingDisplay'); if (d2) d2.textContent = v;
+    drawStaticPreview();
+  });
+}
+const titleScaleEl = document.getElementById('titleScale');
+if (titleScaleEl) {
+  titleScaleEl.addEventListener('input', () => {
+    const v = (parseInt(titleScaleEl.value)/100).toFixed(2) + 'x';
+    const d = document.getElementById('titleScaleVal'); if (d) d.textContent = v;
+    const d2 = document.getElementById('titleScaleDisplay'); if (d2) d2.textContent = v;
     drawStaticPreview();
   });
 }
