@@ -7358,9 +7358,9 @@ function switchKeyTab(tab) {
 <!-- ── 7-DAY CALENDAR MODAL ── -->
 <div id="calendarOverlay">
   <div id="calendarModal">
-    <div class="cal-header">
-      <h2>📅 7-DAY CONTENT CALENDAR</h2>
-      <button class="cal-close" onclick="closeCalendar()">✕</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 style="font-size:18px;font-weight:800;letter-spacing:1px;color:#ffffff;margin:0;">📅 7-DAY CONTENT CALENDAR</h2>
+      <button onclick="closeCalendar()" style="background:none;border:none;color:#666;font-size:22px;cursor:pointer;">✕</button>
     </div>
     <div class="cal-notif-bar">
       <label>🔔 Daily reminder time (applies to all days with no custom time)</label>
@@ -7383,13 +7383,13 @@ function switchKeyTab(tab) {
 </button>
 
 <div id="chatPanel">
-  <div class="chat-header">
-    <div class="chat-avatar">🧠</div>
-    <div class="chat-header-info">
-      <div class="chat-header-name">DARK PSYCHO AI</div>
-      <div class="chat-header-status" id="chatStatus">Ask anything · Generate images</div>
+  <div style="padding:12px 14px;background:#1a1a1a;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:10px;">
+    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#e53935);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧠</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:13px;font-weight:700;color:#ffffff;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DARK PSYCHO AI</div>
+      <div id="chatStatus" style="font-size:10px;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ask anything · Generate images</div>
     </div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
+    <button onclick="toggleChat()" style="background:none;border:none;color:#666;font-size:16px;cursor:pointer;padding:4px 6px;border-radius:6px;flex-shrink:0;line-height:1;">✕</button>
   </div>
   <div id="chatMessages">
     <div class="chat-msg bot">
