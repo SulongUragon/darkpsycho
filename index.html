@@ -7406,6 +7406,7 @@ function switchKeyTab(tab) {
       <div style="font-size:13px;font-weight:700;color:#ffffff;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DARK PSYCHO AI</div>
       <div id="chatStatus" style="font-size:10px;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ask anything · Generate images</div>
     </div>
+    <button onclick="clearChat()" title="Clear conversation" style="background:none;border:none;box-shadow:none;color:#555;font-size:12px;cursor:pointer;padding:4px 6px;border-radius:6px;flex-shrink:0;width:auto;text-transform:none;letter-spacing:0;">🗑</button>
     <button onclick="toggleChat()" style="background:none;border:none;box-shadow:none;color:#666;font-size:16px;cursor:pointer;padding:4px 6px;border-radius:6px;flex-shrink:0;line-height:1;width:auto;text-transform:none;letter-spacing:0;">✕</button>
   </div>
   <div id="chatMessages">
@@ -7630,6 +7631,11 @@ function switchKeyTab(tab) {
   });
 
   window.chatSuggest = function(el) { input.value = el.textContent; input.focus(); };
+
+  window.clearChat = function() {
+    history = [];
+    msgs.innerHTML = `<div class="chat-msg bot"><div class="bubble">Chat cleared. Tanungin mo ako tungkol sa app o dark psychology!</div></div>`;
+  };
 
   function getKeys() {
     return {
