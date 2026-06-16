@@ -7498,13 +7498,13 @@ function switchKeyTab(tab) {
     });
 
     grid.querySelectorAll('.cal-topic').forEach(el => {
-      el.addEventListener('input', e => { calData[+e.target.dataset.idx].topic = e.target.value; });
+      el.addEventListener('input', e => { calData[+e.target.dataset.idx].topic = e.target.value; saveCal(); });
     });
     grid.querySelectorAll('.cal-mode-sel').forEach(el => {
-      el.addEventListener('change', e => { calData[+e.target.dataset.idx].mode = e.target.value; });
+      el.addEventListener('change', e => { calData[+e.target.dataset.idx].mode = e.target.value; saveCal(); });
     });
     grid.querySelectorAll('.cal-time-input').forEach(el => {
-      el.addEventListener('change', e => { calData[+e.target.dataset.idx].time = e.target.value; });
+      el.addEventListener('change', e => { calData[+e.target.dataset.idx].time = e.target.value; saveCal(); });
     });
     grid.querySelectorAll('.cal-load-btn').forEach(el => {
       el.addEventListener('click', e => {
