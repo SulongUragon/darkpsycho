@@ -790,8 +790,9 @@ details > *:not(summary) { margin-top: 10px; }
 .cal-ampm-label.pm { background: rgba(96, 165, 250, .12); color: var(--info); }
 .cal-day-row.debate { grid-template-columns: 60px auto 1fr auto auto; }
 @media (max-width: 600px) {
-  .cal-day-row { grid-template-columns: 40px 1fr; }
-  .cal-actions { flex-wrap: wrap; }
+  .cal-day-row { grid-template-columns: 36px 1fr auto auto; gap: 6px; }
+  .cal-day-row.debate { grid-template-columns: 36px auto 1fr auto auto; }
+  .cal-actions { flex-wrap: nowrap; gap: 4px; }
 }
 
 .hidden { display: none !important; }
