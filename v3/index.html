@@ -24,28 +24,28 @@
 
 /* ── Design Tokens ────────────────────────────────────────────── */
 :root {
-  /* Deep noir palette — warm black, blood red */
-  --bg: #080608;
-  --bg-elev-1: #0f0d10;
-  --bg-elev-2: #161319;
-  --bg-input: #0c0a0d;
-  --bg-input-hover: #0f0d10;
-  --border: #1e1820;
-  --border-strong: #2a2230;
-  --border-hover: #3d3248;
-  --text: #f2eef5;
-  --text-soft: #c4bccf;
-  --text-mute: #7a6e88;
-  --text-faint: #483e55;
-  /* Muted forest green + dark navy palette */
-  --accent: #6b9b5a;
-  --accent-hi: #8abf72;
-  --accent-lo: #4a7a3a;
-  --accent-deep: #1e3a18;
-  --accent-glow: rgba(107, 155, 90, 0.25);
-  --blood: #0a1e40;
-  --success: #6b9b5a;
-  --success-bg: rgba(107, 155, 90, 0.10);
+  /* Metallic dark green + metallic dark blue */
+  --bg: #030405;
+  --bg-elev-1: #060b12;
+  --bg-elev-2: #0a1320;
+  --bg-input: #040810;
+  --bg-input-hover: #080f1c;
+  --border: #0e1e3a;
+  --border-strong: #163054;
+  --border-hover: #224468;
+  --text: #f0f6ff;
+  --text-soft: #8ab0d0;
+  --text-mute: #3a6080;
+  --text-faint: #1e3850;
+  /* Evergreen Velvet + Royal Blue + Deep Amber */
+  --accent: #164A3C;
+  --accent-hi: #1E5B4C;
+  --accent-lo: #0F3A2E;
+  --accent-deep: #092B21;
+  --accent-glow: rgba(30,91,76,0.55);
+  --blood: #091e14;
+  --success: #2D7A62;
+  --success-bg: rgba(30,91,76,0.14);
   --warning: #f59e0b;
   --warning-bg: rgba(245, 158, 11, 0.10);
   --info: #818cf8;
@@ -89,11 +89,11 @@
   --text-soft: #3f3f46;
   --text-mute: #71717a;
   --text-faint: #a1a1aa;
-  --accent: #5a8a4a;
-  --accent-hi: #78aa62;
-  --accent-lo: #3d6630;
-  --accent-deep: #1a3018;
-  --accent-glow: rgba(90, 138, 74, 0.18);
+  --accent: #164A3C;
+  --accent-hi: #1E5B4C;
+  --accent-lo: #0F3A2E;
+  --accent-deep: #092B21;
+  --accent-glow: rgba(30,91,76,0.22);
   --shadow-1: 0 1px 2px rgba(0,0,0,.06);
   --shadow-2: 0 12px 28px rgba(0,0,0,.08);
 }
@@ -141,23 +141,24 @@ html { color-scheme: dark; }
 
 /* ── Glitch animation on brand title ─────────────────────────── */
 @keyframes glitch {
-  0%, 90%, 100% { text-shadow: 0 0 24px rgba(107,155,90,.35); transform: translate(0); clip-path: none; }
-  91%  { text-shadow: -2px 0 #6b9b5a, 2px 0 #1e4a8a; transform: translate(-1px, 0); }
-  92%  { text-shadow: 2px 0 #6b9b5a, -2px 0 #1e4a8a; transform: translate(2px, 0); clip-path: inset(20% 0 60% 0); }
-  93%  { text-shadow: -1px 0 #8abf72; transform: translate(-2px, 1px); clip-path: inset(50% 0 20% 0); }
-  94%  { text-shadow: 0 0 24px rgba(107,155,90,.35); transform: translate(0); clip-path: none; }
-  96%  { text-shadow: 3px 0 #6b9b5a, -3px 0 #1e4a8a; transform: translate(1px, -1px); }
-  97%  { text-shadow: 0 0 24px rgba(107,155,90,.35); transform: translate(0); clip-path: none; }
+  0%, 90%, 100% { text-shadow: 0 0 24px rgba(30,91,76,.52); transform: translate(0); clip-path: none; }
+  91%  { text-shadow: -2px 0 #2D7A62, 2px 0 #09122E; transform: translate(-1px, 0); }
+  92%  { text-shadow: 2px 0 #2D7A62, -2px 0 #09122E; transform: translate(2px, 0); clip-path: inset(20% 0 60% 0); }
+  93%  { text-shadow: -1px 0 #1E5B4C; transform: translate(-2px, 1px); clip-path: inset(50% 0 20% 0); }
+  94%  { text-shadow: 0 0 24px rgba(30,91,76,.52); transform: translate(0); clip-path: none; }
+  96%  { text-shadow: 3px 0 #2D7A62, -3px 0 #09122E; transform: translate(1px, -1px); }
+  97%  { text-shadow: 0 0 24px rgba(30,91,76,.52); transform: translate(0); clip-path: none; }
 }
 h1 { animation: glitch 6s infinite; }
 
 /* ── Generate button heartbeat glow ──────────────────────────── */
 @keyframes heartbeat {
   0%, 100% { box-shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 32px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.1); }
-  50%       { box-shadow: 0 1px 2px rgba(0,0,0,.5), 0 18px 52px rgba(107,155,90,.55), 0 0 60px rgba(107,155,90,.2), inset 0 1px 0 rgba(255,255,255,.1); }
+  50%       { box-shadow: 0 1px 2px rgba(0,0,0,.5), 0 18px 52px rgba(30,91,76,.68), 0 0 60px rgba(30,91,76,.34), inset 0 1px 0 rgba(255,255,255,.1); }
 }
 .big-btn { animation: heartbeat 2.4s ease-in-out infinite; }
 .big-btn:hover { animation: none; }
+.big-btn:disabled { animation: none; }
 
 /* ── Particle canvas ──────────────────────────────────────────── */
 #particleCanvas {
@@ -177,7 +178,7 @@ h1 { animation: glitch 6s infinite; }
 }
 .orb-1 {
   width: 500px; height: 500px;
-  background: radial-gradient(circle, #6b9b5a, transparent 70%);
+  background: radial-gradient(circle, #2D7A62, transparent 70%);
   top: -150px; left: 20%;
   animation-duration: 28s;
   animation-name: orbFloat1;
@@ -228,7 +229,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-image:
-    radial-gradient(ellipse 100% 40% at 50% -5%, rgba(107, 155, 90, 0.12), transparent 55%),
+    radial-gradient(ellipse 100% 40% at 50% -5%, rgba(30,91,76,0.16), transparent 55%),
     radial-gradient(ellipse 60% 80% at 100% 100%, rgba(127, 29, 29, 0.05), transparent 50%),
     radial-gradient(ellipse 60% 80% at 0% 100%, rgba(127, 29, 29, 0.04), transparent 50%);
   background-attachment: fixed;
@@ -277,7 +278,7 @@ h1 {
   font-size: 22px; font-weight: 400; letter-spacing: 4px;
   color: var(--text);
   margin-bottom: 2px; line-height: 1;
-  text-shadow: 0 0 24px rgba(107, 155, 90, 0.35);
+  text-shadow: 0 0 24px rgba(30,91,76,0.52);
 }
 .subtitle { color: var(--text-faint); font-size: 9px; letter-spacing: 2.8px; text-transform: uppercase; font-weight: 500; }
 
@@ -294,7 +295,7 @@ h1 {
 @media (hover: hover) and (pointer: fine) {
   .icon-btn:hover { color: var(--text); border-color: var(--border-hover); background: var(--bg-elev-2); }
 }
-.icon-btn:active { transform: scale(0.94); }
+.icon-btn:active { transform: scale(0.97); }
 .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .kbd-hint {
   display: inline-flex; align-items: center; gap: 4px;
@@ -497,8 +498,7 @@ canvas {
   background: var(--bg-elev-2);
   border-radius: var(--radius);
   display: block; margin: 0 auto;
-  box-shadow: 0 40px 90px rgba(0,0,0,.7), 0 0 0 1px color-mix(in srgb, var(--accent) 20%, var(--border) 80%), 0 0 60px rgba(107,155,90,.06);
-  transition: box-shadow .3s var(--ease);
+  box-shadow: 0 40px 90px rgba(0,0,0,.75), 0 0 0 1px color-mix(in srgb, var(--accent) 30%, var(--border) 70%), 0 0 60px 12px var(--accent-glow), 0 0 120px 24px var(--accent-glow);
 }
 .preview-wrapper {
   display: flex; justify-content: center;
@@ -508,13 +508,13 @@ canvas {
 .preview-wrapper::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 70% 40% at 50% 100%, rgba(107,155,90,.07), transparent 60%);
+  background: radial-gradient(ellipse 90% 60% at 50% 100%, var(--accent-glow), transparent 70%);
   pointer-events: none;
 }
 
 @keyframes canvasPulse {
-  0%, 100% { box-shadow: 0 32px 70px rgba(0,0,0,.6), 0 0 0 1px var(--accent-deep), 0 0 40px rgba(107,155,90,.05); }
-  50% { box-shadow: 0 32px 70px rgba(0,0,0,.6), 0 0 0 1px var(--accent), 0 0 60px rgba(107,155,90,.18); }
+  0%, 100% { box-shadow: 0 32px 70px rgba(0,0,0,.6), 0 0 0 1px var(--accent-deep), 0 0 60px 12px var(--accent-glow); }
+  50% { box-shadow: 0 32px 70px rgba(0,0,0,.6), 0 0 0 1px var(--accent), 0 0 100px 24px var(--accent-glow); }
 }
 canvas.generating { animation: canvasPulse 1.8s ease-in-out infinite; }
 
@@ -605,7 +605,9 @@ a:hover { color: var(--accent); }
   font-size: 9px; padding: 3px 8px; border-radius: 999px;
   cursor: pointer; font-weight: 700; letter-spacing: .5px;
   box-shadow: 0 2px 8px var(--accent-glow);
+  transition: transform .12s var(--ease-out);
 }
+.thumb .regen:active { transform: scale(0.92); }
 .thumb.empty {
   display: flex; align-items: center; justify-content: center;
   color: var(--text-faint); font-size: 20px;
@@ -649,7 +651,11 @@ a:hover { color: var(--accent); }
 }
 .project-load-btn { background: linear-gradient(135deg, var(--accent), var(--accent-lo)); color: #fff; border: none; }
 .project-del-btn { background: transparent; border: 1px solid var(--border); color: var(--text-mute); }
-.project-del-btn:hover { border-color: var(--danger); color: var(--danger); }
+@media (hover: hover) and (pointer: fine) {
+  .project-del-btn:hover { border-color: var(--danger); color: var(--danger); }
+}
+.project-load-btn:active { transform: scale(0.97); }
+.project-del-btn:active { transform: scale(0.97); }
 
 .folder-row { display: flex; gap: 8px; align-items: center; }
 .folder-display {
@@ -775,7 +781,7 @@ details > *:not(summary) { margin-top: 10px; }
   box-shadow: 0 4px 12px var(--accent-glow);
 }
 .cal-progress { height: 4px; background: var(--bg-elev-2); border-radius: 999px; margin-top: var(--space-3); overflow: hidden; }
-.cal-progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-lo), var(--accent-hi)); width: 0; transition: width .4s var(--ease); }
+.cal-progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-lo), var(--accent-hi)); width: 100%; transform: scaleX(0); transform-origin: left; transition: transform .4s var(--ease); }
 .cal-ampm-label {
   font-size: 8px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
   padding: 3px 7px; border-radius: 999px; flex-shrink: 0;
@@ -858,20 +864,21 @@ details > *:not(summary) { margin-top: 10px; }
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   z-index: 1000;
-  display: none; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   padding: 20px;
-  animation: fadeIn .18s var(--ease);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .18s var(--ease), visibility .18s;
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.preflight-overlay.show { display: flex; }
+.preflight-overlay.show { opacity: 1; visibility: visible; pointer-events: auto; }
 .preflight-box {
   background: var(--bg-elev-1); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: 28px;
   max-width: 460px; width: 100%;
   box-shadow: 0 24px 64px rgba(0,0,0,.6), 0 0 0 1px var(--border), 0 0 80px var(--accent-glow);
-  animation: pfPop .22s var(--ease-out);
+  transform: translateY(12px) scale(0.96);
+  transition: transform .22s var(--ease-out);
 }
-@keyframes pfPop { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: none; } }
+.preflight-overlay.show .preflight-box { transform: translateY(0) scale(1); }
 .preflight-box h3 {
   font-size: 14px; letter-spacing: 3px; text-transform: uppercase;
   font-weight: 800; margin-bottom: 4px;
@@ -1009,28 +1016,33 @@ details > *:not(summary) { margin-top: 10px; }
   display: flex; align-items: center; gap: 10px;
   min-width: 240px; max-width: 380px;
   pointer-events: auto;
-  /* Asymmetric: enter 250ms (you read it), exit 200ms (system responds) */
-  animation: toastIn .25s var(--ease-out);
-  transform-origin: right center;
+  opacity: 1; transform: translateX(0);
+  /* Transitions retarget smoothly when multiple toasts fire rapidly */
+  transition: opacity .2s var(--ease-out), transform .25s var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateX(20px);
+  }
 }
-.toast:active { transform: scale(0.98); transition: transform .12s var(--ease-out); }
+.toast:active { transform: scale(0.98); }
 .toast.success { border-left: 3px solid var(--success); }
 .toast.error { border-left: 3px solid var(--danger); }
 .toast.info { border-left: 3px solid var(--info); }
 .toast.warn { border-left: 3px solid var(--warning); }
-.toast.fade { animation: toastOut .2s var(--ease) forwards; }
-@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
-@keyframes toastOut { to { opacity: 0; transform: translateX(20px); } }
+.toast.fade { opacity: 0; transform: translateX(20px); transition: opacity .2s var(--ease), transform .2s var(--ease); }
 
 .cmdk-overlay {
   position: fixed; inset: 0; z-index: 3000;
-  display: none; align-items: flex-start; justify-content: center;
+  display: flex; align-items: flex-start; justify-content: center;
   padding: 12vh 20px 20px;
   background: color-mix(in srgb, var(--bg) 60%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .15s var(--ease), visibility .15s;
 }
-.cmdk-overlay.show { display: flex; }
+.cmdk-overlay.show { opacity: 1; visibility: visible; pointer-events: auto; }
 /* Keyboard-driven, used 100+ times/day — no entrance animation (Raycast pattern). */
 .cmdk-box {
   width: 100%; max-width: 540px;
@@ -1098,13 +1110,13 @@ details > *:not(summary) { margin-top: 10px; }
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.panel { animation: panelEnter .35s var(--ease-out) both; }
+.panel { animation: panelEnter .3s var(--ease-out) both; }
 .panel:nth-of-type(1) { animation-delay: 0ms; }
-.panel:nth-of-type(2) { animation-delay: 50ms; }
-.panel:nth-of-type(3) { animation-delay: 100ms; }
-.panel:nth-of-type(4) { animation-delay: 150ms; }
-.panel:nth-of-type(5) { animation-delay: 200ms; }
-.panel:nth-of-type(6) { animation-delay: 250ms; }
+.panel:nth-of-type(2) { animation-delay: 25ms; }
+.panel:nth-of-type(3) { animation-delay: 50ms; }
+.panel:nth-of-type(4) { animation-delay: 75ms; }
+.panel:nth-of-type(5) { animation-delay: 100ms; }
+.panel:nth-of-type(6) { animation-delay: 125ms; }
 
 /* ── Mode tab bar (Listicle / Quotes / Episode Poster) ────────── */
 .mode-tab-bar {
@@ -1260,7 +1272,7 @@ details > *:not(summary) { margin-top: 10px; }
 }
 .cal-notif-bar button {
   padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
-  background: linear-gradient(135deg,#1e4a8a,#6b9b5a); color: #fff;
+  background: linear-gradient(135deg,#09122E,#2D7A62); color: #fff;
   font-size: 12px; font-weight: 700; letter-spacing: .5px;
 }
 .cal-grid { display: flex; flex-direction: column; gap: 10px; }
@@ -1268,16 +1280,16 @@ details > *:not(summary) { margin-top: 10px; }
   background: #161616; border: 1px solid #222; border-radius: 12px;
   padding: 12px 14px; display: flex; align-items: flex-start; gap: 12px;
 }
-.cal-day.today { border-color: #1e4a8a; }
+.cal-day.today { border-color: #09122E; }
 .cal-day-label { min-width: 52px; }
-.cal-day-label .day-name { font-size: 11px; font-weight: 700; color: #1e4a8a; letter-spacing: 1px; }
+.cal-day-label .day-name { font-size: 11px; font-weight: 700; color: #1E5B4C; letter-spacing: 1px; }
 .cal-day-label .day-date { font-size: 10px; color: #555; margin-top: 2px; }
 .cal-day-body { flex: 1; display: flex; flex-direction: column; gap: 7px; }
 .cal-day-body input[type=text] {
   width: 100%; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 7px;
   color: #e8e8e8; font-size: 13px; padding: 7px 10px; outline: none; box-sizing: border-box;
 }
-.cal-day-body input[type=text]:focus { border-color: #1e4a8a; }
+.cal-day-body input[type=text]:focus { border-color: #1E5B4C; }
 .cal-day-foot { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
 .cal-mode-sel {
   background: #222; border: 1px solid #2a2a2a; border-radius: 6px;
@@ -1289,7 +1301,7 @@ details > *:not(summary) { margin-top: 10px; }
 }
 .cal-load-btn {
   padding: 4px 12px; border-radius: 6px; border: none; cursor: pointer;
-  background: #1e4a8a; color: #fff; font-size: 11px; font-weight: 700;
+  background: #09122E; color: #fff; font-size: 11px; font-weight: 700;
   margin-left: auto;
 }
 .cal-load-btn:hover { background: #6d28d9; }
@@ -1298,7 +1310,7 @@ details > *:not(summary) { margin-top: 10px; }
 #chatToggle {
   position: fixed; bottom: 90px; right: 24px; z-index: 9999;
   width: 56px; height: 56px; border-radius: 50%;
-  background: linear-gradient(135deg, #1e4a8a, #6b9b5a);
+  background: linear-gradient(135deg, #09122E, #2D7A62);
   border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(124,58,237,.5);
   display: flex; align-items: center; justify-content: center;
   font-size: 24px; transition: transform .2s, box-shadow .2s;
@@ -1306,7 +1318,7 @@ details > *:not(summary) { margin-top: 10px; }
 #chatToggle:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(30,74,138,.7); }
 #chatToggle .chat-badge {
   position: absolute; top: -4px; right: -4px;
-  background: #6b9b5a; color: #fff; font-size: 10px; font-weight: 700;
+  background: #2D7A62; color: #fff; font-size: 10px; font-weight: 700;
   width: 18px; height: 18px; border-radius: 50%;
   display: none; align-items: center; justify-content: center;
 }
@@ -1326,7 +1338,7 @@ details > *:not(summary) { margin-top: 10px; }
 }
 .chat-header .chat-avatar {
   width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg,#1e4a8a,#6b9b5a);
+  background: linear-gradient(135deg,#09122E,#2D7A62);
   display: flex; align-items: center; justify-content: center; font-size: 18px;
 }
 .chat-header-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
@@ -1355,7 +1367,7 @@ details > *:not(summary) { margin-top: 10px; }
   font-size: 13px; line-height: 1.5; color: #e8e8e8; word-break: break-word;
 }
 .chat-msg.bot .bubble { background: #1e1e1e; border-bottom-left-radius: 4px; }
-.chat-msg.user .bubble { background: #1e4a8a; color: #fff; border-bottom-right-radius: 4px; }
+.chat-msg.user .bubble { background: #09122E; color: #fff; border-bottom-right-radius: 4px; }
 .chat-msg .bubble img { max-width: 220px; border-radius: 8px; margin-top: 6px; display: block; }
 .chat-msg .bubble .img-caption { font-size: 10px; color: #666; margin-top: 4px; }
 .chat-typing { display: flex; gap: 4px; align-items: center; padding: 10px 13px; }
@@ -1375,10 +1387,10 @@ details > *:not(summary) { margin-top: 10px; }
   color: #e8e8e8; font-size: 13px; padding: 9px 12px; resize: none;
   min-height: 38px; max-height: 100px; font-family: inherit; outline: none;
 }
-#chatInput:focus { border-color: #1e4a8a; }
+#chatInput:focus { border-color: #1E5B4C; }
 #chatSend {
   width: 38px; height: 38px; border-radius: 10px; border: none;
-  background: linear-gradient(135deg,#1e4a8a,#6b9b5a); color: #fff;
+  background: linear-gradient(135deg,#09122E,#2D7A62); color: #fff;
   font-size: 16px; cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   transition: opacity .15s;
@@ -1389,10 +1401,43 @@ details > *:not(summary) { margin-top: 10px; }
   border-radius: 20px; font-size: 11px; color: #aaa; cursor: pointer; margin: 2px;
   transition: border-color .15s, color .15s;
 }
-.chat-suggestion:hover { border-color: #1e4a8a; color: #fff; }
+.chat-suggestion:hover { border-color: #1E5B4C; color: #fff; }
 .chat-img-pill {
-  font-size: 10px; color: #1e4a8a; background: rgba(30,74,138,.12);
+  font-size: 10px; color: #1E5B4C; background: rgba(30,91,76,.12);
   border-radius: 4px; padding: 2px 6px; display: inline-block; margin-bottom: 4px;
+}
+
+/* ── Per-panel shade system — shade-1=lightest → shade-5=darkest ── */
+:root {
+  --shade-1: #2D7A62; --shade-2: #1E5B4C; --shade-3: #164A3C;
+  --shade-4: #0F3A2E; --shade-5: #092B21;
+}
+/* Right column top-level panels */
+.layout > div:last-child > .panel:nth-of-type(1) { --accent: var(--shade-1); }
+.layout > div:last-child > .panel:nth-of-type(2) { --accent: var(--shade-2); }
+/* Panels inside mode panels (Topic, Script, Images, Subs…) */
+.mode-panel > .panel:nth-of-type(1) { --accent: var(--shade-2); }
+.mode-panel > .panel:nth-of-type(2) { --accent: var(--shade-3); }
+.mode-panel > .panel:nth-of-type(3) { --accent: var(--shade-4); }
+.mode-panel > .panel:nth-of-type(4) { --accent: var(--shade-5); }
+/* Left column panels */
+.layout > div:first-child > .panel:nth-of-type(1) { --accent: var(--shade-3); }
+.layout > div:first-child > .panel:nth-of-type(2) { --accent: var(--shade-4); }
+/* scene-dot, toggle, slider, big-btn all inherit --accent from their panel */
+.panel button,
+.panel .scene-dot.active,
+.panel .toggle-switch input:checked + .toggle-track,
+.panel input[type=range]::-webkit-slider-thumb,
+.panel .subs-preset-btn.active,
+.panel .mode-btn.active,
+.panel .key-tab.active,
+.panel .cal-btn.primary,
+.panel .project-load-btn {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+.panel .big-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 60%, #000) 100%) !important;
 }
 </style>
 </head>
@@ -1847,7 +1892,7 @@ details > *:not(summary) { margin-top: 10px; }
                 </select>
               </div>
               <textarea id="posterCustomText" style="min-height:64px;font-size:12px;line-height:1.4;width:100%;background:#080808;border:1px solid #252525;color:#e5e5e5;padding:10px;border-radius:6px;font-family:inherit;" placeholder="Type your own quote, or generate one below…"></textarea>
-              <button type="button" id="posterGenQuoteBtn" style="margin-top:7px;width:100%;padding:9px;border-radius:7px;border:1px dashed #1e4a8a;background:rgba(30,74,138,.08);color:#7799cc;font-size:12px;cursor:pointer;font-weight:600;letter-spacing:.5px;">✨ Generate Inspirational Quote</button>
+              <button type="button" id="posterGenQuoteBtn" style="margin-top:7px;width:100%;padding:9px;border-radius:7px;border:1px dashed #3B1900;background:rgba(106,46,0,.08);color:#c4844a;font-size:12px;cursor:pointer;font-weight:600;letter-spacing:.5px;">✨ Generate Inspirational Quote</button>
               <div id="posterQuoteStatus" style="font-size:10px;color:#555;margin-top:4px;min-height:14px;"></div>
               <div class="field" style="margin-top:10px;">
                 <label>Quote Style</label>
@@ -4933,7 +4978,7 @@ function getSceneGap() {
 const SUBS_PRESETS = {
   tiktok:  { color:'#ffffff', strokeColor:'#000000', stroke:14, font:"'Inter', sans-serif",   words:2, size:60, pos:75, allCaps:true,  bgEnabled:false, bgColor:'#000000', bgOpacity:60, style:'chunks' },
   impact:  { color:'#ffe600', strokeColor:'#000000', stroke:16, font:"'Anton', sans-serif",    words:1, size:72, pos:70, allCaps:true,  bgEnabled:false, bgColor:'#000000', bgOpacity:60, style:'chunks' },
-  neon:    { color:'#8abf72', strokeColor:'#003322', stroke:8,  font:"'Inter', sans-serif",    words:2, size:58, pos:75, allCaps:true,  bgEnabled:true,  bgColor:'#001a0d', bgOpacity:75, style:'chunks' },
+  neon:    { color:'#1E5B4C', strokeColor:'#060B1E', stroke:8,  font:"'Inter', sans-serif",    words:2, size:58, pos:75, allCaps:true,  bgEnabled:true,  bgColor:'#00080e', bgOpacity:75, style:'chunks' },
   cinema:  { color:'#ffffff', strokeColor:'#000000', stroke:6,  font:"'Montserrat', sans-serif", words:3, size:48, pos:82, allCaps:false, bgEnabled:true,  bgColor:'#000000', bgOpacity:70, style:'chunks' },
   minimal: { color:'#ffffff', strokeColor:'#000000', stroke:0,  font:"'Kalam', cursive",       words:2, size:54, pos:78, allCaps:false, bgEnabled:false, bgColor:'#000000', bgOpacity:40, style:'chunks' },
   typewriter:{ color:'#ffe600', strokeColor:'#000000', stroke:4,  font:"'Special Elite', monospace", words:1, size:28, pos:76, subsCase:'lower', bgEnabled:true, bgColor:'#000000', bgOpacity:100, style:'chunks' },
@@ -5331,12 +5376,12 @@ async function calGenerateAll() {
   for (let j = 0; j < slots.length; j++) {
     const s = slots[j];
     document.getElementById('calStatus').textContent = `Generating ${j+1}/${slots.length}: ${s.day} — ${s.topic}`;
-    bar.style.width = ((j / slots.length) * 100) + '%';
+    bar.style.transform = `scaleX(${j / slots.length})`;
     await calGenerateDaySlot(s.idx, s.ampm, calData.days[s.idx].seriesMain);
   }
 
-  bar.style.width = '100%';
-  setTimeout(() => { prog.style.display = 'none'; bar.style.width = '0'; }, 1200);
+  bar.style.transform = 'scaleX(1)';
+  setTimeout(() => { prog.style.display = 'none'; bar.style.transform = 'scaleX(0)'; }, 1200);
   btn.disabled = false;
   document.getElementById('calStatus').textContent = '✅ All days generated! Mark them as Posted when you upload.';
 }
@@ -5612,7 +5657,7 @@ function openScheduleModal() {
 
   document.getElementById('schedStatus').textContent = '';
   const bar = document.getElementById('schedProgressBar');
-  if (bar) bar.style.width = '0';
+  if (bar) bar.style.transform = 'scaleX(0)';
   const modal = document.getElementById('scheduleModal');
   modal.style.display = 'flex';
 }
@@ -5678,9 +5723,9 @@ async function executeSchedule() {
   try {
     // Step 1: Upload to Cloudinary
     statusEl.textContent = '☁️ Uploading to Cloudinary…';
-    bar.style.width = '30%';
+    bar.style.transform = 'scaleX(0.3)';
     const videoUrl = await uploadToCloudinary(currentBlob, preset);
-    bar.style.width = '60%';
+    bar.style.transform = 'scaleX(0.6)';
 
     const fullCaption = [caption, script?.hashtags?.map(h => '#'+h).join(' ')].filter(Boolean).join('\n\n');
     const action = isLater ? 'schedule' : 'post';
@@ -5723,7 +5768,7 @@ async function executeSchedule() {
       usedService = 'Ayrshare';
     }
 
-    bar.style.width = '100%';
+    bar.style.transform = 'scaleX(1)';
 
     if (isLater) {
       const when = new Date(scheduleDateISO).toLocaleString(undefined, {
@@ -5736,7 +5781,7 @@ async function executeSchedule() {
     setTimeout(() => closeScheduleModal(), 3500);
   } catch (err) {
     document.getElementById('schedStatus').textContent = '❌ ' + (err?.message || String(err));
-    bar.style.width = '0';
+    bar.style.transform = 'scaleX(0)';
   } finally {
     confirmBtn.disabled = false;
   }
@@ -6240,9 +6285,51 @@ function setContentMode(mode) {
   contentMode = mode;
   try { localStorage.setItem('content_mode', mode); } catch (e) {}
 
-  // ── Tab accent colours ────────────────────────────────
-  const ACCENT = { listicle: '#6b9b5a', quotes: '#1e4a8a', poster: '#d97706' };
-  document.documentElement.style.setProperty('--tab-accent', ACCENT[mode] || '#6b9b5a');
+  // ── Per-mode metallic palette swap ─────────────────────
+  const PALETTES = {
+    // Evergreen Velvet — light→dark
+    listicle: {
+      accent:      '#164A3C', hi: '#1E5B4C', lo: '#0F3A2E', deep: '#092B21',
+      glow:        'rgba(30,91,76,0.55)',
+      blood:       '#091e14',
+      border:      '#0a1e17', borderStrong: '#122e22', borderHover: '#1a4a38',
+      shades:      ['#2D7A62','#1E5B4C','#164A3C','#0F3A2E','#092B21'],
+    },
+    // Royal Blue — light→dark
+    quotes: {
+      accent:      '#0D1A3E', hi: '#112250', lo: '#09122E', deep: '#060B1E',
+      glow:        'rgba(17,34,80,0.55)',
+      blood:       '#06091a',
+      border:      '#08101e', borderStrong: '#0d1a32', borderHover: '#162847',
+      shades:      ['#1A3570','#112250','#0D1A3E','#09122E','#060B1E'],
+    },
+    // Deep Amber — light→dark
+    poster: {
+      accent:      '#522300', hi: '#6A2E00', lo: '#3B1900', deep: '#250F00',
+      glow:        'rgba(106,46,0,0.55)',
+      blood:       '#1a0c00',
+      border:      '#1a0c00', borderStrong: '#2e1500', borderHover: '#4a2000',
+      shades:      ['#8C3D00','#6A2E00','#522300','#3B1900','#250F00'],
+    },
+  };
+  const P = PALETTES[mode] || PALETTES.listicle;
+  const r = document.documentElement;
+  r.style.setProperty('--accent',        P.accent);
+  r.style.setProperty('--accent-hi',     P.hi);
+  r.style.setProperty('--accent-lo',     P.lo);
+  r.style.setProperty('--accent-deep',   P.deep);
+  r.style.setProperty('--accent-glow',   P.glow);
+  r.style.setProperty('--blood',         P.blood);
+  r.style.setProperty('--success',       P.accent);
+  r.style.setProperty('--success-bg',    P.glow.replace('0.45','0.12'));
+  r.style.setProperty('--border',        P.border);
+  r.style.setProperty('--border-strong', P.borderStrong);
+  r.style.setProperty('--border-hover',  P.borderHover);
+  r.style.setProperty('--tab-accent',    P.accent);
+  // Per-panel shade variables
+  if (P.shades) {
+    P.shades.forEach((s, i) => r.style.setProperty('--shade-' + (i+1), s));
+  }
 
   // ── Show / hide mode-specific sub-panels ──────────────
   ['listiclePanel', 'quotesPanel', 'posterPanel'].forEach(id => {
@@ -6444,7 +6531,7 @@ function drawQuoteScene(sceneIdx, tInScene, sceneDuration) {
   const startY = H / 2 - blockH / 2 - 16;
 
   // Attribution label above quote (Hook / Validation / Connection / Closing)
-  const ATTR_COLORS = { hook:'#6b9b5a', validation:'#1e4a8a', connection:'#2196f3', closing:'#6b9b5a' };
+  const ATTR_COLORS = { hook:'#2D7A62', validation:'#09122E', connection:'#2196f3', closing:'#2D7A62' };
   const attrKey = attribution.toLowerCase();
   const attrColor = ATTR_COLORS[attrKey] || '#ffffff';
   ctx.font = `700 22px 'Inter', sans-serif`;
@@ -7355,7 +7442,7 @@ It was the door we had to open.`
       if (p.life <= 0 || p.y < -10) p.reset();
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(107, 155, 90, ${p.alpha * p.life})`;
+      ctx.fillStyle = `rgba(30,91,76,${p.alpha * p.life})`;
       ctx.fill();
     });
     requestAnimationFrame(draw);
@@ -7388,7 +7475,7 @@ function switchKeyTab(tab) {
     <div class="cal-grid" id="calGrid"></div>
     <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
       <button onclick="calClearAll()" style="padding:8px 18px;border-radius:8px;border:1px solid #333;background:none;color:#666;cursor:pointer;font-size:12px;">Clear All</button>
-      <button onclick="calSaveAll()" style="padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#1e4a8a,#6b9b5a);color:#fff;cursor:pointer;font-size:13px;font-weight:700;">💾 Save Calendar</button>
+      <button onclick="calSaveAll()" style="padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#09122E,#2D7A62);color:#fff;cursor:pointer;font-size:13px;font-weight:700;">💾 Save Calendar</button>
     </div>
   </div>
 </div>
@@ -7401,7 +7488,7 @@ function switchKeyTab(tab) {
 
 <div id="chatPanel">
   <div style="padding:12px 14px;background:#1a1a1a;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:10px;">
-    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1e4a8a,#6b9b5a);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧠</div>
+    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#09122E,#2D7A62);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🧠</div>
     <div style="flex:1;min-width:0;">
       <div style="font-size:13px;font-weight:700;color:#ffffff;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DARK PSYCHO AI</div>
       <div id="chatStatus" style="font-size:10px;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ask anything · Generate images</div>
