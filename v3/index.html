@@ -324,7 +324,7 @@ h1 {
     scrollbar-gutter: stable;
   }
 }
-@media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+@media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) {
   body { padding: var(--space-3); }
   header { margin: calc(var(--space-3) * -1) calc(var(--space-3) * -1) var(--space-4); padding: var(--space-3); }
