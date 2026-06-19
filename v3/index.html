@@ -2868,8 +2868,8 @@ async function generateImageForScene(scenePrompt, apiKey, isCartoon = false) {
   const baseNegative = 'deformed hands, missing fingers, extra fingers, mutilated hands, floating limbs, disconnected limbs, detached head, missing neck, no neck, fused neck, extra heads, extra arms, extra legs, bad anatomy, disfigured, malformed, cloned face, long neck, short neck, cropped body, cut off limbs, amputated, headless, out of frame body parts, full body shot, feet, shoes';
   const negative_prompt = isRealism ? `${cinematicNegative}, ${baseNegative}` : baseNegative;
 
-  const falModel = isRealism ? 'fal-ai/flux-realism' : isAnime ? 'fal-ai/flux-anime' : 'fal-ai/flux/schnell';
-  const steps = isRealism ? 28 : isAnime ? 20 : 4;
+  const falModel = isRealism ? 'fal-ai/flux-realism' : 'fal-ai/flux/schnell';
+  const steps = isRealism ? 28 : 4;
 
   const body = {
     prompt: getStylePrefix() + cartoonStyleAddition + scenePrompt,
