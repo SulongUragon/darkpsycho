@@ -1516,6 +1516,10 @@ details > *:not(summary) { margin-top: 10px; }
           <button id="recordBtn">● Record</button>
           <button id="downloadBtn" class="secondary" disabled>↓ Download Video</button>
         </div>
+        <div class="button-row" style="margin-top:8px;">
+          <button id="thumbYTBtn" class="secondary" disabled>🖼 Thumbnail YT (16:9)</button>
+          <button id="thumbIGBtn" class="secondary" disabled>🖼 Thumbnail IG (9:16)</button>
+        </div>
         <button id="downloadAudioBtn" class="secondary" disabled style="margin-top:10px">↓ Audio Only (WAV) · for CapCut</button>
         <button id="scheduleBtn" class="secondary" disabled title="Record an MP4 first to enable upload &amp; posting" style="margin-top:10px;background:linear-gradient(135deg,#0a1a3a,#051020);border-color:#204080;">☁️ Upload &amp; Post / Schedule</button>
         <div class="cost-note" style="margin-top:6px">If CapCut chops the audio: import the video, MUTE its track, then add this WAV as new audio at 0:00</div>
@@ -4275,6 +4279,7 @@ async function runPlayback(record) {
     currentBlob = new Blob(chunks, { type: mimeType });
     currentExt = ext;
     $('downloadBtn').disabled = false;
+    if (images[0]) { $('thumbYTBtn').disabled = false; $('thumbIGBtn').disabled = false; }
   const schedBtn = document.getElementById('scheduleBtn'); if (schedBtn) schedBtn.disabled = false;
   uploadAfterRecord(); // Auto-upload to Cloudinary after recording
     setStatus(`Done · ${(currentBlob.size / 1024 / 1024).toFixed(1)} MB · ${ext.toUpperCase()}`, 'success');
@@ -4531,6 +4536,72 @@ $('downloadAudioBtn').onclick = async () => {
   }
   downloadBlobDefault(wavBlob, filename);
 };
+
+function generateThumbnail(w, h) {
+  if (!images[0]) return;
+  const tc = document.createElement('canvas');
+  tc.width = w; tc.height = h;
+  const tx = tc.getContext('2d');
+
+  // Draw image cover-fit
+  const img = images[0];
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+  const iw = img.naturalWidth * scale, ih = img.naturalHeight * scale;
+  tx.drawImage(img, (w - iw) / 2, (h - ih) / 2, iw, ih);
+
+  // Dark gradient overlay bottom 55%
+  const grad = tx.createLinearGradient(0, h * 0.3, 0, h);
+  grad.addColorStop(0, 'rgba(0,0,0,0)');
+  grad.addColorStop(0.45, 'rgba(0,0,0,0.72)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.93)');
+  tx.fillStyle = grad;
+  tx.fillRect(0, 0, w, h);
+
+  // Title text
+  const title = script?.mainTitle || 'Dark Psycho';
+  const fontSize = Math.round(w * 0.058);
+  tx.font = `900 ${fontSize}px 'Bebas Neue', 'Anton', Impact, sans-serif`;
+  tx.textAlign = 'left';
+  tx.textBaseline = 'bottom';
+  tx.fillStyle = '#ffffff';
+  tx.shadowColor = 'rgba(0,0,0,0.9)';
+  tx.shadowBlur = 14;
+
+  // Word-wrap title
+  const maxW = w * 0.88, pad = w * 0.055;
+  const words = title.split(' ');
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (tx.measureText(test).width > maxW && line) { lines.push(line); line = word; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+
+  const lineH = fontSize * 1.15;
+  let y = h - Math.round(h * 0.055);
+  for (let i = lines.length - 1; i >= 0; i--) {
+    tx.fillText(lines[i], pad, y);
+    y -= lineH;
+  }
+
+  // Dark Psycho watermark top-left
+  tx.font = `700 ${Math.round(w * 0.022)}px 'Inter', sans-serif`;
+  tx.textBaseline = 'top';
+  tx.fillStyle = 'rgba(255,255,255,0.55)';
+  tx.shadowBlur = 0;
+  tx.fillText('DARK PSYCHO', pad, Math.round(h * 0.04));
+
+  tc.toBlob(blob => {
+    const stamp = new Date().toISOString().replace(/[:.]/g,'‑').slice(0,19);
+    const slug = (script?.mainTitle||'story').replace(/\s+/g,'-').toLowerCase().slice(0,30);
+    downloadBlobDefault(blob, `thumb-${w}x${h}-${slug}-${stamp}.jpg`);
+  }, 'image/jpeg', 0.92);
+}
+
+$('thumbYTBtn').onclick = () => generateThumbnail(1280, 720);
+$('thumbIGBtn').onclick  = () => generateThumbnail(1080, 1920);
 
 $('downloadBtn').onclick = async () => {
   if (!currentBlob) return;
