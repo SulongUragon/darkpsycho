@@ -5502,12 +5502,18 @@ Output STRICTLY valid JSON — an array of exactly 7 strings, one topic per day 
     // Sync topics to the 7-day modal calendar and open it
     try {
       const existing = JSON.parse(localStorage.getItem('dp_calendar_v1') || 'null') || Array.from({length:7}, () => ({topic:'',mode:'listicle',time:'',done:false}));
-      calData.days.forEach((day, i) => {
-        if (existing[i]) {
-          if (isDebateMode) existing[i].topic = (day.amTopic || day.pmTopic || '');
-          else existing[i].topic = day.topic || existing[i].topic;
+      // Modal calendar starts from today; first calendar is Mon(0)–Sun(6)
+      // Map each modal slot to the correct day-of-week in calData.days
+      for (let modalIdx = 0; modalIdx < 7; modalIdx++) {
+        const d = new Date(); d.setDate(d.getDate() + modalIdx);
+        const dow = d.getDay(); // 0=Sun
+        const calIdx = dow === 0 ? 6 : dow - 1; // convert to Mon=0
+        const day = calData.days[calIdx];
+        if (day && existing[modalIdx]) {
+          const topic = isDebateMode ? (day.amTopic || day.pmTopic || '') : (day.topic || '');
+          if (topic) existing[modalIdx].topic = topic;
         }
-      });
+      }
       localStorage.setItem('dp_calendar_v1', JSON.stringify(existing));
       if (typeof openCalendar === 'function') setTimeout(openCalendar, 300);
     } catch(e) {}
