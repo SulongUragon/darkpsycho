@@ -1699,6 +1699,9 @@ details > *:not(summary) { margin-top: 10px; }
               <option value="clean">Clean (white bg)</option>
               <option value="colored" selected>Colored (vibrant)</option>
               <option value="cinematic">Cinematic (dark photo)</option>
+              <option value="anime">Anime (dark psych)</option>
+              <option value="neon">Neon Noir (cyberpunk)</option>
+              <option value="horror">Horror (gothic dark)</option>
             </select>
             <div class="cost-note" id="illModeNote" style="margin-top:4px;">Changing this requires re-generating images</div>
           </div>
@@ -2837,27 +2840,36 @@ const STYLE_PREFIX_BAKED = "Minimalist cartoon illustration, clean hand-drawn bl
 const STYLE_PREFIX_CLEAN = "Bold minimalist cartoon illustration, clean thick black ink outlines, 2D vector style, SINGLE centered subject isolated on a PLAIN FLAT SOLID PURE WHITE BACKGROUND (#FFFFFF, absolutely completely white everywhere, NO texture, NO shadow, NO gradient, NO background elements, NO wall, NO floor, NO scenery), vertical 9:16 aspect ratio, viral social media aesthetic. ABSOLUTELY NO TEXT. NO watermarks. NO logos. NO borders. NO background objects. Subject: ";
 const STYLE_PREFIX_COLORED = "Vibrant full-color digital illustration, rich saturated colors, smooth cel-shading style, bold outlines, cinematic dramatic lighting, high contrast, deep rich background with dark moody atmosphere, vertical 9:16 framing, viral dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
 const STYLE_PREFIX_CINEMATIC = "Cinematic 35mm film photography, dramatic chiaroscuro lighting, deep shadows with selective highlights, moody dark psychological thriller atmosphere, rich blacks and deep contrast, film grain texture, shallow depth of field, editorial portrait or environmental shot, vertical 9:16 composition, dark cinematic color grade (teal shadows, warm highlights), viral dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
+const STYLE_PREFIX_ANIME = "Dark psychological anime illustration, Satoshi Kon and Makoto Shinkai influence, detailed cel-shading linework, rich moody color palette with deep blues and purples, dramatic chiaroscuro shadows, melancholic haunting atmosphere, cinematic close-up composition, high-detail faces with expressive eyes, vertical 9:16 framing, dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
+const STYLE_PREFIX_NEON = "Cyberpunk neon noir photography, dark rain-soaked city streets at night, electric neon light reflections (deep purple, cyan, crimson), dramatic shadows, ultra-high contrast, deep blacks, atmospheric fog and mist, shallow depth of field, moody psychological thriller, vertical 9:16 composition, dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
+const STYLE_PREFIX_HORROR = "Dark gothic horror illustration, haunting and deeply unsettling atmosphere, deep shadows and heavily desaturated muted palette with selective blood-red accents, distressed cracked textures, dramatic horror lighting from below, psychological dread and existential terror, high contrast near-monochromatic tones, vertical 9:16 framing, dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
 
 function getStylePrefix() {
   const mode = document.getElementById('illMode')?.value || 'baked';
   if (mode === 'clean') return STYLE_PREFIX_CLEAN;
   if (mode === 'colored') return STYLE_PREFIX_COLORED;
   if (mode === 'cinematic') return STYLE_PREFIX_CINEMATIC;
+  if (mode === 'anime') return STYLE_PREFIX_ANIME;
+  if (mode === 'neon') return STYLE_PREFIX_NEON;
+  if (mode === 'horror') return STYLE_PREFIX_HORROR;
   return STYLE_PREFIX_BAKED;
 }
 
 async function generateImageForScene(scenePrompt, apiKey, isCartoon = false) {
-  const isCinematic = (document.getElementById('illMode')?.value || '') === 'cinematic';
-  const cartoonStyleAddition = (isCartoon && !isCinematic)
+  const illMode = document.getElementById('illMode')?.value || 'baked';
+  const isCinematic = illMode === 'cinematic';
+  const isRealism = isCinematic || illMode === 'neon' || illMode === 'horror';
+  const isAnime = illMode === 'anime';
+  const cartoonStyleAddition = (isCartoon && !isRealism && !isAnime)
     ? 'Expressive HUMAN cartoon character (man, woman, or child only), human face with exaggerated facial emotion, bold ink outlines, dynamic pose, vibrant personality. ONLY human people. NO monsters, NO vampires, NO demons, NO zombies, NO skeletons, NO aliens, NO animals, NO creatures, NO fantasy beings, NO supernatural entities. '
     : '';
 
   const cinematicNegative = 'cartoon, illustration, drawing, anime, manga, 2D art, painting, sketch, animated, render, CGI, digital art, vector art, flat art, comic, caricature, clip art, watercolor, oil painting, unrealistic, stylized';
   const baseNegative = 'deformed hands, missing fingers, extra fingers, mutilated hands, floating limbs, disconnected limbs, detached head, missing neck, no neck, fused neck, extra heads, extra arms, extra legs, bad anatomy, disfigured, malformed, cloned face, long neck, short neck, cropped body, cut off limbs, amputated, headless, out of frame body parts, full body shot, feet, shoes';
-  const negative_prompt = isCinematic ? `${cinematicNegative}, ${baseNegative}` : baseNegative;
+  const negative_prompt = isRealism ? `${cinematicNegative}, ${baseNegative}` : baseNegative;
 
-  const falModel = isCinematic ? 'fal-ai/flux-realism' : 'fal-ai/flux/schnell';
-  const steps = isCinematic ? 28 : 4;
+  const falModel = isRealism ? 'fal-ai/flux-realism' : isAnime ? 'fal-ai/flux-anime' : 'fal-ai/flux/schnell';
+  const steps = isRealism ? 28 : isAnime ? 20 : 4;
 
   const body = {
     prompt: getStylePrefix() + cartoonStyleAddition + scenePrompt,
