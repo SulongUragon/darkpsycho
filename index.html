@@ -4539,32 +4539,65 @@ function generateThumbnail(w, h) {
   tc.width = w; tc.height = h;
   const tx = tc.getContext('2d');
 
-  // Draw image cover-fit
+  // Mode accent color
+  const accentMap = { listicle:'#2D7A62', quotes:'#1A3570', poster:'#8C3D00', default:'#2D7A62' };
+  const accentHex = accentMap[contentMode] || accentMap.default;
+  const accentRGB = accentHex.replace('#','').match(/../g).map(x=>parseInt(x,16));
+  const aR=accentRGB[0],aG=accentRGB[1],aB=accentRGB[2];
+
+  // 1. Draw image cover-fit (saturated)
   const img = images[0];
+  tx.filter = 'saturate(1.5) contrast(1.1)';
   const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
   const iw = img.naturalWidth * scale, ih = img.naturalHeight * scale;
   tx.drawImage(img, (w - iw) / 2, (h - ih) / 2, iw, ih);
+  tx.filter = 'none';
 
-  // Dark gradient overlay bottom 55%
-  const grad = tx.createLinearGradient(0, h * 0.3, 0, h);
-  grad.addColorStop(0, 'rgba(0,0,0,0)');
-  grad.addColorStop(0.45, 'rgba(0,0,0,0.72)');
-  grad.addColorStop(1, 'rgba(0,0,0,0.93)');
-  tx.fillStyle = grad;
+  // 2. Color tint overlay top
+  const tint = tx.createLinearGradient(0, 0, 0, h * 0.5);
+  tint.addColorStop(0, `rgba(${aR},${aG},${aB},0.55)`);
+  tint.addColorStop(1, 'rgba(0,0,0,0)');
+  tx.fillStyle = tint;
   tx.fillRect(0, 0, w, h);
 
-  // Title text
-  const title = script?.mainTitle || 'Dark Psycho';
-  const fontSize = Math.round(w * 0.058);
+  // 3. Dark gradient bottom 60%
+  const dark = tx.createLinearGradient(0, h * 0.25, 0, h);
+  dark.addColorStop(0, 'rgba(0,0,0,0)');
+  dark.addColorStop(0.4, 'rgba(0,0,0,0.78)');
+  dark.addColorStop(1, 'rgba(0,0,0,0.97)');
+  tx.fillStyle = dark;
+  tx.fillRect(0, 0, w, h);
+
+  const pad = w * 0.055;
+  const title = (script?.mainTitle || 'DARK PSYCHO').toUpperCase();
+  const subtitle = (script?.scenes?.[0]?.title || '').toUpperCase();
+
+  // 4. Subtitle pill badge (above title)
+  if (subtitle) {
+    const subSize = Math.round(w * 0.032);
+    tx.font = `800 ${subSize}px 'Inter', sans-serif`;
+    const subW = tx.measureText(subtitle).width;
+    const pillX = pad, pillY = h * (w > 900 ? 0.68 : 0.62);
+    const pillPad = subSize * 0.55, pillH = subSize * 2;
+    tx.fillStyle = `rgba(${aR},${aG},${aB},0.9)`;
+    tx.beginPath();
+    tx.roundRect(pillX, pillY, subW + pillPad * 2, pillH, pillH / 2);
+    tx.fill();
+    tx.fillStyle = '#fff';
+    tx.textAlign = 'left';
+    tx.textBaseline = 'middle';
+    tx.shadowColor = 'rgba(0,0,0,0.6)'; tx.shadowBlur = 6;
+    tx.fillText(subtitle, pillX + pillPad, pillY + pillH / 2);
+    tx.shadowBlur = 0;
+  }
+
+  // 5. BIG title text with stroke
+  const fontSize = Math.round(w * (w > 900 ? 0.072 : 0.082));
   tx.font = `900 ${fontSize}px 'Bebas Neue', 'Anton', Impact, sans-serif`;
   tx.textAlign = 'left';
   tx.textBaseline = 'bottom';
-  tx.fillStyle = '#ffffff';
-  tx.shadowColor = 'rgba(0,0,0,0.9)';
-  tx.shadowBlur = 14;
 
-  // Word-wrap title
-  const maxW = w * 0.88, pad = w * 0.055;
+  const maxW = w * 0.9;
   const words = title.split(' ');
   const lines = [];
   let line = '';
@@ -4575,19 +4608,54 @@ function generateThumbnail(w, h) {
   }
   if (line) lines.push(line);
 
-  const lineH = fontSize * 1.15;
-  let y = h - Math.round(h * 0.055);
+  const lineH = fontSize * 1.1;
+  let y = h - Math.round(h * 0.04);
   for (let i = lines.length - 1; i >= 0; i--) {
+    // Stroke
+    tx.strokeStyle = `rgba(${aR},${aG},${aB},1)`;
+    tx.lineWidth = fontSize * 0.07;
+    tx.lineJoin = 'round';
+    tx.strokeText(lines[i], pad, y);
+    // Fill
+    tx.fillStyle = '#ffffff';
+    tx.shadowColor = 'rgba(0,0,0,0.95)'; tx.shadowBlur = 18;
     tx.fillText(lines[i], pad, y);
+    tx.shadowBlur = 0;
     y -= lineH;
   }
 
-  // Dark Psycho watermark top-left
-  tx.font = `700 ${Math.round(w * 0.022)}px 'Inter', sans-serif`;
-  tx.textBaseline = 'top';
-  tx.fillStyle = 'rgba(255,255,255,0.55)';
-  tx.shadowBlur = 0;
-  tx.fillText('DARK PSYCHO', pad, Math.round(h * 0.04));
+  // 6. Top-left DARK PSYCHO brand badge
+  const badgeH = Math.round(h * 0.06);
+  const badgeFontSize = Math.round(badgeH * 0.42);
+  tx.font = `900 ${badgeFontSize}px 'Inter', sans-serif`;
+  const brandW = tx.measureText('DARK PSYCHO').width + badgeFontSize * 1.4;
+  tx.fillStyle = `rgba(${aR},${aG},${aB},1)`;
+  tx.beginPath();
+  tx.roundRect(pad * 0.7, pad * 0.7, brandW, badgeH, 6);
+  tx.fill();
+  tx.fillStyle = '#fff';
+  tx.textAlign = 'left';
+  tx.textBaseline = 'middle';
+  tx.fillText('DARK PSYCHO', pad * 0.7 + badgeFontSize * 0.7, pad * 0.7 + badgeH / 2);
+
+  // 7. Top-right episode count badge
+  const epLabel = `${(script?.scenes?.length || 5)} SCENES`;
+  const epSize = Math.round(w * 0.028);
+  tx.font = `800 ${epSize}px 'Inter', sans-serif`;
+  const epW = tx.measureText(epLabel).width + epSize * 1.4;
+  const epX = w - epW - pad * 0.7;
+  tx.fillStyle = '#ffffff';
+  tx.beginPath();
+  tx.roundRect(epX, pad * 0.7, epW, badgeH, 6);
+  tx.fill();
+  tx.fillStyle = `rgb(${aR},${aG},${aB})`;
+  tx.textAlign = 'left';
+  tx.textBaseline = 'middle';
+  tx.fillText(epLabel, epX + epSize * 0.7, pad * 0.7 + badgeH / 2);
+
+  // 8. Bottom accent bar
+  tx.fillStyle = `rgba(${aR},${aG},${aB},0.85)`;
+  tx.fillRect(0, h - Math.round(h * 0.008), w, Math.round(h * 0.008));
 
   tc.toBlob(blob => {
     const stamp = new Date().toISOString().replace(/[:.]/g,'‑').slice(0,19);
