@@ -2817,7 +2817,7 @@ CRITICAL RULES:
   });
   if (!response.ok) {
     let detail = '';
-    try { detail = (await response.json()).error?.message || ''; } catch (e) {}
+    try { const errData = await response.json(); detail = errData.error?.message || ''; } catch (e) { try { detail = await response.text(); } catch {} }
     throw new Error(`Claude ${response.status}: ${detail || response.statusText}`);
   }
   const data = await response.json();
@@ -3002,7 +3002,7 @@ async function generateSpeechElevenLabs(text, voiceId, apiKey, audioCtx) {
   });
   if (!response.ok) {
     let detail = '';
-    try { detail = (await response.json()).detail?.message || (await response.text()); } catch (e) {}
+    try { const errData = await response.json(); detail = errData.detail?.message || ''; } catch (e) { try { detail = await response.text(); } catch {} }
     if (response.status === 401 || response.status === 402 || response.status === 429) {
       const err = new Error(`ElevenLabs ${response.status}: ${detail || response.statusText}`);
       err.__quota = response.status;
@@ -3735,10 +3735,15 @@ async function runGenerateAll() {
           try {
             const body = { prompt: QUOTES_STYLE + prompt, negative_prompt: 'deformed hands, missing fingers, extra fingers, mutilated hands, floating limbs, disconnected limbs, detached head, missing neck, no neck, bad anatomy, disfigured, malformed, extra limbs, full body shot, feet, shoes', image_size: { width: 768, height: 1344 }, num_images: 1, num_inference_steps: 4, enable_safety_checker: false, sync_mode: true };
             const res = await fetch('https://fal.run/fal-ai/flux/schnell', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Key ${falKey}` }, body: JSON.stringify(body) });
+            if (!res.ok) throw new Error(`FAL.ai ${res.status}`);
             const data = await res.json();
             const url = data.images?.[0]?.url;
-            if (url) { const blob = await (await fetch(url)).blob(); images[i] = await loadImage(URL.createObjectURL(blob)); }
-          } catch(e) { console.warn('Quote bg gen failed:', e); }
+            if (!url) throw new Error('No image URL in FAL response');
+            const imgResp = await fetch(url);
+            if (!imgResp.ok) throw new Error(`Image fetch failed: ${imgResp.status}`);
+            const blob = await imgResp.blob();
+            images[i] = await loadImage(URL.createObjectURL(blob));
+          } catch(e) { console.warn(`Quote bg ${i+1} failed:`, e); setStatus(`Warning: background ${i+1} failed — ${e.message}`, 'warn'); }
           rebuildThumbGrid();
         }
         assetsStatusEl.textContent = `✓ ${script.scenes.length} AI backgrounds ready`;
@@ -3874,7 +3879,7 @@ Output ONLY the JSON. No preamble. No markdown code blocks.
   });
   if (!response.ok) {
     let detail = '';
-    try { detail = (await response.json()).error?.message || ''; } catch (e) {}
+    try { const errData = await response.json(); detail = errData.error?.message || ''; } catch (e) { try { detail = await response.text(); } catch {} }
     throw new Error(`Claude ${response.status}: ${detail || response.statusText}`);
   }
   const data = await response.json();
