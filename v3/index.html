@@ -7731,6 +7731,7 @@ function switchKeyTab(tab) {
   }
 
   window.openCalendar = function() {
+    calData = loadCal(); // always re-read from localStorage so Plan Week topics show up
     buildGrid();
     const gt = localStorage.getItem(LS_GLOBAL) || '09:00';
     document.getElementById('calGlobalTime').value = gt;
