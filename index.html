@@ -3063,6 +3063,7 @@ async function generateSpeech(text, voiceId, apiKey, audioCtx) {
       if (!_voiceFallbackNotified) {
         _voiceFallbackNotified = true;
         try { window.toast && window.toast(`⚠️ ${reason} — falling back to OpenAI TTS`, 'error', 8000); } catch {}
+        try { setStatus(`⚠️ ${reason} — trying OpenAI TTS fallback`, 'error'); } catch {}
         try { applyVoiceProviderUI('openai'); } catch {}
       }
       if (!oKey) throw new Error(`${reason}. Add an OpenAI key as fallback, or fix your ElevenLabs key.`);
@@ -4153,6 +4154,8 @@ function playAudioSequence(audioCtx, recordDest) {
 async function runPlayback(record) {
   if (!script) { setStatus('Generate a script first', 'error'); return; }
   if (playing) return;
+  const hasAudio = audios && audios.some(a => !!a);
+  if (!hasAudio) { setStatus('No voice generated yet — click ↺ Voice to generate', 'error'); return; }
   playing = true;
   playAbort = { cancel: false };
 
