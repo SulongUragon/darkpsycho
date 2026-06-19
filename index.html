@@ -1702,6 +1702,7 @@ details > *:not(summary) { margin-top: 10px; }
               <option value="anime">Anime (dark psych)</option>
               <option value="neon">Neon Noir (cyberpunk)</option>
               <option value="horror">Horror (gothic dark)</option>
+              <option value="faithful">Faithful (dog &amp; bond)</option>
             </select>
             <div class="cost-note" id="illModeNote" style="margin-top:4px;">Changing this requires re-generating images</div>
           </div>
@@ -2843,6 +2844,7 @@ const STYLE_PREFIX_CINEMATIC = "Cinematic 35mm film photography, dramatic chiaro
 const STYLE_PREFIX_ANIME = "Dark psychological anime illustration, Satoshi Kon and Makoto Shinkai influence, detailed cel-shading linework, rich moody color palette with deep blues and purples, dramatic chiaroscuro shadows, melancholic haunting atmosphere, cinematic close-up composition, high-detail faces with expressive eyes, vertical 9:16 framing, dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
 const STYLE_PREFIX_NEON = "Cyberpunk neon noir photography, dark rain-soaked city streets at night, electric neon light reflections (deep purple, cyan, crimson), dramatic shadows, ultra-high contrast, deep blacks, atmospheric fog and mist, shallow depth of field, moody psychological thriller, vertical 9:16 composition, dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
 const STYLE_PREFIX_HORROR = "Dark gothic horror illustration, haunting and deeply unsettling atmosphere, deep shadows and heavily desaturated muted palette with selective blood-red accents, distressed cracked textures, dramatic horror lighting from below, psychological dread and existential terror, high contrast near-monochromatic tones, vertical 9:16 framing, dark-psychology social media aesthetic. NO text. NO watermarks. NO logos. NO borders. Subject: ";
+const STYLE_PREFIX_FAITHFUL = "Warm heartfelt digital painting, soft golden hour light, rich earthy tones, emotional bond between humans and their beloved dog, painterly brushstrokes with gentle texture, nostalgic and tender atmosphere, depth of field blur on background, vertical 9:16 composition, unconditional love and loyalty theme. NO text. NO watermarks. NO logos. NO borders. Subject: ";
 
 function getStylePrefix() {
   const mode = document.getElementById('illMode')?.value || 'baked';
@@ -2852,6 +2854,7 @@ function getStylePrefix() {
   if (mode === 'anime') return STYLE_PREFIX_ANIME;
   if (mode === 'neon') return STYLE_PREFIX_NEON;
   if (mode === 'horror') return STYLE_PREFIX_HORROR;
+  if (mode === 'faithful') return STYLE_PREFIX_FAITHFUL;
   return STYLE_PREFIX_BAKED;
 }
 
