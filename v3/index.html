@@ -5499,6 +5499,18 @@ Output STRICTLY valid JSON — an array of exactly 7 strings, one topic per day 
     }
     saveCalendar(calData);
     renderCalendar();
+    // Sync topics to the 7-day modal calendar and open it
+    try {
+      const existing = JSON.parse(localStorage.getItem('dp_calendar_v1') || 'null') || Array.from({length:7}, () => ({topic:'',mode:'listicle',time:'',done:false}));
+      calData.days.forEach((day, i) => {
+        if (existing[i]) {
+          if (isDebateMode) existing[i].topic = (day.amTopic || day.pmTopic || '');
+          else existing[i].topic = day.topic || existing[i].topic;
+        }
+      });
+      localStorage.setItem('dp_calendar_v1', JSON.stringify(existing));
+      if (typeof openCalendar === 'function') setTimeout(openCalendar, 300);
+    } catch(e) {}
     const msg = isDebateMode
       ? `✓ 14 posts planned (7 days × 2) for "${debateTopic}" — ${sideA} in the morning, ${sideB} in the evening!`
       : isSeriesMode
