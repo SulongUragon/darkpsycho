@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dark Psycho — Preview Watermark Tool</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #030405; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; gap: 1.5rem; }
+h1 { font-size: 1.1rem; letter-spacing: 0.2em; color: #c8ff00; font-weight: 800; }
+#dropzone {
+  width: 100%; max-width: 560px; border: 2px dashed #2a3a2a;
+  border-radius: 12px; padding: 2.5rem; text-align: center;
+  cursor: pointer; transition: border-color 0.2s; color: #556;
+  font-size: 0.9rem;
+}
+#dropzone.over { border-color: #c8ff00; color: #c8ff00; }
+#dropzone input { display: none; }
+canvas { max-width: 100%; max-height: 60vh; border-radius: 8px; display: none; }
+button {
+  padding: 0.75rem 2rem; background: #c8ff00; color: #030405;
+  border: none; border-radius: 8px; font-weight: 800; font-size: 0.95rem;
+  cursor: pointer; display: none; letter-spacing: 0.05em;
+}
+button:hover { background: #d4ff33; }
+#info { font-size: 0.75rem; color: #445; }
+</style>
+</head>
+<body>
+<h1>PREVIEW WATERMARK TOOL</h1>
+
+<div id="dropzone" onclick="document.getElementById('fileInput').click()"
+  ondragover="event.preventDefault();this.classList.add('over')"
+  ondragleave="this.classList.remove('over')"
+  ondrop="handleDrop(event)">
+  <input type="file" id="fileInput" accept="image/*" onchange="loadFile(this.files[0])">
+  Drop thumbnail here or click to choose
+</div>
+
+<canvas id="canvas"></canvas>
+<button id="dlBtn" onclick="download()">⬇ Download Watermarked Image</button>
+<div id="info"></div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let filename = 'preview-thumbnail';
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadFile(file);
+}
+
+function loadFile(file) {
+  if (!file) return;
+  filename = file.name.replace(/\.[^.]+$/, '') + '-preview';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => drawWithWatermark(img);
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function drawWithWatermark(img) {
+  canvas.width = img.width;
+  canvas.height = img.height;
+  ctx.drawImage(img, 0, 0);
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Semi-transparent dark overlay
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Diagonal PREVIEW text
+  ctx.save();
+  ctx.translate(W / 2, H / 2);
+  ctx.rotate(-Math.PI / 6);
+  const fontSize = Math.round(W * 0.13);
+  ctx.font = `900 ${fontSize}px 'Arial Black', 'Impact', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillText('PREVIEW', 4, 4);
+  // Text
+  ctx.fillStyle = 'rgba(255,255,255,0.10)';
+  ctx.fillText('PREVIEW', 0, 0);
+  ctx.restore();
+
+  // Small URL tag at bottom
+  const tagH = Math.round(H * 0.045);
+  const tagFont = Math.round(tagH * 0.55);
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(0, H - tagH, W, tagH);
+  ctx.fillStyle = 'rgba(200,255,0,0.7)';
+  ctx.font = `700 ${tagFont}px 'Inter', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('darkpsycho.loudminds.club', W / 2, H - tagH / 2);
+
+  canvas.style.display = 'block';
+  document.getElementById('dlBtn').style.display = 'inline-block';
+  document.getElementById('info').textContent = `${W} × ${H}px`;
+  document.getElementById('dropzone').style.display = 'none';
+}
+
+function download() {
+  const ext = 'png';
+  const link = document.createElement('a');
+  link.download = filename + '.' + ext;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>
