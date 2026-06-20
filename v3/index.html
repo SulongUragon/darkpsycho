@@ -1679,6 +1679,15 @@ details > *:not(summary) { margin-top: 10px; }
             </select>
           </div>
           <div class="field">
+            <label>Scene Duration</label>
+            <select id="sceneDuration">
+              <option value="5">5 sec</option>
+              <option value="7" selected>7 sec</option>
+              <option value="10">10 sec</option>
+              <option value="12">12 sec</option>
+            </select>
+          </div>
+          <div class="field">
             <label>Voice</label>
             <select id="voice">
               <option value="yBtWe2ymKT0oXUmsi6st" selected>My Voice (Sulong)</option>
@@ -2812,7 +2821,7 @@ Output STRICTLY valid JSON in this exact shape:
   "scenes": [
     {
       "title": "short scene heading shown on screen, MAX 5 WORDS",
-      "narration": "spoken voice-over for this scene, 2-3 sentences, 4-6 seconds when read naturally, conversational tone",
+      "narration": "spoken voice-over for this scene, conversational tone, MUST be ${parseInt(document.getElementById('sceneDuration')?.value||'7')-2}-${document.getElementById('sceneDuration')?.value||'7'} seconds when read naturally — keep it tight",
       "imagePrompt": "clear visual description of ONE scene illustration. ${cartoonInstruction} FRAMING: portrait, bust, or waist-up only — NO full body, NO feet. Keep it under 25 words."
     }
   ],
