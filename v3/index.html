@@ -2821,7 +2821,7 @@ Output STRICTLY valid JSON in this exact shape:
   "scenes": [
     {
       "title": "short scene heading shown on screen, MAX 5 WORDS",
-      "narration": "spoken voice-over for this scene, conversational tone, MUST be ${parseInt(document.getElementById('sceneDuration')?.value||'7')-2}-${document.getElementById('sceneDuration')?.value||'7'} seconds when read naturally — keep it tight",
+      "narration": "spoken voice-over for this scene, conversational tone. STRICT LIMIT: MAX ${Math.round((parseInt(document.getElementById('sceneDuration')?.value||'7')/60)*130)} words — count every word, do not exceed this limit. One to two short sentences only.",
       "imagePrompt": "clear visual description of ONE scene illustration. ${cartoonInstruction} FRAMING: portrait, bust, or waist-up only — NO full body, NO feet. Keep it under 25 words."
     }
   ],
