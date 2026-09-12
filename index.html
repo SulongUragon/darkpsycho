@@ -1535,9 +1535,32 @@ details > *:not(summary) { margin-top: 10px; }
 
         <!-- Tab: AI -->
         <div class="key-tab-pane" id="keytab-ai">
-          <div class="api-row">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px;">AI Provider</div>
+            <div id="aiProviderToggle" style="display:flex;gap:6px;">
+              <button type="button" onclick="setAiProvider('anthropic')" id="aiBtn_anthropic" class="vp-btn active">Claude</button>
+              <button type="button" onclick="setAiProvider('kimi')" id="aiBtn_kimi" class="vp-btn">Kimi</button>
+            </div>
+            <input type="hidden" id="aiProvider" value="anthropic">
+          </div>
+          <div class="api-row" id="anthropicKeyRow">
             <div class="api-label">Anthropic</div>
             <input type="password" id="anthropicKey" placeholder="sk-ant-… (Claude)" autocomplete="off">
+          </div>
+          <div id="kimiConfig" style="display:none;">
+            <div class="api-row">
+              <div class="api-label">Kimi</div>
+              <input type="password" id="kimiKey" placeholder="Kimi API key" autocomplete="off">
+            </div>
+            <div class="api-row">
+              <div class="api-label">Model</div>
+              <select id="kimiModel">
+                <option value="kimi-k2.6" selected>Kimi K2.6</option>
+                <option value="kimi-k2.5">Kimi K2.5</option>
+                <option value="kimi-k2-turbo-preview">Kimi K2 Turbo</option>
+                <option value="kimi-k2-thinking">Kimi K2 Thinking</option>
+              </select>
+            </div>
           </div>
           <div class="api-row">
             <div class="api-label">FAL.ai</div>
@@ -1727,7 +1750,7 @@ details > *:not(summary) { margin-top: 10px; }
           </div>
           <div class="cost-breakdown">
             <div class="cost-line claude">
-              <span class="svc">Claude</span>
+              <span class="svc">AI Script</span>
               <span class="val" id="costClaude">$0.000</span>
             </div>
             <div class="cost-line fal">
@@ -2540,6 +2563,7 @@ const H = canvas.height;
 // ----- DOM refs
 const $ = id => document.getElementById(id);
 const anthropicKeyEl = $('anthropicKey');
+const kimiKeyEl = $('kimiKey');
 const falKeyEl = $('falKey');
 const elevenKeyEl = $('elevenKey');
 const topicEl = $('topic');
@@ -2705,6 +2729,20 @@ function setProgress(pct) {
 }
 
 // ----- Save keys
+function setAiProvider(provider) { applyAiProviderUI(provider); }
+function applyAiProviderUI(provider) {
+  if (provider !== 'anthropic' && provider !== 'kimi') provider = 'anthropic';
+  if ($('aiProvider')) $('aiProvider').value = provider;
+  ['anthropic', 'kimi'].forEach(p => $('aiBtn_' + p)?.classList.toggle('active', p === provider));
+  if ($('anthropicKeyRow')) $('anthropicKeyRow').style.display = provider === 'anthropic' ? '' : 'none';
+  if ($('kimiConfig')) $('kimiConfig').style.display = provider === 'kimi' ? '' : 'none';
+  localStorage.setItem('ai_provider', provider);
+}
+
+function getAiProvider() { return $('aiProvider')?.value || 'anthropic'; }
+function getAiName() { return getAiProvider() === 'kimi' ? 'Kimi' : 'Claude'; }
+function getAiKey() { return getAiProvider() === 'kimi' ? (kimiKeyEl?.value.trim() || '') : (anthropicKeyEl?.value.trim() || ''); }
+
 // ----- Voice provider UI toggle (ElevenLabs / OpenAI)
 function setVoiceProvider(provider) { applyVoiceProviderUI(provider); }
 function applyVoiceProviderUI(provider) {
@@ -2723,6 +2761,9 @@ function applyVoiceProviderUI(provider) {
 
 $('saveKeys').onclick = () => {
   localStorage.setItem('anthropic_api_key', anthropicKeyEl.value.trim());
+  localStorage.setItem('kimi_api_key', kimiKeyEl?.value.trim() || '');
+  localStorage.setItem('kimi_model', $('kimiModel')?.value || 'kimi-k2.6');
+  localStorage.setItem('ai_provider', getAiProvider());
   localStorage.setItem('fal_api_key', falKeyEl.value.trim());
   localStorage.setItem('elevenlabs_api_key', elevenKeyEl.value.trim());
   localStorage.setItem('openai_api_key', $('openaiKey')?.value.trim() || '');
@@ -2738,6 +2779,9 @@ $('saveKeys').onclick = () => {
 
 function loadKeys() {
   anthropicKeyEl.value = localStorage.getItem('anthropic_api_key') || '';
+  if (kimiKeyEl) kimiKeyEl.value = localStorage.getItem('kimi_api_key') || '';
+  if ($('kimiModel')) $('kimiModel').value = localStorage.getItem('kimi_model') || 'kimi-k2.6';
+  applyAiProviderUI(localStorage.getItem('ai_provider') || 'anthropic');
   falKeyEl.value = localStorage.getItem('fal_api_key') || '';
   elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
   const _oKey = localStorage.getItem('openai_api_key'); if (_oKey && $('openaiKey')) $('openaiKey').value = _oKey;
@@ -2758,6 +2802,52 @@ function stripDashes(obj) {
   if (Array.isArray(obj)) { obj.forEach((v, i) => { obj[i] = stripDashes(v); }); }
   else if (obj && typeof obj === 'object') { Object.keys(obj).forEach(k => { obj[k] = stripDashes(obj[k]); }); }
   return obj;
+}
+
+async function callTextAI(prompt, maxTokens = 2500, options = {}) {
+  const provider = getAiProvider();
+  const apiKey = options.apiKey || getAiKey();
+  if (!apiKey) throw new Error(`Need ${getAiName()} API key`);
+
+  if (provider === 'kimi') {
+    const response = await fetch('https://api.moonshot.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: $('kimiModel')?.value || 'kimi-k2.6',
+        max_tokens: maxTokens,
+        messages: [
+          ...(options.system ? [{ role: 'system', content: options.system }] : []),
+          ...(options.messages || [{ role: 'user', content: prompt }])
+        ]
+      })
+    });
+    if (!response.ok) {
+      let detail = ''; try { detail = (await response.json()).error?.message || ''; } catch (e) {}
+      throw new Error(`Kimi ${response.status}: ${detail || response.statusText}`);
+    }
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() || '';
+  }
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json', 'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6', max_tokens: maxTokens,
+      ...(options.system ? { system: options.system } : {}),
+      messages: options.messages || [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!response.ok) {
+    let detail = ''; try { detail = (await response.json()).error?.message || ''; } catch (e) {}
+    throw new Error(`Claude ${response.status}: ${detail || response.statusText}`);
+  }
+  const data = await response.json();
+  return data.content?.[0]?.text?.trim() || '';
 }
 
 async function generateScript(topic, sceneCount, apiKey) {
@@ -2801,32 +2891,12 @@ CRITICAL RULES:
 - NO MARKDOWN CODE BLOCKS. Output only the raw JSON starting with { and ending with }
 - NEVER use em dashes (—) or en dashes (–). Use commas, periods, or colons instead.`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2500,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  if (!response.ok) {
-    let detail = '';
-    try { detail = (await response.json()).error?.message || ''; } catch (e) {}
-    throw new Error(`Claude ${response.status}: ${detail || response.statusText}`);
-  }
-  const data = await response.json();
-  let text = data.content[0].text.trim();
+  let text = await callTextAI(prompt, 2500, { apiKey });
   // Strip markdown fences if any
   text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
   const parsed = JSON.parse(text);
   if (!parsed.mainTitle || !Array.isArray(parsed.scenes)) {
-    throw new Error('Claude returned malformed JSON');
+    throw new Error(`${getAiName()} returned malformed JSON`);
   }
   // Strip any em/en dashes that slipped through
   stripDashes(parsed);
@@ -3678,7 +3748,7 @@ function rebuildThumbGrid() {
 //  WORKFLOW — Generate All
 // =========================================================
 async function runGenerateAll() {
-  const anthropicKey = anthropicKeyEl.value.trim();
+  const anthropicKey = getAiKey();
   const falKey = falKeyEl.value.trim();
   const elevenKey = elevenKeyEl.value.trim();
   const openaiKey = document.getElementById('openaiKey')?.value.trim() || '';
@@ -3686,7 +3756,7 @@ async function runGenerateAll() {
   const voiceKeyOk = provider === 'openai' ? !!openaiKey : !!elevenKey;
   if (!anthropicKey || !falKey || !voiceKeyOk) {
     const missing = [];
-    if (!anthropicKey) missing.push('Anthropic');
+    if (!anthropicKey) missing.push(getAiName());
     if (!falKey) missing.push('FAL.ai');
     if (!voiceKeyOk) missing.push(provider === 'openai' ? 'OpenAI' : 'ElevenLabs');
     setStatus(`Need API keys: ${missing.join(', ')}`, 'error');
@@ -3701,7 +3771,7 @@ async function runGenerateAll() {
   canvas.classList.add('generating');
   try {
     // Step 1: Script
-    setStatus('Claude writing script…', 'info');
+    setStatus(`${getAiName()} writing script…`, 'info');
     setProgress(5);
     script = contentMode === 'quotes'
       ? await generateQuotesScript(topic, sceneCount, anthropicKey)
@@ -3801,13 +3871,13 @@ async function runGenerateAll() {
 }
 
 async function regenerateScript() {
-  const key = anthropicKeyEl.value.trim();
-  if (!key) { setStatus('Need Anthropic key', 'error'); return; }
+  const key = getAiKey();
+  if (!key) { setStatus(`Need ${getAiName()} API key`, 'error'); return; }
   const topic = topicEl.value.trim();
   if (!topic) { setStatus('Enter a topic', 'error'); return; }
   disableControls(true);
   try {
-    setStatus('Claude writing new script…', 'info');
+    setStatus(`${getAiName()} writing new script…`, 'info');
     script = await generateScript(topic, parseInt(sceneCountEl.value), key);
     images = new Array(script.scenes.length).fill(null);
     imageBlobs = new Array(script.scenes.length).fill(null);
@@ -3858,38 +3928,18 @@ Output STRICTLY valid JSON in this exact shape:
 Output ONLY the JSON. No preamble. No markdown code blocks.
 - NEVER use em dashes (—) or en dashes (–). Use commas, periods, or colons instead.`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 3000,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  if (!response.ok) {
-    let detail = '';
-    try { detail = (await response.json()).error?.message || ''; } catch (e) {}
-    throw new Error(`Claude ${response.status}: ${detail || response.statusText}`);
-  }
-  const data = await response.json();
-  let text = data.content[0].text.trim();
+  let text = await callTextAI(prompt, 3000, { apiKey });
   text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
   const parsed = JSON.parse(text);
-  if (!Array.isArray(parsed.scenes)) throw new Error('Claude did not return a scenes array');
+  if (!Array.isArray(parsed.scenes)) throw new Error(`${getAiName()} did not return a scenes array`);
   // Strip any em/en dashes that slipped through
   stripDashes(parsed);
   return parsed; // { scenes, caption, keywords, hashtags }
 }
 
 async function buildFromCustomScript() {
-  const key = anthropicKeyEl.value.trim();
-  if (!key) { setStatus('Need Anthropic key for image-prompt generation', 'error'); return; }
+  const key = getAiKey();
+  if (!key) { setStatus(`Need ${getAiName()} key for image-prompt generation`, 'error'); return; }
   const mainTitle = $('customMainTitle').value.trim();
   const text = $('customScriptText').value.trim();
   if (!mainTitle) { setStatus('Enter a main title', 'error'); return; }
@@ -3902,7 +3952,7 @@ async function buildFromCustomScript() {
 
   disableControls(true);
   try {
-    setStatus(`Building ${paragraphs.length}-scene script with Claude…`, 'info');
+    setStatus(`Building ${paragraphs.length}-scene script with ${getAiName()}…`, 'info');
     const result = await buildCustomScenes(mainTitle, paragraphs, key);
     const scenes = result.scenes;
     script = {
@@ -5357,10 +5407,10 @@ function updateCalStatus() {
   // Don't overwrite user-set status messages from plan/generate actions
 }
 
-// ── Plan Week: Claude generates topics (series OR variety) ────────────────────
+// ── Plan Week: selected AI provider generates topics ─────────────────────────
 async function calPlanWeek() {
-  const key = document.getElementById('anthropicKey')?.value.trim();
-  if (!key) { alert('Add your Anthropic API key first (Section 1)'); return; }
+  const key = getAiKey();
+  if (!key) { alert(`Add your ${getAiName()} API key first (Section 1)`); return; }
   const isDebateMode = calMode === 'debate';
   const isSeriesMode = calMode === 'series';
   const seriesTopic = document.getElementById('calSeriesTopic')?.value.trim();
@@ -5426,13 +5476,7 @@ Output STRICTLY valid JSON — an array of exactly 7 strings, one topic per day 
 - NEVER use em dashes (—) or en dashes (–). Use commas, periods, or colons instead.`;
     }
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
-    });
-    const data = await res.json();
-    let text = data.content[0].text.trim().replace(/^```json?\s*/i,'').replace(/```$/,'').trim();
+    let text = (await callTextAI(prompt, 800, { apiKey: key })).replace(/^```json?\s*/i,'').replace(/```$/,'').trim();
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed) || parsed.length !== 7) throw new Error('Bad response');
     // Strip any em/en dashes that slipped through
@@ -6105,6 +6149,9 @@ if (silenceMinEl) {
 function getAllKeys() {
   return {
     anthropic: document.getElementById('anthropicKey')?.value || localStorage.getItem('anthropic_api_key') || '',
+    kimi: document.getElementById('kimiKey')?.value || localStorage.getItem('kimi_api_key') || '',
+    aiProvider: getAiProvider(),
+    kimiModel: document.getElementById('kimiModel')?.value || localStorage.getItem('kimi_model') || 'kimi-k2.6',
     fal: document.getElementById('falKey')?.value || localStorage.getItem('fal_api_key') || '',
     eleven: document.getElementById('elevenKey')?.value || localStorage.getItem('elevenlabs_api_key') || '',
     openai: document.getElementById('openaiKey')?.value || localStorage.getItem('openai_api_key') || '',
@@ -6120,6 +6167,8 @@ function getAllKeys() {
 function applyKeys(keys) {
   const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
   set('anthropicKey', keys.anthropic);
+  set('kimiKey', keys.kimi);
+  set('kimiModel', keys.kimiModel);
   set('falKey', keys.fal);
   set('elevenKey', keys.eleven);
   set('openaiKey', keys.openai);
@@ -6129,6 +6178,12 @@ function applyKeys(keys) {
   set('ayrshareKey', keys.ayrshare);
   set('makeWebhook', keys.makeWebhook);
   if (keys.anthropic) localStorage.setItem('anthropic_api_key', keys.anthropic);
+  if (keys.kimi) localStorage.setItem('kimi_api_key', keys.kimi);
+  if (keys.kimiModel) localStorage.setItem('kimi_model', keys.kimiModel);
+  if (keys.aiProvider) {
+    localStorage.setItem('ai_provider', keys.aiProvider);
+    try { applyAiProviderUI(keys.aiProvider); } catch {}
+  }
   if (keys.fal) localStorage.setItem('fal_api_key', keys.fal);
   if (keys.eleven) localStorage.setItem('elevenlabs_api_key', keys.eleven);
   if (keys.openai) localStorage.setItem('openai_api_key', keys.openai);
@@ -6580,14 +6635,7 @@ RULES:
 - Write for a SPECIFIC emotional state, not generic positivity
 - NO MARKDOWN. Raw JSON only.`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
-  });
-  if (!response.ok) throw new Error('Claude ' + response.status);
-  const data = await response.json();
-  let text = data.content[0].text.trim().replace(/^```json\s*/i,'').replace(/```$/,'').trim();
+  let text = (await callTextAI(prompt, 2000, { apiKey })).replace(/^```json\s*/i,'').replace(/```$/,'').trim();
   const parsed = JSON.parse(text);
   // Strip any em/en dashes that slipped through
   stripDashes(parsed);
@@ -6762,7 +6810,7 @@ document.fonts.ready.then(init);
     <div class="preflight-row"><span class="lbl">Topic</span><span class="val" id="pfTopic">—</span></div>
     <div class="preflight-row"><span class="lbl">Scenes</span><span class="val" id="pfScenes">—</span></div>
     <div class="preflight-row"><span class="lbl">Voice Model</span><span class="val" id="pfVoice">—</span></div>
-    <div class="preflight-row"><span class="lbl">Claude (script)</span><span class="val" id="pfClaude">$0.000</span></div>
+    <div class="preflight-row"><span class="lbl">AI (script)</span><span class="val" id="pfClaude">$0.000</span></div>
     <div class="preflight-row"><span class="lbl">FAL (images)</span><span class="val" id="pfFal">$0.000</span></div>
     <div class="preflight-row"><span class="lbl">ElevenLabs (TTS)</span><span class="val" id="pfEleven">$0.000</span></div>
     <div class="preflight-total">
@@ -6926,7 +6974,7 @@ document.fonts.ready.then(init);
 
     btn.onclick = (ev) => {
       // Skip preflight if missing keys/topic — let original handler show its error
-      const hasKeys = $('anthropicKey')?.value.trim()
+      const hasKeys = getAiKey()
                     && $('falKey')?.value.trim()
                     && $('elevenKey')?.value.trim();
       const hasTopic = !!$('topic')?.value.trim();
@@ -7382,8 +7430,8 @@ document.fonts.ready.then(init);
   }
 
   async function generatePosterQuote() {
-    const apiKey = document.getElementById('anthropicKey')?.value.trim() || '';
-    if (!apiKey) { alert('Wala pang Anthropic API key. I-add sa API Keys tab.'); return; }
+    const apiKey = getAiKey();
+    if (!apiKey) { alert(`Wala pang ${getAiName()} API key. I-add sa API Keys tab.`); return; }
     const topic = $('posterTopic')?.value.trim()
       || (typeof window.script !== 'undefined' && window.script?.mainTitle)
       || 'life and resilience';
@@ -7391,22 +7439,9 @@ document.fonts.ready.then(init);
     const statusEl = $('posterQuoteStatus');
     btn.disabled = true;
     btn.textContent = '⏳ Generating…';
-    if (statusEl) statusEl.textContent = 'Calling Claude…';
+    if (statusEl) statusEl.textContent = `Calling ${getAiName()}…`;
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 200,
-          messages: [{
-            role: 'user',
-            content: `Write a 4-line inspirational quote for a social media episode poster about: "${topic}"
+      const quote = await callTextAI(`Write a 4-line inspirational quote for a social media episode poster about: "${topic}"
 
 Rules:
 - 4 lines, each line 4-8 words
@@ -7420,12 +7455,7 @@ Example style:
 Some lessons arrive disguised as loss.
 Only later do we understand their gift.
 The pain was never the enemy.
-It was the door we had to open.`
-          }]
-        })
-      });
-      const data = await res.json();
-      const quote = data.content?.[0]?.text?.trim() || '';
+It was the door we had to open.`, 200, { apiKey });
       if (!quote) throw new Error('No quote returned');
       const customEl = $('posterCustomText');
       const srcEl = $('posterTextSource');
@@ -7865,6 +7895,7 @@ function switchKeyTab(tab) {
 
   function getKeys() {
     return {
+      ai: getAiKey(),
       anthropic: document.getElementById('anthropicKey')?.value.trim() || '',
       fal: document.getElementById('falKey')?.value.trim() || ''
     };
@@ -7900,7 +7931,7 @@ function switchKeyTab(tab) {
     const text = input.value.trim();
     if (!text) return;
     const keys = getKeys();
-    if (!keys.anthropic) { addMsg('bot', '⚠️ Wala pang Anthropic API key. I-add sa API Keys tab.'); return; }
+    if (!keys.ai) { addMsg('bot', `⚠️ Wala pang ${getAiName()} API key. I-add sa API Keys tab.`); return; }
 
     input.value = '';
     input.style.height = 'auto';
@@ -7928,6 +7959,20 @@ function switchKeyTab(tab) {
     let full = '';
 
     try {
+      if (getAiProvider() === 'kimi') {
+        full = await callTextAI('', 1024, {
+          apiKey: keys.ai,
+          system: 'You are the built-in assistant for DARK PSYCHO v3, a viral short-form video generator. Help with the app and dark psychology content. The app uses the selected AI provider for scripts, FAL.ai for images, and ElevenLabs or OpenAI for voice. Respond in the same language as the user, directly and concisely.',
+          messages: history.map(m => ({ role: m.role, content: m.content }))
+        });
+        typing.remove();
+        const wrap = document.createElement('div');
+        wrap.className = 'chat-msg bot';
+        bubble.innerHTML = mdToHtml(full);
+        wrap.appendChild(bubble); msgs.appendChild(wrap);
+        history.push({ role: 'assistant', content: full });
+        return;
+      }
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
