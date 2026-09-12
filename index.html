@@ -2810,7 +2810,7 @@ async function callTextAI(prompt, maxTokens = 2500, options = {}) {
   if (!apiKey) throw new Error(`Need ${getAiName()} API key`);
 
   if (provider === 'kimi') {
-    const response = await fetch('https://api.moonshot.ai/v1/chat/completions', {
+    const response = await fetch('https://api.moonshot.cn/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
