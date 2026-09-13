@@ -1555,7 +1555,8 @@ details > *:not(summary) { margin-top: 10px; }
             <div class="api-row">
               <div class="api-label">Model</div>
               <select id="kimiModel">
-                <option value="kimi-k2.6" selected>Kimi K2.6</option>
+                <option value="kimi-k3" selected>Kimi K3</option>
+                <option value="kimi-k2.6">Kimi K2.6</option>
                 <option value="kimi-k2.5">Kimi K2.5</option>
                 <option value="kimi-k2-turbo-preview">Kimi K2 Turbo</option>
                 <option value="kimi-k2-thinking">Kimi K2 Thinking</option>
@@ -2762,7 +2763,7 @@ function applyVoiceProviderUI(provider) {
 $('saveKeys').onclick = () => {
   localStorage.setItem('anthropic_api_key', anthropicKeyEl.value.trim());
   localStorage.setItem('kimi_api_key', kimiKeyEl?.value.trim() || '');
-  localStorage.setItem('kimi_model', $('kimiModel')?.value || 'kimi-k2.6');
+  localStorage.setItem('kimi_model', $('kimiModel')?.value || 'kimi-k3');
   localStorage.setItem('ai_provider', getAiProvider());
   localStorage.setItem('fal_api_key', falKeyEl.value.trim());
   localStorage.setItem('elevenlabs_api_key', elevenKeyEl.value.trim());
@@ -2780,7 +2781,7 @@ $('saveKeys').onclick = () => {
 function loadKeys() {
   anthropicKeyEl.value = localStorage.getItem('anthropic_api_key') || '';
   if (kimiKeyEl) kimiKeyEl.value = localStorage.getItem('kimi_api_key') || '';
-  if ($('kimiModel')) $('kimiModel').value = localStorage.getItem('kimi_model') || 'kimi-k2.6';
+  if ($('kimiModel')) $('kimiModel').value = localStorage.getItem('kimi_model') || 'kimi-k3';
   applyAiProviderUI(localStorage.getItem('ai_provider') || 'anthropic');
   falKeyEl.value = localStorage.getItem('fal_api_key') || '';
   elevenKeyEl.value = localStorage.getItem('elevenlabs_api_key') || '';
@@ -2814,7 +2815,7 @@ async function callTextAI(prompt, maxTokens = 2500, options = {}) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: $('kimiModel')?.value || 'kimi-k2.6',
+        model: $('kimiModel')?.value || 'kimi-k3',
         max_tokens: maxTokens,
         messages: [
           ...(options.system ? [{ role: 'system', content: options.system }] : []),
@@ -6151,7 +6152,7 @@ function getAllKeys() {
     anthropic: document.getElementById('anthropicKey')?.value || localStorage.getItem('anthropic_api_key') || '',
     kimi: document.getElementById('kimiKey')?.value || localStorage.getItem('kimi_api_key') || '',
     aiProvider: getAiProvider(),
-    kimiModel: document.getElementById('kimiModel')?.value || localStorage.getItem('kimi_model') || 'kimi-k2.6',
+    kimiModel: document.getElementById('kimiModel')?.value || localStorage.getItem('kimi_model') || 'kimi-k3',
     fal: document.getElementById('falKey')?.value || localStorage.getItem('fal_api_key') || '',
     eleven: document.getElementById('elevenKey')?.value || localStorage.getItem('elevenlabs_api_key') || '',
     openai: document.getElementById('openaiKey')?.value || localStorage.getItem('openai_api_key') || '',
